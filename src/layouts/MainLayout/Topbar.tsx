@@ -1,120 +1,100 @@
-import { Bell, Search } from "lucide-react";
+import {
+  Bell,
+  ChevronDown,
+  Menu,
+  Search,
+} from "lucide-react";
 
-function Topbar() {
+import AppLogo from "@/components/branding/AppLogo";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 
-    return (
+type TopbarProps = {
+  sidebarCollapsed: boolean;
+  onSidebarToggle: () => void;
+};
 
-        <header
-            className="
-                flex
-                h-20
-                items-center
-                justify-between
-                border-b
-                bg-white
-                px-10
-            "
+function Topbar({ sidebarCollapsed, onSidebarToggle }: TopbarProps) {
+  return (
+    <header className="sticky top-0 z-30 border-b border-[var(--border)] bg-white/92 backdrop-blur">
+      <div className="flex h-[72px] items-center gap-3 px-4 sm:px-6 lg:px-8">
+        <Sheet>
+          <SheetTrigger
+            render={
+              <Button variant="outline" size="icon" className="lg:hidden" aria-label="Abrir navegación">
+                <Menu size={18} />
+              </Button>
+            }
+          />
+          <SheetContent side="left" className="w-[292px] border-0 bg-[var(--sidebar)] p-0 text-white">
+            <SheetHeader className="sr-only">
+              <SheetTitle>Navegación principal</SheetTitle>
+            </SheetHeader>
+            <div className="px-6 py-5">
+              <AppLogo />
+            </div>
+            <div className="px-4 text-sm text-white/70">
+              La navegación móvil completa se habilitará junto con el router del Sprint 2.
+            </div>
+          </SheetContent>
+        </Sheet>
+
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          className="hidden lg:inline-flex"
+          onClick={onSidebarToggle}
+          aria-label={sidebarCollapsed ? "Expandir menú" : "Contraer menú"}
         >
+          <Menu size={18} />
+        </Button>
 
-            <div>
+        <div className="min-w-0">
+          <p className="truncate text-sm font-semibold text-[var(--text)]">Centro de Operaciones</p>
+          <p className="truncate text-xs text-[var(--text-secondary)]">Calidad · OVOSUR</p>
+        </div>
 
-                <h2
-                    className="
-                        text-xl
-                        font-semibold
-                        text-slate-800
-                    "
-                >
-                    Centro de Operaciones
-                </h2>
+        <div className="ml-auto hidden w-full max-w-md lg:block">
+          <div className="relative">
+            <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+            <Input
+              aria-label="Buscar en OVOCALIDAD"
+              placeholder="Buscar lotes, productos, documentos..."
+              className="h-10 rounded-xl border-[var(--border)] bg-[var(--surface-muted)] pl-9 shadow-none"
+            />
+          </div>
+        </div>
 
-                <p
-                    className="
-                        text-sm
-                        text-slate-500
-                    "
-                >
-                    OVOCALIDAD 2.0
-                </p>
+        <Button variant="ghost" size="icon" className="relative" aria-label="Notificaciones">
+          <Bell size={18} />
+          <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-[var(--secondary)] ring-2 ring-white" />
+        </Button>
 
-            </div>
-
-            <div
-                className="
-                    flex
-                    items-center
-                    gap-6
-                "
-            >
-
-                <button
-                    className="
-                        rounded-lg
-                        p-2
-                        hover:bg-slate-100
-                    "
-                >
-                    <Search size={20}/>
-                </button>
-
-                <button
-                    className="
-                        rounded-lg
-                        p-2
-                        hover:bg-slate-100
-                    "
-                >
-                    <Bell size={20}/>
-                </button>
-
-                <div
-                    className="
-                        flex
-                        items-center
-                        gap-3
-                    "
-                >
-
-                    <div
-                        className="
-                            flex
-                            h-11
-                            w-11
-                            items-center
-                            justify-center
-                            rounded-full
-                            bg-[var(--primary)]
-                            text-white
-                            font-bold
-                        "
-                    >
-                        G
-                    </div>
-
-                    <div>
-
-                        <p className="font-semibold">
-
-                            Giuliana Minaya
-
-                        </p>
-
-                        <p className="text-xs text-slate-500">
-
-                            Supervisor SGC
-
-                        </p>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </header>
-
-    );
-
+        <button
+          type="button"
+          className="flex items-center gap-3 rounded-xl px-2 py-1.5 text-left transition hover:bg-slate-50"
+        >
+          <Avatar className="h-9 w-9">
+            <AvatarFallback className="bg-[var(--primary-soft)] text-xs font-semibold text-[var(--primary)]">GM</AvatarFallback>
+          </Avatar>
+          <span className="hidden min-w-0 md:block">
+            <span className="block truncate text-sm font-semibold text-[var(--text)]">Giuliana Minaya</span>
+            <span className="block truncate text-xs text-[var(--text-secondary)]">Supervisor SGC</span>
+          </span>
+          <ChevronDown size={15} className="hidden text-slate-400 md:block" />
+        </button>
+      </div>
+    </header>
+  );
 }
 
 export default Topbar;
