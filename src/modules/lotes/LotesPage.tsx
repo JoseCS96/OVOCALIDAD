@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { ChevronLeft, ChevronRight, Eye, FilterX, Plus, RefreshCw, Search } from "lucide-react";
+import { ArrowDownUp, ChevronLeft, ChevronRight, Eye, FilterX, Plus, RefreshCw, Search } from "lucide-react";
 import PageContainer from "@/components/common/PageContainer";
 import PageHeader from "@/components/common/PageHeader";
 import { Badge } from "@/components/ui/badge";
@@ -9,7 +9,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { listarLotes } from "./api";
 import GenerarLoteModal from "./GenerarLoteModal";
-import type { LotesFiltros } from "./types";
+import type { LoteListado, LotesFiltros } from "./types";
+
+type SortKey = "codigoLote" | "productoCodigo" | "fechaHoraProduccion" | "faseDescripcion" | "lineaOrigenCodigo" | "estadoLoteDescripcion" | "estadoEvaluacionDescripcion";
+type SortDirection = "asc" | "desc";
 
 const estadoLoteOptions = [
   { id: 1, label: "Pendiente" },
@@ -58,6 +61,8 @@ export default function LotesPage() {
   const [filtros, setFiltros] = useState<LotesFiltros>({});
   const [generarOpen, setGenerarOpen] = useState(false);
   const [page, setPage] = useState(1);
+  const [sortKey, setSortKey] = useState<SortKey>("fechaHoraProduccion");
+  const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
   const pageSize = 10;
 
   const { data = [], isLoading, isFetching, isError, refetch } = useQuery({
@@ -67,14 +72,29 @@ export default function LotesPage() {
 
   useEffect(() => { setPage(1); }, [filtros]);
 
-  const totalPages = Math.max(1, Math.ceil(data.length / pageSize));
-  const pagedData = useMemo(() => data.slice((page - 1) * pageSize, page * pageSize), [data, page]);
+  const sortedData = useMemo(() => [...data].sort((a, b) => {
+    const left = a[sortKey] ?? "";
+    const right = b[sortKey] ?? "";
+    const comparison = sortKey === "fechaHoraProduccion"
+      ? new Date(String(left)).getTime() - new Date(String(right)).getTime()
+      : String(left).localeCompare(String(right), "es", { numeric: true, sensitivity: "base" });
+    return sortDirection === "asc" ? comparison : -comparison;
+  }), [data, sortKey, sortDirection]);
+
+  const totalPages = Math.max(1, Math.ceil(sortedData.length / pageSize));
+  const pagedData = useMemo(() => sortedData.slice((page - 1) * pageSize, page * pageSize), [sortedData, page]);
   useEffect(() => { if (page > totalPages) setPage(totalPages); }, [page, totalPages]);
 
   const totalConEvaluacion = useMemo(
     () => data.filter((item) => item.evaluacionId !== null).length,
     [data]
   );
+
+  function sortBy(key: SortKey) {
+    if (sortKey === key) setSortDirection((x) => x === "asc" ? "desc" : "asc");
+    else { setSortKey(key); setSortDirection("asc"); }
+    setPage(1);
+  }
 
   function applyFilters() {
     setFiltros({
@@ -104,7 +124,7 @@ export default function LotesPage() {
               <RefreshCw size={16} className={isFetching ? "animate-spin" : ""} />
               Actualizar
             </Button>
-            <Button size="lg" className="min-w-36 shadow-sm" onClick={() => setGenerarOpen(true)}>
+            <Button size="lg" className="min-w-44 bg-[var(--primary)] px-5 font-semibold text-white shadow-md hover:bg-[var(--primary-strong)] hover:shadow-lg" onClick={() => setGenerarOpen(true)}>
               <Plus size={17} />
               Generar lote
             </Button>
@@ -192,13 +212,13 @@ export default function LotesPage() {
             <table className="w-full min-w-[1100px] border-collapse text-sm">
               <thead className="sticky top-0 z-10 bg-[var(--surface-muted)] text-left text-xs uppercase tracking-[0.08em] text-[var(--text-secondary)]">
                 <tr>
-                  <th className="px-5 py-3">Lote</th>
-                  <th className="px-5 py-3">Producto</th>
-                  <th className="px-5 py-3">Producción</th>
-                  <th className="px-5 py-3">Fase</th>
-                  <th className="px-5 py-3">Línea</th>
-                  <th className="px-5 py-3">Estado lote</th>
-                  <th className="px-5 py-3">Evaluación</th>
+                  <th className="px-5 py-3"><button type="button" onClick={() => sortBy("codigoLote")} className="group inline-flex items-center gap-1.5 whitespace-nowrap font-semibold uppercase tracking-[0.08em] hover:text-[var(--primary)]">Lote<ArrowDownUp size={13} className={sortKey === "codigoLote" ? "text-[var(--primary)]" : "opacity-45 group-hover:opacity-100"} /></button></th>
+                  <th className="px-5 py-3"><button type="button" onClick={() => sortBy("productoCodigo")} className="group inline-flex items-center gap-1.5 whitespace-nowrap font-semibold uppercase tracking-[0.08em] hover:text-[var(--primary)]">Producto<ArrowDownUp size={13} className={sortKey === "productoCodigo" ? "text-[var(--primary)]" : "opacity-45 group-hover:opacity-100"} /></button></th>
+                  <th className="px-5 py-3"><button type="button" onClick={() => sortBy("fechaHoraProduccion")} className="group inline-flex items-center gap-1.5 whitespace-nowrap font-semibold uppercase tracking-[0.08em] hover:text-[var(--primary)]">Producción<ArrowDownUp size={13} className={sortKey === "fechaHoraProduccion" ? "text-[var(--primary)]" : "opacity-45 group-hover:opacity-100"} /></button></th>
+                  <th className="px-5 py-3"><button type="button" onClick={() => sortBy("faseDescripcion")} className="group inline-flex items-center gap-1.5 whitespace-nowrap font-semibold uppercase tracking-[0.08em] hover:text-[var(--primary)]">Fase<ArrowDownUp size={13} className={sortKey === "faseDescripcion" ? "text-[var(--primary)]" : "opacity-45 group-hover:opacity-100"} /></button></th>
+                  <th className="px-5 py-3"><button type="button" onClick={() => sortBy("lineaOrigenCodigo")} className="group inline-flex items-center gap-1.5 whitespace-nowrap font-semibold uppercase tracking-[0.08em] hover:text-[var(--primary)]">Línea<ArrowDownUp size={13} className={sortKey === "lineaOrigenCodigo" ? "text-[var(--primary)]" : "opacity-45 group-hover:opacity-100"} /></button></th>
+                  <th className="px-5 py-3"><button type="button" onClick={() => sortBy("estadoLoteDescripcion")} className="group inline-flex items-center gap-1.5 whitespace-nowrap font-semibold uppercase tracking-[0.08em] hover:text-[var(--primary)]">Estado lote<ArrowDownUp size={13} className={sortKey === "estadoLoteDescripcion" ? "text-[var(--primary)]" : "opacity-45 group-hover:opacity-100"} /></button></th>
+                  <th className="px-5 py-3"><button type="button" onClick={() => sortBy("estadoEvaluacionDescripcion")} className="group inline-flex items-center gap-1.5 whitespace-nowrap font-semibold uppercase tracking-[0.08em] hover:text-[var(--primary)]">Evaluación<ArrowDownUp size={13} className={sortKey === "estadoEvaluacionDescripcion" ? "text-[var(--primary)]" : "opacity-45 group-hover:opacity-100"} /></button></th>
                   <th className="px-5 py-3 text-right">Acciones</th>
                 </tr>
               </thead>
