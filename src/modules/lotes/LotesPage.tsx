@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Eye, FilterX, RefreshCw, Search } from "lucide-react";
+import { Eye, FilterX, Plus, RefreshCw, Search } from "lucide-react";
 import PageContainer from "@/components/common/PageContainer";
 import PageHeader from "@/components/common/PageHeader";
 import { Badge } from "@/components/ui/badge";
@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { listarLotes } from "./api";
+import GenerarLoteModal from "./GenerarLoteModal";
 import type { LotesFiltros } from "./types";
 
 const estadoLoteOptions = [
@@ -55,6 +56,7 @@ function formatDate(value: string | null) {
 export default function LotesPage() {
   const [draft, setDraft] = useState<LotesFiltros>({});
   const [filtros, setFiltros] = useState<LotesFiltros>({});
+  const [generarOpen, setGenerarOpen] = useState(false);
 
   const { data = [], isLoading, isFetching, isError, refetch } = useQuery({
     queryKey: ["lotes", filtros],
@@ -89,10 +91,16 @@ export default function LotesPage() {
         title="Lotes"
         description="Consulta operativa de lotes y su última evaluación registrada."
         actions={
-          <Button variant="outline" onClick={() => refetch()} disabled={isFetching}>
-            <RefreshCw size={16} className={isFetching ? "animate-spin" : ""} />
-            Actualizar
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => refetch()} disabled={isFetching}>
+              <RefreshCw size={16} className={isFetching ? "animate-spin" : ""} />
+              Actualizar
+            </Button>
+            <Button onClick={() => setGenerarOpen(true)}>
+              <Plus size={16} />
+              Generar lote
+            </Button>
+          </div>
         }
       />
 
@@ -236,6 +244,7 @@ export default function LotesPage() {
           </div>
         </CardContent>
       </Card>
+      <GenerarLoteModal open={generarOpen} onClose={() => setGenerarOpen(false)} onCreated={() => refetch()} />
     </PageContainer>
   );
 }
