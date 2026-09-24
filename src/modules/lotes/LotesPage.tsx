@@ -9,7 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { listarLotes } from "./api";
 import GenerarLoteModal from "./GenerarLoteModal";
-import type { LoteListado, LotesFiltros } from "./types";
+import type { LotesFiltros } from "./types";
 
 type SortKey = "codigoLote" | "productoCodigo" | "fechaHoraProduccion" | "faseDescripcion" | "lineaOrigenCodigo" | "estadoLoteDescripcion" | "estadoEvaluacionDescripcion";
 type SortDirection = "asc" | "desc";
