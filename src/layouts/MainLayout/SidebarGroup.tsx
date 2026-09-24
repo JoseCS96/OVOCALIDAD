@@ -1,55 +1,19 @@
 import type { ReactNode } from "react";
 
 type Props = {
-
-    title: string;
-
-    children: ReactNode;
-
+  title: string;
+  children: ReactNode;
 };
 
-function SidebarGroup({
-
-    title,
-
-    children
-
-}: Props) {
-
-    return (
-
-        <section className="mt-8">
-
-            <div className="flex items-center gap-2 mb-3">
-
-                <div className="h-px flex-1 bg-sky-400/20" />
-
-                <span
-                    className="
-                        text-[11px]
-                        uppercase
-                        tracking-[2px]
-                        text-sky-200
-                        font-semibold
-                    "
-                >
-                    {title}
-                </span>
-
-                <div className="h-px flex-1 bg-sky-400/20" />
-
-            </div>
-
-            <div className="space-y-1">
-
-                {children}
-
-            </div>
-
-        </section>
-
-    );
-
+function SidebarGroup({ title, children }: Props) {
+  return (
+    <section className="space-y-2">
+      <p className="px-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-sky-100/45">
+        {title}
+      </p>
+      <div className="space-y-1">{children}</div>
+    </section>
+  );
 }
 
 export default SidebarGroup;
