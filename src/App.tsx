@@ -1,18 +1,12 @@
-import MainLayout from "@/layouts/MainLayout/MainLayout";
-import Dashboard from "@/modules/dashboard/Dashboard";
+import { BrowserRouter } from "react-router-dom";
+import AppRouter from "@/router/AppRouter";
 
 function App() {
-
-    return (
-
-        <MainLayout>
-
-            <Dashboard />
-
-        </MainLayout>
-
-    );
-
+  return (
+    <BrowserRouter>
+      <AppRouter />
+    </BrowserRouter>
+  );
 }
 
 export default App;
