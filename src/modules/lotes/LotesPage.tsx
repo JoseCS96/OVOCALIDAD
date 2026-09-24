@@ -1,6 +1,6 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Eye, FilterX, RefreshCw, Search } from "lucide-react";
+import { ArrowDownUp, ChevronLeft, ChevronRight, Eye, FilterX, Plus, RefreshCw, Search } from "lucide-react";
 import PageContainer from "@/components/common/PageContainer";
 import PageHeader from "@/components/common/PageHeader";
 import { Badge } from "@/components/ui/badge";
@@ -8,7 +8,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { listarLotes } from "./api";
+import GenerarLoteModal from "./GenerarLoteModal";
 import type { LotesFiltros } from "./types";
+
+type SortKey = "codigoLote" | "productoCodigo" | "fechaHoraProduccion" | "faseDescripcion" | "lineaOrigenCodigo" | "estadoLoteDescripcion" | "estadoEvaluacionDescripcion";
+type SortDirection = "asc" | "desc";
 
 const estadoLoteOptions = [
   { id: 1, label: "Pendiente" },
@@ -55,16 +59,42 @@ function formatDate(value: string | null) {
 export default function LotesPage() {
   const [draft, setDraft] = useState<LotesFiltros>({});
   const [filtros, setFiltros] = useState<LotesFiltros>({});
+  const [generarOpen, setGenerarOpen] = useState(false);
+  const [page, setPage] = useState(1);
+  const [sortKey, setSortKey] = useState<SortKey>("fechaHoraProduccion");
+  const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
+  const pageSize = 10;
 
   const { data = [], isLoading, isFetching, isError, refetch } = useQuery({
     queryKey: ["lotes", filtros],
     queryFn: () => listarLotes(filtros),
   });
 
+  useEffect(() => { setPage(1); }, [filtros]);
+
+  const sortedData = useMemo(() => [...data].sort((a, b) => {
+    const left = a[sortKey] ?? "";
+    const right = b[sortKey] ?? "";
+    const comparison = sortKey === "fechaHoraProduccion"
+      ? new Date(String(left)).getTime() - new Date(String(right)).getTime()
+      : String(left).localeCompare(String(right), "es", { numeric: true, sensitivity: "base" });
+    return sortDirection === "asc" ? comparison : -comparison;
+  }), [data, sortKey, sortDirection]);
+
+  const totalPages = Math.max(1, Math.ceil(sortedData.length / pageSize));
+  const pagedData = useMemo(() => sortedData.slice((page - 1) * pageSize, page * pageSize), [sortedData, page]);
+  useEffect(() => { if (page > totalPages) setPage(totalPages); }, [page, totalPages]);
+
   const totalConEvaluacion = useMemo(
     () => data.filter((item) => item.evaluacionId !== null).length,
     [data]
   );
+
+  function sortBy(key: SortKey) {
+    if (sortKey === key) setSortDirection((x) => x === "asc" ? "desc" : "asc");
+    else { setSortKey(key); setSortDirection("asc"); }
+    setPage(1);
+  }
 
   function applyFilters() {
     setFiltros({
@@ -89,10 +119,16 @@ export default function LotesPage() {
         title="Lotes"
         description="Consulta operativa de lotes y su última evaluación registrada."
         actions={
-          <Button variant="outline" onClick={() => refetch()} disabled={isFetching}>
-            <RefreshCw size={16} className={isFetching ? "animate-spin" : ""} />
-            Actualizar
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => refetch()} disabled={isFetching}>
+              <RefreshCw size={16} className={isFetching ? "animate-spin" : ""} />
+              Actualizar
+            </Button>
+            <Button size="lg" className="min-w-44 bg-[var(--primary)] px-5 font-semibold text-white shadow-md hover:bg-[var(--primary-strong)] hover:shadow-lg" onClick={() => setGenerarOpen(true)}>
+              <Plus size={17} />
+              Generar lote
+            </Button>
+          </div>
         }
       />
 
@@ -172,17 +208,17 @@ export default function LotesPage() {
 
       <Card className="overflow-hidden border-[var(--border)] shadow-[var(--shadow-card)]">
         <CardContent className="p-0">
-          <div className="overflow-x-auto">
+          <div className="max-h-[460px] overflow-auto">
             <table className="w-full min-w-[1100px] border-collapse text-sm">
-              <thead className="bg-[var(--surface-muted)] text-left text-xs uppercase tracking-[0.08em] text-[var(--text-secondary)]">
+              <thead className="sticky top-0 z-10 bg-[var(--surface-muted)] text-left text-xs uppercase tracking-[0.08em] text-[var(--text-secondary)]">
                 <tr>
-                  <th className="px-5 py-3">Lote</th>
-                  <th className="px-5 py-3">Producto</th>
-                  <th className="px-5 py-3">Producción</th>
-                  <th className="px-5 py-3">Fase</th>
-                  <th className="px-5 py-3">Línea</th>
-                  <th className="px-5 py-3">Estado lote</th>
-                  <th className="px-5 py-3">Evaluación</th>
+                  <th className="px-5 py-3"><button type="button" onClick={() => sortBy("codigoLote")} className="group inline-flex items-center gap-1.5 whitespace-nowrap font-semibold uppercase tracking-[0.08em] hover:text-[var(--primary)]">Lote<ArrowDownUp size={13} className={sortKey === "codigoLote" ? "text-[var(--primary)]" : "opacity-45 group-hover:opacity-100"} /></button></th>
+                  <th className="px-5 py-3"><button type="button" onClick={() => sortBy("productoCodigo")} className="group inline-flex items-center gap-1.5 whitespace-nowrap font-semibold uppercase tracking-[0.08em] hover:text-[var(--primary)]">Producto<ArrowDownUp size={13} className={sortKey === "productoCodigo" ? "text-[var(--primary)]" : "opacity-45 group-hover:opacity-100"} /></button></th>
+                  <th className="px-5 py-3"><button type="button" onClick={() => sortBy("fechaHoraProduccion")} className="group inline-flex items-center gap-1.5 whitespace-nowrap font-semibold uppercase tracking-[0.08em] hover:text-[var(--primary)]">Producción<ArrowDownUp size={13} className={sortKey === "fechaHoraProduccion" ? "text-[var(--primary)]" : "opacity-45 group-hover:opacity-100"} /></button></th>
+                  <th className="px-5 py-3"><button type="button" onClick={() => sortBy("faseDescripcion")} className="group inline-flex items-center gap-1.5 whitespace-nowrap font-semibold uppercase tracking-[0.08em] hover:text-[var(--primary)]">Fase<ArrowDownUp size={13} className={sortKey === "faseDescripcion" ? "text-[var(--primary)]" : "opacity-45 group-hover:opacity-100"} /></button></th>
+                  <th className="px-5 py-3"><button type="button" onClick={() => sortBy("lineaOrigenCodigo")} className="group inline-flex items-center gap-1.5 whitespace-nowrap font-semibold uppercase tracking-[0.08em] hover:text-[var(--primary)]">Línea<ArrowDownUp size={13} className={sortKey === "lineaOrigenCodigo" ? "text-[var(--primary)]" : "opacity-45 group-hover:opacity-100"} /></button></th>
+                  <th className="px-5 py-3"><button type="button" onClick={() => sortBy("estadoLoteDescripcion")} className="group inline-flex items-center gap-1.5 whitespace-nowrap font-semibold uppercase tracking-[0.08em] hover:text-[var(--primary)]">Estado lote<ArrowDownUp size={13} className={sortKey === "estadoLoteDescripcion" ? "text-[var(--primary)]" : "opacity-45 group-hover:opacity-100"} /></button></th>
+                  <th className="px-5 py-3"><button type="button" onClick={() => sortBy("estadoEvaluacionDescripcion")} className="group inline-flex items-center gap-1.5 whitespace-nowrap font-semibold uppercase tracking-[0.08em] hover:text-[var(--primary)]">Evaluación<ArrowDownUp size={13} className={sortKey === "estadoEvaluacionDescripcion" ? "text-[var(--primary)]" : "opacity-45 group-hover:opacity-100"} /></button></th>
                   <th className="px-5 py-3 text-right">Acciones</th>
                 </tr>
               </thead>
@@ -193,7 +229,7 @@ export default function LotesPage() {
                   <tr><td colSpan={8} className="px-5 py-12 text-center text-red-600">No se pudo consultar la API de lotes.</td></tr>
                 ) : data.length === 0 ? (
                   <tr><td colSpan={8} className="px-5 py-12 text-center text-[var(--text-secondary)]">No hay lotes para los filtros seleccionados.</td></tr>
-                ) : data.map((lote) => (
+                ) : pagedData.map((lote) => (
                   <tr key={lote.loteId} className="border-t border-[var(--border)] hover:bg-[var(--surface-muted)]/70">
                     <td className="px-5 py-4">
                       <div className="font-semibold text-[var(--text)]">{lote.codigoLote}</div>
@@ -234,8 +270,21 @@ export default function LotesPage() {
               </tbody>
             </table>
           </div>
+          {!isLoading && !isError && data.length > 0 && (
+            <div className="flex flex-col gap-3 border-t border-[var(--border)] bg-white px-5 py-3 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-xs text-[var(--text-secondary)]">
+                Mostrando <span className="font-semibold text-[var(--text)]">{(page - 1) * pageSize + 1}</span>–<span className="font-semibold text-[var(--text)]">{Math.min(page * pageSize, data.length)}</span> de <span className="font-semibold text-[var(--text)]">{data.length}</span> lotes
+              </p>
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="sm" disabled={page === 1} onClick={() => setPage((x) => Math.max(1, x - 1))}><ChevronLeft size={15} />Anterior</Button>
+                <span className="min-w-24 text-center text-xs font-medium text-[var(--text-secondary)]">Página {page} de {totalPages}</span>
+                <Button variant="outline" size="sm" disabled={page === totalPages} onClick={() => setPage((x) => Math.min(totalPages, x + 1))}>Siguiente<ChevronRight size={15} /></Button>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
+      <GenerarLoteModal open={generarOpen} onClose={() => setGenerarOpen(false)} onCreated={() => refetch()} />
     </PageContainer>
   );
 }
