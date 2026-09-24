@@ -9,6 +9,16 @@ export default defineConfig({
     tailwindcss(),
   ],
 
+  server: {
+    proxy: {
+      "/api": {
+        target: "https://localhost:7190",
+        changeOrigin: true,
+        secure: false,
+      },
+    },
+  },
+
   resolve: {
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),
