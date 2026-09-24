@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { generarLote, obtenerCatalogosLote } from "./api";
 import type { GenerarLoteRequest } from "./types";
+import SearchableSelect from "./SearchableSelect";
 
 type Props = {
   open: boolean;
@@ -91,10 +92,12 @@ export default function GenerarLoteModal({ open, onClose, onCreated }: Props) {
             ) : (
               <>
                 <Field label="Producto" required>
-                  <select className="h-10 w-full rounded-lg border border-[var(--border)] bg-white px-3 text-sm outline-none focus:ring-2 focus:ring-[var(--ring)]" value={form.productoCodigo} onChange={(e) => setForm((x) => ({ ...x, productoCodigo: e.target.value }))}>
-                    <option value="">Seleccionar producto</option>
-                    {catalogos.data?.productos.map((x) => <option key={x.codigo} value={x.codigo}>{x.codigo} — {x.descripcion}</option>)}
-                  </select>
+                  <SearchableSelect
+                    value={form.productoCodigo}
+                    placeholder="Buscar o seleccionar producto"
+                    options={(catalogos.data?.productos ?? []).map((x) => ({ value: x.codigo, label: `${x.codigo} — ${x.descripcion}` }))}
+                    onChange={(value) => setForm((x) => ({ ...x, productoCodigo: value }))}
+                  />
                 </Field>
                 <div className="grid gap-4 md:grid-cols-2">
                   <Field label="Naturaleza" required>
@@ -111,16 +114,18 @@ export default function GenerarLoteModal({ open, onClose, onCreated }: Props) {
                   </Field>
                 </div>
                 <Field label="Línea de origen" required>
-                  <select className="h-10 w-full rounded-lg border border-[var(--border)] bg-white px-3 text-sm outline-none focus:ring-2 focus:ring-[var(--ring)]" value={form.lineaOrigenId || ""} onChange={(e) => setForm((x) => ({ ...x, lineaOrigenId: Number(e.target.value) }))}>
-                    <option value="">Seleccionar línea</option>
-                    {catalogos.data?.lineasOrigen.map((x) => <option key={x.id} value={x.id}>{x.codigo} — {x.descripcion}</option>)}
-                  </select>
+                  <SearchableSelect
+                    value={form.lineaOrigenId || ""}
+                    placeholder="Buscar o seleccionar línea"
+                    options={(catalogos.data?.lineasOrigen ?? []).map((x) => ({ value: x.id, label: `${x.codigo} — ${x.descripcion}` }))}
+                    onChange={(value) => setForm((x) => ({ ...x, lineaOrigenId: Number(value) }))}
+                  />
                 </Field>
                 <Field label="Observación">
                   <textarea className="min-h-24 w-full resize-y rounded-lg border border-[var(--border)] bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[var(--ring)]" maxLength={500} placeholder="Observación opcional del lote" value={form.observacion ?? ""} onChange={(e) => setForm((x) => ({ ...x, observacion: e.target.value }))} />
                 </Field>
-                <Field label="Usuario">
-                  <Input value={form.usuario} onChange={(e) => setForm((x) => ({ ...x, usuario: e.target.value }))} />
+                <Field label="Registrado por">
+                  <Input value={form.usuario} disabled className="cursor-not-allowed bg-[var(--surface-muted)] text-[var(--text-secondary)] disabled:opacity-100" />
                 </Field>
               </>
             )}
