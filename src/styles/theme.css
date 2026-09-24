@@ -1,0 +1,55 @@
+:root{
+
+    /* Fondo */
+
+    --background:#F5F7FA;
+
+    --surface:#FFFFFF;
+
+    /* Marca OVOSUR */
+
+    --primary:#114C97;
+
+    --primary-hover:#0D3D79;
+
+    --secondary:#F4A300;
+
+    --secondary-hover:#DD9200;
+
+    /* Estados */
+
+    --success:#16A34A;
+
+    --warning:#F59E0B;
+
+    --danger:#DC2626;
+
+    --info:#0EA5E9;
+
+    /* Texto */
+
+    --text:#1F2937;
+
+    --text-secondary:#6B7280;
+
+    /* Bordes */
+
+    --border:#E5E7EB;
+
+    /* Sidebar */
+
+    --sidebar:#0F4F79;
+
+    --sidebar-hover:#15638F;
+
+    --sidebar-active:#FFFFFF;
+
+    /* Radius */
+
+    --radius-sm:8px;
+
+    --radius-md:12px;
+
+    --radius-lg:18px;
+
+}
