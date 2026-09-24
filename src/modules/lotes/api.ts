@@ -2,7 +2,7 @@ import axios from "axios";
 import type { LoteListado, LotesFiltros } from "./types";
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL ?? "https://localhost:7190",
+  baseURL: import.meta.env.VITE_API_URL ?? "",
 });
 
 export async function listarLotes(filtros: LotesFiltros = {}) {
