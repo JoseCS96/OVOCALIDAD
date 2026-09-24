@@ -1,55 +1,26 @@
-:root{
-
-    /* Fondo */
-
-    --background:#F5F7FA;
-
-    --surface:#FFFFFF;
-
-    /* Marca OVOSUR */
-
-    --primary:#114C97;
-
-    --primary-hover:#0D3D79;
-
-    --secondary:#F4A300;
-
-    --secondary-hover:#DD9200;
-
-    /* Estados */
-
-    --success:#16A34A;
-
-    --warning:#F59E0B;
-
-    --danger:#DC2626;
-
-    --info:#0EA5E9;
-
-    /* Texto */
-
-    --text:#1F2937;
-
-    --text-secondary:#6B7280;
-
-    /* Bordes */
-
-    --border:#E5E7EB;
-
-    /* Sidebar */
-
-    --sidebar:#0F4F79;
-
-    --sidebar-hover:#15638F;
-
-    --sidebar-active:#FFFFFF;
-
-    /* Radius */
-
-    --radius-sm:8px;
-
-    --radius-md:12px;
-
-    --radius-lg:18px;
-
+:root {
+  --background: #f4f7fb;
+  --surface: #ffffff;
+  --surface-muted: #f8fafc;
+  --primary: #0a5c77;
+  --primary-strong: #084b61;
+  --primary-soft: #e8f3f7;
+  --secondary: #f2a23a;
+  --success: #169b62;
+  --warning: #d98a18;
+  --danger: #d94a4a;
+  --info: #2f6fed;
+  --text: #172033;
+  --text-secondary: #6b7484;
+  --border: #e6eaf0;
+  --sidebar: #083f52;
+  --sidebar-strong: #062f3e;
+  --sidebar-hover: rgba(255, 255, 255, 0.08);
+  --sidebar-active: rgba(255, 255, 255, 0.14);
+  --ring: rgba(10, 92, 119, 0.24);
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --shadow-soft: 0 12px 30px rgba(23, 32, 51, 0.08);
+  --shadow-card: 0 8px 24px rgba(23, 32, 51, 0.06);
 }
