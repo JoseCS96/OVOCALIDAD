@@ -240,34 +240,33 @@ export default function EvaluacionEnLineaPage() {
   const { cabecera, avance } = data;
 
   return (
-    <PageContainer className="space-y-3">
-      <div>
-        <Link to="/operacion/lotes" className="inline-flex items-center gap-2 text-sm font-medium text-[var(--primary)] hover:underline">
-          <ArrowLeft size={16} /> Volver a lotes
+    <PageContainer className="space-y-2">
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+        <Link to="/operacion/lotes" className="inline-flex items-center gap-1 text-xs font-medium text-[var(--primary)] hover:underline">
+          <ArrowLeft size={14} /> Volver a lotes
         </Link>
-        <div className="flex flex-col gap-1 lg:flex-row lg:items-center lg:justify-between">
-          <div>
-            <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--text-secondary)]">Operación · Control de calidad</p>
-            <h1 className="text-xl font-semibold leading-tight tracking-tight">Evaluación en Línea</h1>
-            <p className="text-[11px] leading-tight text-[var(--text-secondary)]">Registro de resultados contra la especificación técnica vigente del lote.</p>
-          </div>
-          <Badge variant="outline" className="w-fit border-blue-200 bg-blue-50 px-3 py-1 text-blue-700">{cabecera.estadoEvaluacion.replaceAll("_", " ")}</Badge>
+        <span className="hidden h-4 w-px bg-[var(--border)] sm:block" />
+        <div className="flex min-w-0 items-baseline gap-2">
+          <h1 className="text-lg font-semibold leading-none tracking-tight">Evaluación en Línea</h1>
+          <span className="hidden text-[11px] text-[var(--text-secondary)] lg:inline">Control de calidad</span>
         </div>
+        <Badge variant="outline" className="ml-auto w-fit border-blue-200 bg-blue-50 px-2 py-0.5 text-[11px] text-blue-700">{cabecera.estadoEvaluacion.replaceAll("_", " ")}</Badge>
       </div>
 
       <Card className="border-[var(--border)] shadow-[var(--shadow-card)]">
-        <CardContent className="grid gap-2 px-4 py-2 md:grid-cols-2 xl:grid-cols-5">
-          <div><p className="text-xs font-semibold uppercase text-[var(--text-secondary)]">Lote</p><p className="font-semibold">{cabecera.codigoLote}</p></div>
-          <div><p className="text-xs font-semibold uppercase text-[var(--text-secondary)]">Producto</p><p className="mt-1 font-semibold">{cabecera.productoCodigo}</p><p className="text-xs text-[var(--text-secondary)]">{cabecera.productoDescripcion}</p></div>
-          <div><p className="text-xs font-semibold uppercase text-[var(--text-secondary)]">Especificación técnica</p><p className="mt-1 font-semibold">{cabecera.documentoCodigo}</p><p className="text-xs text-[var(--text-secondary)]">Versión {cabecera.versionNumero}</p></div>
-          <div><p className="text-xs font-semibold uppercase text-[var(--text-secondary)]">Evaluación</p><p className="mt-1 font-semibold">{cabecera.tipoEvaluacion}</p><p className="text-xs text-[var(--text-secondary)]">Intento {cabecera.intento}</p></div>
-          <div><p className="text-xs font-semibold uppercase text-[var(--text-secondary)]">Evaluador</p><p className="mt-1 font-semibold">{cabecera.usuarioEvaluador || "—"}</p></div>
+        <CardContent className="grid gap-x-5 gap-y-1 px-4 py-2 xl:grid-cols-[1fr_1.15fr_1.2fr_.8fr_.8fr]">
+          <div className="min-w-0"><span className="text-[10px] font-semibold uppercase text-[var(--text-secondary)]">Lote</span><p className="truncate text-sm font-semibold">{cabecera.codigoLote}</p></div>
+          <div className="min-w-0"><span className="text-[10px] font-semibold uppercase text-[var(--text-secondary)]">Producto</span><p className="truncate text-sm font-semibold">{cabecera.productoCodigo} <span className="font-normal text-[var(--text-secondary)]">· {cabecera.productoDescripcion}</span></p></div>
+          <div className="min-w-0"><span className="text-[10px] font-semibold uppercase text-[var(--text-secondary)]">ET</span><p className="truncate text-sm font-semibold">{cabecera.documentoCodigo} <span className="font-normal text-[var(--text-secondary)]">· V{cabecera.versionNumero}</span></p></div>
+          <div className="min-w-0"><span className="text-[10px] font-semibold uppercase text-[var(--text-secondary)]">Evaluación</span><p className="truncate text-sm font-semibold">{cabecera.tipoEvaluacion} <span className="font-normal text-[var(--text-secondary)]">· I{cabecera.intento}</span></p></div>
+          <div className="min-w-0"><span className="text-[10px] font-semibold uppercase text-[var(--text-secondary)]">Evaluador</span><p className="truncate text-sm font-semibold">{cabecera.usuarioEvaluador || "—"}</p></div>
         </CardContent>
       </Card>
 
-      <div className="flex gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs text-amber-900">
-        <FlaskConical className="mt-0.5 h-5 w-5 shrink-0" />
-        <div className="flex flex-wrap items-center gap-x-2"><p className="font-semibold">Registro parcial habilitado.</p><p className="text-amber-800">Puedes guardar avances sin cerrar la evaluación.</p></div>
+      <div className="flex items-center gap-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-1 text-[11px] leading-none text-amber-900">
+        <FlaskConical className="h-4 w-4 shrink-0" />
+        <span className="font-semibold">Registro parcial habilitado.</span>
+        <span className="text-amber-800">Puedes guardar avances sin cerrar la evaluación.</span>
       </div>
 
       <Card className="overflow-hidden border-[var(--border)] shadow-[var(--shadow-card)]">
@@ -277,7 +276,7 @@ export default function EvaluacionEnLineaPage() {
             <div className="text-sm font-medium text-[var(--text-secondary)]">{avance.totalCaracteristicas} características</div>
           </div>
 
-          <div className="max-h-[calc(100vh-315px)] min-h-[390px] overflow-auto">
+          <div className="max-h-[calc(100vh-245px)] min-h-[440px] overflow-auto">
             <table className="w-full min-w-[1120px] border-collapse text-sm">
               <thead className="sticky top-0 z-20 bg-[var(--surface-muted)] text-left text-xs uppercase tracking-[0.08em] text-[var(--text-secondary)] shadow-[0_1px_0_var(--border)]">
                 <tr><th className="px-5 py-3">Tipo</th><th className="px-5 py-3">Característica</th><th className="px-5 py-3">Obligatoria</th><th className="px-5 py-3">Especificación</th><th className="px-5 py-3">Resultado / validación</th><th className="px-5 py-3">Unidad</th></tr>
