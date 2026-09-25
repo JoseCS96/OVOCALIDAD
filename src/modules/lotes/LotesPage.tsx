@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowDownUp, ChevronLeft, ChevronRight, Eye, FilterX, Plus, RefreshCw, Search } from "lucide-react";
+import { ArrowDownUp, ChevronLeft, ChevronRight, Eye, FilterX, MoreHorizontal, Play, Plus, RefreshCw, Search } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import PageContainer from "@/components/common/PageContainer";
 import PageHeader from "@/components/common/PageHeader";
 import { Badge } from "@/components/ui/badge";
@@ -8,6 +10,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { listarLotes } from "./api";
+import { iniciarEvaluacion } from "@/modules/evaluaciones/api";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import GenerarLoteModal from "./GenerarLoteModal";
 import type { LotesFiltros } from "./types";
 
@@ -57,6 +61,18 @@ function formatDate(value: string | null) {
 }
 
 export default function LotesPage() {
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const [actionError, setActionError] = useState<string | null>(null);
+  const iniciarMutation = useMutation({
+    mutationFn: (evaluacionId: number) => iniciarEvaluacion(evaluacionId),
+    onSuccess: async (_, evaluacionId) => {
+      setActionError(null);
+      await queryClient.invalidateQueries({ queryKey: ["lotes"] });
+      navigate(`/operacion/evaluaciones/${evaluacionId}`);
+    },
+    onError: (error) => setActionError(error instanceof Error ? error.message : "No se pudo iniciar la evaluación."),
+  });
   const [draft, setDraft] = useState<LotesFiltros>({});
   const [filtros, setFiltros] = useState<LotesFiltros>({});
   const [generarOpen, setGenerarOpen] = useState(false);
@@ -260,10 +276,32 @@ export default function LotesPage() {
                       )}
                     </td>
                     <td className="px-5 py-4 text-right">
-                      <Button variant="outline" size="sm" disabled>
-                        <Eye size={15} />
-                        Ver detalle
-                      </Button>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger
+                          render={<Button variant="outline" size="sm" aria-label={`Acciones del lote ${lote.codigoLote}`} />}
+                        >
+                          <MoreHorizontal size={16} />
+                          Acciones
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-52">
+                          {lote.evaluacionId !== null && lote.estadoEvaluacionCodigo === "PENDIENTE" && (
+                            <DropdownMenuItem onClick={() => iniciarMutation.mutate(lote.evaluacionId!)}>
+                              <Play size={15} />
+                              Iniciar evaluación
+                            </DropdownMenuItem>
+                          )}
+                          {lote.evaluacionId !== null && lote.estadoEvaluacionCodigo === "EN_PROCESO" && (
+                            <DropdownMenuItem onClick={() => navigate(`/operacion/evaluaciones/${lote.evaluacionId}`)}>
+                              <Play size={15} />
+                              Continuar evaluación
+                            </DropdownMenuItem>
+                          )}
+                          <DropdownMenuItem disabled>
+                            <Eye size={15} />
+                            Ver detalle
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </td>
                   </tr>
                 ))}
@@ -284,6 +322,7 @@ export default function LotesPage() {
           )}
         </CardContent>
       </Card>
+      {actionError && <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{actionError}</div>}
       <GenerarLoteModal open={generarOpen} onClose={() => setGenerarOpen(false)} onCreated={() => refetch()} />
     </PageContainer>
   );
