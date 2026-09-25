@@ -3,6 +3,7 @@ export type InformacionGeneralEt = {
   documentoDescripcionDocumento: string; productoCodigo: string; productoDescripcion: string;
   versionId: number; versionNumero: number | null; estadoVersion: string; versionInicioVigencia: string | null;
   versionReemplazaAId: number | null; versionNroPaginas: number | null; versionDescripcion: string | null;
+  envyEmbDescripcion?: string|null; almacyDistDescripcion?: string|null; vidaUtilDescripcion?: string|null; descongelamientoDescripcion?: string|null;
   permiteEditar: boolean; permiteEnviarRevision: boolean; permiteRevisar: boolean; permitePublicar: boolean;
 };
 export type CaracteristicaEt = {
@@ -11,7 +12,23 @@ export type CaracteristicaEt = {
   valorCuantitativoInicial:number|null; valorCuantitativoFinal:number|null; valorCuantitativoIgual:number|null;
   valorCualitativo:string|null; faseId:number|null; faseCodigo:string|null; fase:string|null; esObligatorio:boolean; orden:number|null;
 };
-export type DetalleEt = { informacionGeneral: InformacionGeneralEt; caracteristicas: CaracteristicaEt[]; [key:string]: unknown };
+export type SeccionEt={versSeccId:number;versionId:number;seccionId:number;seccionDescripcion:string;orden:number|null;idTipoSeccion:number|null;tipoSeccionDescripcion:string|null;esBase:boolean;puedeEliminarse:boolean;permiteReordenar:boolean;icono:string|null};
+export type ResponsableEt={tipoResponsabilidad:string;idRelacion:number;usuarioDni:string;usuarioNombresApellidos:string;cargoId:number|null};
+export type IngredienteEt={versIngrId:number;ingredienteId:number;ingredienteDescripcion:string;unidadDeMedida:string|null;versIngrValor:number|null;idTipoContenido:number|null;tipoContenidoCodigo:string|null;tipoContenido:string|null;orden:number|null};
+export type RecetaEt={versRectId:number;recetaId:number;recetaDescripcion:string;idTipoContenido:number|null;tipoContenidoCodigo:string|null;tipoContenido:string|null;orden:number|null};
+export type ProcedimientoEt={versProcId:number;procPrepId:number;procPrepDescripcion:string;idTipoContenido:number|null;tipoContenidoCodigo:string|null;tipoContenido:string|null;orden:number|null};
+export type TratamientoEt={versTratConsId:number;tratConservId:number;tratConservDescripcion:string};
+export type ParametroTratamientoEt={versParamTratId:number;versTratConsId:number;parametroTratId:number;paramTratDescripcion:string;paramTratUnidadDeMedida:string|null;tipoCriterioId:number;tipoCriterio:string;valorCuantitativoInicial:number|null;valorCuantitativoFinal:number|null;valorCuantitativoIgual:number|null;valorCualitativo:string|null;orden:number|null};
+export type TextoOrdenadoEt={orden:number|null;[key:string]:unknown};
+export type DetalleEt = {
+ informacionGeneral:InformacionGeneralEt;secciones:SeccionEt[];responsables:ResponsableEt[];ingredientes:IngredienteEt[];recetas:RecetaEt[];procedimientos:ProcedimientoEt[];
+ tratamientos:TratamientoEt[];parametrosTratamiento:ParametroTratamientoEt[];caracteristicas:CaracteristicaEt[];
+ instrucciones:Array<{versInstrId:number;instruccionId:number;instruccionDescripcion:string;orden:number|null}>;
+ contenidoRotulado:Array<{versContRotId:number;contRotuladoId:number;contRotuladoDescripcion:string;orden:number|null}>;
+ cambiosVersion:Array<{versCambId:number;cambVersiId:number;cambVersNumeroDeRevision:number;cambVersFechaDeActualizacion:string|null;cambVersDescripcion:string}>;
+ anexos:Array<{versionAnexoId:number;anexoId:number;anexoDescripcion:string}>;
+ historial:Array<{versionHistorialEstadoId:number;estadoOrigen:string|null;estadoDestino:string;accion:string;comentario:string|null;usuario:string;fecha:string}>;
+};
 export type ProductoEt={productoCodigo:string;productoDescripcion:string};
 export type CaracteristicaCatalogoEt={caracteristicaId:number;caracteristicaDescripcion:string;unidad:string|null;tipoCaractId:number;tipoCaracteristica:string;metEnsayoId:number|null;metodoEnsayo:string|null};
 export type CriterioEt={tipoCriterioId:number;tipoCriterio:string};
