@@ -30,50 +30,88 @@ function EstadoResultado({ cumple, tieneResultado }: { cumple: boolean | null; t
   return <Badge variant="outline" className="border-amber-200 bg-amber-50 text-amber-700">Por definir</Badge>;
 }
 
+function normalizarTexto(value: string | null | undefined) {
+  return (value ?? "").trim().toLocaleUpperCase("es-PE");
+}
+
+function calcularCumpleLocal(item: EvaluacionDetalle, draft: Draft): boolean | null {
+  const criterio = (item.tipoCriterio ?? "").toUpperCase();
+
+  if (criterio === "CUALITATIVO" || criterio === "AUSENCIA") {
+    if (!draft.texto.trim()) return null;
+    return normalizarTexto(draft.texto) === normalizarTexto(item.especificacion);
+  }
+
+  if (!draft.numero.trim()) return null;
+  const valor = Number(draft.numero);
+  if (!Number.isFinite(valor)) return null;
+
+  const especificacion = item.especificacion ?? "";
+  const numeros = especificacion.match(/-?\d+(?:[.,]\d+)?/g)?.map((v) => Number(v.replace(",", "."))) ?? [];
+
+  if (criterio === "MINIMO") return numeros[0] !== undefined ? valor >= numeros[0] : null;
+  if (criterio === "MAXIMO") return numeros[0] !== undefined ? valor <= numeros[0] : null;
+  if (criterio === "RANGO") return numeros.length >= 2 ? valor >= numeros[0] && valor <= numeros[1] : null;
+  if (criterio === "IGUAL") return numeros[0] !== undefined ? valor === numeros[0] : null;
+
+  return null;
+}
+
 function ResultadoControl({ item, draft, onChange }: { item: EvaluacionDetalle; draft: Draft; onChange: (next: Partial<Draft>) => void }) {
   const criterio = (item.tipoCriterio ?? "").toUpperCase();
+  const cumpleLocal = calcularCumpleLocal(item, draft);
+  const inputClass = cumpleLocal === true
+    ? "border-emerald-300 bg-emerald-50/60 focus-visible:ring-emerald-200"
+    : cumpleLocal === false
+      ? "border-amber-300 bg-amber-50/70 focus-visible:ring-amber-200"
+      : "";
+
   if (criterio === "AUSENCIA") {
     return (
-      <select
-        className="h-9 w-full min-w-32 rounded-md border border-[var(--border)] bg-white px-3 text-sm outline-none focus:ring-2 focus:ring-[var(--ring)]"
-        value={draft.texto}
-        disabled={!item.permiteEditar}
-        onChange={(e) => onChange({ texto: e.target.value, numero: "", cumple: null, dirty: true })}
-      >
-        <option value="">Seleccionar</option>
-        <option value="Ausencia">Ausencia</option>
-        <option value="Presencia">Presencia</option>
-      </select>
+      <div className="flex min-w-64 items-center gap-2">
+        <select
+          className={`h-9 min-w-36 flex-1 rounded-md border px-3 text-sm outline-none focus:ring-2 ${inputClass || "border-[var(--border)] bg-white focus:ring-[var(--ring)]"}`}
+          value={draft.texto}
+          disabled={!item.permiteEditar}
+          onChange={(e) => onChange({ texto: e.target.value, numero: "", cumple: null, dirty: true })}
+        >
+          <option value="">Seleccionar</option>
+          <option value="Ausencia">Ausencia</option>
+          <option value="Presencia">Presencia</option>
+        </select>
+        <EstadoResultado cumple={cumpleLocal} tieneResultado={draft.texto.trim() !== ""} />
+      </div>
     );
   }
 
   if (criterio === "CUALITATIVO") {
     return (
-      <div className="min-w-64 space-y-2">
+      <div className="flex min-w-[360px] items-center gap-2">
         <Input
+          className={`min-w-0 flex-1 ${inputClass}`}
           value={draft.texto}
           disabled={!item.permiteEditar}
           placeholder="Registrar resultado"
-          onChange={(e) => onChange({ texto: e.target.value, dirty: true })}
+          onChange={(e) => onChange({ texto: e.target.value, cumple: null, dirty: true })}
         />
-        <div className="flex gap-2">
-          <Button type="button" size="sm" variant={draft.cumple === true ? "default" : "outline"} disabled={!item.permiteEditar} onClick={() => onChange({ cumple: true, dirty: true })}>Cumple</Button>
-          <Button type="button" size="sm" variant={draft.cumple === false ? "destructive" : "outline"} disabled={!item.permiteEditar} onClick={() => onChange({ cumple: false, dirty: true })}>No cumple</Button>
-        </div>
+        <EstadoResultado cumple={cumpleLocal} tieneResultado={draft.texto.trim() !== ""} />
       </div>
     );
   }
 
   return (
-    <Input
-      type="number"
-      step="any"
-      className="min-w-32"
-      value={draft.numero}
-      disabled={!item.permiteEditar}
-      placeholder="0.00"
-      onChange={(e) => onChange({ numero: e.target.value, texto: "", cumple: null, dirty: true })}
-    />
+    <div className="flex min-w-56 items-center gap-2">
+      <Input
+        type="number"
+        step="any"
+        className={`min-w-0 flex-1 ${inputClass}`}
+        value={draft.numero}
+        disabled={!item.permiteEditar}
+        placeholder="0.00"
+        onChange={(e) => onChange({ numero: e.target.value, texto: "", cumple: null, dirty: true })}
+      />
+      <EstadoResultado cumple={cumpleLocal} tieneResultado={draft.numero.trim() !== ""} />
+    </div>
   );
 }
 
@@ -167,7 +205,7 @@ export default function EvaluacionEnLineaPage() {
         versCaractId: item.versCaractId,
         resultadoTexto: ["AUSENCIA", "CUALITATIVO"].includes(criterio) ? draft.texto.trim() : null,
         resultadoNumerico: ["MINIMO", "MAXIMO", "RANGO"].includes(criterio) ? Number(draft.numero) : null,
-        cumple: criterio === "CUALITATIVO" ? draft.cumple : null,
+        cumple: criterio === "CUALITATIVO" ? calcularCumpleLocal(item, draft) : null,
         observacion: null,
         usuario: "USUARIO_WEB",
       });
@@ -186,24 +224,24 @@ export default function EvaluacionEnLineaPage() {
   const { cabecera, avance } = data;
 
   return (
-    <PageContainer className="space-y-5">
+    <PageContainer className="space-y-3">
       <div>
         <Link to="/operacion/lotes" className="inline-flex items-center gap-2 text-sm font-medium text-[var(--primary)] hover:underline">
           <ArrowLeft size={16} /> Volver a lotes
         </Link>
-        <div className="mt-3 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+        <div className="mt-1.5 flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--text-secondary)]">Operación · Control de calidad</p>
-            <h1 className="mt-1 text-3xl font-semibold tracking-tight">Evaluación en Línea</h1>
-            <p className="mt-1 text-sm text-[var(--text-secondary)]">Registro de resultados contra la especificación técnica vigente del lote.</p>
+            <h1 className="text-2xl font-semibold tracking-tight">Evaluación en Línea</h1>
+            <p className="text-xs text-[var(--text-secondary)]">Registro de resultados contra la especificación técnica vigente del lote.</p>
           </div>
           <Badge variant="outline" className="w-fit border-blue-200 bg-blue-50 px-3 py-1 text-blue-700">{cabecera.estadoEvaluacion.replaceAll("_", " ")}</Badge>
         </div>
       </div>
 
       <Card className="border-[var(--border)] shadow-[var(--shadow-card)]">
-        <CardContent className="grid gap-5 p-5 md:grid-cols-2 xl:grid-cols-5">
-          <div><p className="text-xs font-semibold uppercase text-[var(--text-secondary)]">Lote</p><p className="mt-1 text-lg font-semibold">{cabecera.codigoLote}</p></div>
+        <CardContent className="grid gap-3 px-4 py-3 md:grid-cols-2 xl:grid-cols-5">
+          <div><p className="text-xs font-semibold uppercase text-[var(--text-secondary)]">Lote</p><p className="font-semibold">{cabecera.codigoLote}</p></div>
           <div><p className="text-xs font-semibold uppercase text-[var(--text-secondary)]">Producto</p><p className="mt-1 font-semibold">{cabecera.productoCodigo}</p><p className="text-xs text-[var(--text-secondary)]">{cabecera.productoDescripcion}</p></div>
           <div><p className="text-xs font-semibold uppercase text-[var(--text-secondary)]">Especificación técnica</p><p className="mt-1 font-semibold">{cabecera.documentoCodigo}</p><p className="text-xs text-[var(--text-secondary)]">Versión {cabecera.versionNumero}</p></div>
           <div><p className="text-xs font-semibold uppercase text-[var(--text-secondary)]">Evaluación</p><p className="mt-1 font-semibold">{cabecera.tipoEvaluacion}</p><p className="text-xs text-[var(--text-secondary)]">Intento {cabecera.intento}</p></div>
@@ -211,9 +249,9 @@ export default function EvaluacionEnLineaPage() {
         </CardContent>
       </Card>
 
-      <div className="flex gap-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+      <div className="flex gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
         <FlaskConical className="mt-0.5 h-5 w-5 shrink-0" />
-        <div><p className="font-semibold">Registro parcial habilitado</p><p className="mt-0.5 text-amber-800">Puedes guardar avances sin cerrar la evaluación. El cierre definitivo se habilitará cuando completemos la validación de cierre.</p></div>
+        <div className="flex flex-wrap items-center gap-x-2"><p className="font-semibold">Registro parcial habilitado.</p><p className="text-amber-800">Puedes guardar avances sin cerrar la evaluación.</p></div>
       </div>
 
       <Card className="overflow-hidden border-[var(--border)] shadow-[var(--shadow-card)]">
@@ -223,15 +261,15 @@ export default function EvaluacionEnLineaPage() {
             <div className="text-sm font-medium text-[var(--text-secondary)]">{avance.totalCaracteristicas} características</div>
           </div>
 
-          <div className="max-h-[560px] overflow-auto">
+          <div className="max-h-[calc(100vh-390px)] min-h-[330px] overflow-auto">
             <table className="w-full min-w-[1120px] border-collapse text-sm">
               <thead className="sticky top-0 z-20 bg-[var(--surface-muted)] text-left text-xs uppercase tracking-[0.08em] text-[var(--text-secondary)] shadow-[0_1px_0_var(--border)]">
-                <tr><th className="px-5 py-3">Tipo</th><th className="px-5 py-3">Característica</th><th className="px-5 py-3">Obligatoria</th><th className="px-5 py-3">Especificación</th><th className="px-5 py-3">Resultado</th><th className="px-5 py-3">Unidad</th><th className="px-5 py-3">Estado</th></tr>
+                <tr><th className="px-5 py-3">Tipo</th><th className="px-5 py-3">Característica</th><th className="px-5 py-3">Obligatoria</th><th className="px-5 py-3">Especificación</th><th className="px-5 py-3">Resultado / validación</th><th className="px-5 py-3">Unidad</th></tr>
               </thead>
               <tbody>
                 {grupos.map(([grupo, items]) => (
                   <Fragment key={grupo}>
-                    <tr key={`group-${grupo}`} className="border-t border-[var(--border)] bg-slate-50/80"><td colSpan={7} className="px-5 py-2.5 font-semibold text-[var(--text)]">{labelGrupo(grupo)} <span className="ml-2 text-xs font-normal text-[var(--text-secondary)]">{items.length} parámetros</span></td></tr>
+                    <tr key={`group-${grupo}`} className="border-t border-[var(--border)] bg-slate-50/80"><td colSpan={6} className="px-5 py-2.5 font-semibold text-[var(--text)]">{labelGrupo(grupo)} <span className="ml-2 text-xs font-normal text-[var(--text-secondary)]">{items.length} parámetros</span></td></tr>
                     {items.map((item) => {
                       const draft = drafts[item.versCaractId] ?? { texto: "", numero: "", cumple: item.cumple, dirty: false };
                       const tieneResultado = draft.numero !== "" || draft.texto.trim() !== "";
