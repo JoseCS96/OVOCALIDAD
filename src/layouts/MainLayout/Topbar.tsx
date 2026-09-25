@@ -20,10 +20,10 @@ function getInitials(name: string) {
 }
 
 function Topbar({ sidebarCollapsed, onSidebarToggle }: TopbarProps) {
-  const { acceso, logout, tieneModulo } = useAuth();
+  const { acceso, logout, tieneModulo, tienePermiso } = useAuth();
   const navigate = useNavigate();
   const groups = navigationGroups
-    .map((group) => ({ ...group, items: group.items.filter((item) => !item.moduloCodigo || tieneModulo(item.moduloCodigo)) }))
+    .map((group) => ({ ...group, items: group.items.filter((item) => (!item.moduloCodigo || tieneModulo(item.moduloCodigo)) && (!item.permiso || tienePermiso(item.permiso))) }))
     .filter((group) => group.items.length > 0);
 
   const nombre = acceso?.usuario.nombresApellidos ?? acceso?.usuario.nombreUsuario ?? "Usuario";
