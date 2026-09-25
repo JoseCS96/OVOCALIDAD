@@ -48,3 +48,7 @@ export type TipoSeccionEt={idTipoSeccion:number;descripcion:string};
 export type SeccionesEtCatalogo={secciones:SeccionDisponibleEt[];tiposSeccion:TipoSeccionEt[]};
 export type CrearSeccionEt={seccionDescripcion:string;idTipoSeccion:number;usuario:string};
 export type CrearSeccionEtResponse=OperacionEt&{seccionId?:number|null;seccionDescripcion?:string|null;idTipoSeccion?:number|null;ordenDefault?:number|null;esBase?:boolean|null;puedeEliminarse?:boolean|null;permiteReordenar?:boolean|null};
+
+export type ContenidoSeccionEt={versionSeccionContenidoId:number;versSeccId:number;seccionId:number;seccionDescripcion:string;idTipoSeccion:number|null;contenido:string|null};
+export type AgregarSeccionVersionEt={seccionId:number;orden:number|null;usuario:string};
+export type ReordenarSeccionesVersionEt={secciones:Array<{versSeccId:number;orden:number}>;usuario:string};
