@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, CheckCircle2, CircleAlert, FlaskConical, Save, ShieldCheck } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
@@ -96,7 +96,7 @@ export default function EvaluacionEnLineaPage() {
     const next: DraftMap = {};
     for (const item of data.detalle) {
       next[item.versCaractId] = {
-        texto: item.resultadoTexto ?? "",
+        texto: item.resultadoTexto ?? (item.tipoResultado === "TEXTO" ? item.especificacion ?? "" : ""),
         numero: item.resultadoNumerico === null ? "" : String(item.resultadoNumerico),
         cumple: item.cumple,
         dirty: false,
@@ -223,14 +223,14 @@ export default function EvaluacionEnLineaPage() {
             <div className="text-sm font-medium text-[var(--text-secondary)]">{avance.totalCaracteristicas} características</div>
           </div>
 
-          <div className="overflow-x-auto">
+          <div className="max-h-[560px] overflow-auto">
             <table className="w-full min-w-[1120px] border-collapse text-sm">
-              <thead className="bg-[var(--surface-muted)] text-left text-xs uppercase tracking-[0.08em] text-[var(--text-secondary)]">
+              <thead className="sticky top-0 z-20 bg-[var(--surface-muted)] text-left text-xs uppercase tracking-[0.08em] text-[var(--text-secondary)] shadow-[0_1px_0_var(--border)]">
                 <tr><th className="px-5 py-3">Tipo</th><th className="px-5 py-3">Característica</th><th className="px-5 py-3">Obligatoria</th><th className="px-5 py-3">Especificación</th><th className="px-5 py-3">Resultado</th><th className="px-5 py-3">Unidad</th><th className="px-5 py-3">Estado</th></tr>
               </thead>
               <tbody>
                 {grupos.map(([grupo, items]) => (
-                  <>
+                  <Fragment key={grupo}>
                     <tr key={`group-${grupo}`} className="border-t border-[var(--border)] bg-slate-50/80"><td colSpan={7} className="px-5 py-2.5 font-semibold text-[var(--text)]">{labelGrupo(grupo)} <span className="ml-2 text-xs font-normal text-[var(--text-secondary)]">{items.length} parámetros</span></td></tr>
                     {items.map((item) => {
                       const draft = drafts[item.versCaractId] ?? { texto: "", numero: "", cumple: item.cumple, dirty: false };
@@ -247,7 +247,7 @@ export default function EvaluacionEnLineaPage() {
                         </tr>
                       );
                     })}
-                  </>
+                  </Fragment>
                 ))}
               </tbody>
             </table>
