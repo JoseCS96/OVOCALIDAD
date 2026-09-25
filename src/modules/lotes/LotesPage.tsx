@@ -14,6 +14,7 @@ import { iniciarEvaluacion } from "@/modules/evaluaciones/api";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import GenerarLoteModal from "./GenerarLoteModal";
 import type { LotesFiltros } from "./types";
+import { useAuth } from "@/modules/auth/AuthContext";
 
 type SortKey = "codigoLote" | "productoCodigo" | "fechaHoraProduccion" | "faseDescripcion" | "lineaOrigenCodigo" | "estadoLoteDescripcion" | "estadoEvaluacionDescripcion";
 type SortDirection = "asc" | "desc";
@@ -63,6 +64,10 @@ function formatDate(value: string | null) {
 export default function LotesPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { tienePermiso } = useAuth();
+  const puedeCrearLote = tienePermiso("LOTE.CREAR");
+  const puedeIniciarEvaluacion = tienePermiso("EVALUACION.INICIAR");
+  const puedeVerEvaluacion = tienePermiso("EVALUACION.VER");
   const [actionError, setActionError] = useState<string | null>(null);
   const iniciarMutation = useMutation({
     mutationFn: (evaluacionId: number) => iniciarEvaluacion(evaluacionId),
@@ -140,10 +145,10 @@ export default function LotesPage() {
               <RefreshCw size={16} className={isFetching ? "animate-spin" : ""} />
               Actualizar
             </Button>
-            <Button size="lg" className="min-w-44 bg-[var(--primary)] px-5 font-semibold text-white shadow-md hover:bg-[var(--primary-strong)] hover:shadow-lg" onClick={() => setGenerarOpen(true)}>
+            {puedeCrearLote && <Button size="lg" className="min-w-44 bg-[var(--primary)] px-5 font-semibold text-white shadow-md hover:bg-[var(--primary-strong)] hover:shadow-lg" onClick={() => setGenerarOpen(true)}>
               <Plus size={17} />
               Generar lote
-            </Button>
+            </Button>}
           </div>
         }
       />
@@ -316,13 +321,13 @@ export default function LotesPage() {
                           Acciones
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-52">
-                          {lote.evaluacionId !== null && lote.estadoEvaluacionCodigo === "PENDIENTE" && (
+                          {puedeIniciarEvaluacion && lote.evaluacionId !== null && lote.estadoEvaluacionCodigo === "PENDIENTE" && (
                             <DropdownMenuItem onClick={() => iniciarMutation.mutate(lote.evaluacionId!)}>
                               <Play size={15} />
                               Iniciar evaluación
                             </DropdownMenuItem>
                           )}
-                          {lote.evaluacionId !== null && lote.estadoEvaluacionCodigo === "EN_PROCESO" && (
+                          {puedeVerEvaluacion && lote.evaluacionId !== null && lote.estadoEvaluacionCodigo === "EN_PROCESO" && (
                             <DropdownMenuItem onClick={() => navigate(`/operacion/evaluaciones/${lote.evaluacionId}`)}>
                               <Play size={15} />
                               Continuar evaluación
@@ -355,7 +360,7 @@ export default function LotesPage() {
         </CardContent>
       </Card>
       {actionError && <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{actionError}</div>}
-      <GenerarLoteModal open={generarOpen} onClose={() => setGenerarOpen(false)} onCreated={() => refetch()} />
+      {puedeCrearLote && <GenerarLoteModal open={generarOpen} onClose={() => setGenerarOpen(false)} onCreated={() => refetch()} />}
     </PageContainer>
   );
 }
