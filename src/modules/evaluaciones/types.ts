@@ -18,9 +18,11 @@ export type EvaluacionCabecera = {
   fechaInicio: string;
   fechaFin: string | null;
   observacion: string | null;
+  resultadoGeneral: boolean | null;
 };
 
 export type EvaluacionDetalle = {
+  evaluacionResultadoId: number | null;
   versCaractId: number;
   tipoCaracteristica: string;
   caracteristica: string;
