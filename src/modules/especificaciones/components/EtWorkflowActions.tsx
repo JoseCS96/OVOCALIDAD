@@ -1,26 +1,30 @@
 import {useState} from "react";
 import {CheckCircle2,ChevronDown,Eye,Send,Upload,X} from "lucide-react";
 import {Button} from "@/components/ui/button";
+import {useAuth} from "@/modules/auth/AuthContext";
 import type {AccionWorkflowEt,InformacionGeneralEt} from "../types";
 
 type Props={info:InformacionGeneralEt;busy:boolean;onAccion:(accion:AccionWorkflowEt,comentario:string|null)=>void};
 
 export default function EtWorkflowActions({info,busy,onAccion}:Props){
+ const {tienePermiso}=useAuth();
  const [abierto,setAbierto]=useState(false);
  const [accion,setAccion]=useState<AccionWorkflowEt|null>(null);
  const [comentario,setComentario]=useState("");
  const estado=info.estadoVersion?.toUpperCase();
  const habilitado=(a:AccionWorkflowEt)=>{
-  if(a==="ENVIAR_REVISION")return estado==="BORRADOR";
-  if(a==="OBSERVAR")return estado==="PENDIENTE_REVISION"||estado==="VERIFICADO";
-  if(a==="VERIFICAR")return estado==="PENDIENTE_REVISION";
-  if(a==="PUBLICAR")return estado==="VERIFICADO";
+  if(a==="ENVIAR_REVISION")return tienePermiso("ET.ENVIAR_REVISION")&&estado==="BORRADOR";
+  if(a==="OBSERVAR")return tienePermiso("ET.OBSERVAR")&&(estado==="PENDIENTE_REVISION"||estado==="VERIFICADO");
+  if(a==="VERIFICAR")return tienePermiso("ET.VERIFICAR")&&estado==="PENDIENTE_REVISION";
+  if(a==="PUBLICAR")return tienePermiso("ET.PUBLICAR")&&estado==="VERIFICADO";
   return false;
  };
  const seleccionar=(a:AccionWorkflowEt)=>{if(!habilitado(a)||busy)return;setAbierto(false);setComentario("");setAccion(a)};
  const confirmar=()=>{if(!accion)return;if(accion==="OBSERVAR"&&!comentario.trim())return;onAccion(accion,accion==="OBSERVAR"?comentario.trim():null);setAccion(null);setComentario("")};
  const titulo=accion==="ENVIAR_REVISION"?"Enviar a revisión":accion==="OBSERVAR"?"Observar ET":accion==="VERIFICAR"?"Confirmar ET verificada":"Publicar ET";
  const detalle=accion==="ENVIAR_REVISION"?"La ET pasará a PENDIENTE_REVISION y quedará bloqueada para edición.":accion==="OBSERVAR"?(estado==="VERIFICADO"?"La ET volverá a PENDIENTE_REVISION.":"La ET volverá a BORRADOR para su corrección."):accion==="VERIFICAR"?"Confirma que la revisión terminó. La ET pasará a VERIFICADO.":accion==="PUBLICAR"?"La ET debe estar verificada. Al publicar quedará en estado final.":"";
+ const tieneAcciones=["ET.ENVIAR_REVISION","ET.OBSERVAR","ET.VERIFICAR","ET.PUBLICAR"].some(tienePermiso);
+ if(!tieneAcciones)return null;
  return <>
   <div className="relative">
    <Button variant="outline" className="h-11 px-4 font-semibold" disabled={busy||estado==="PUBLICADO"} onClick={()=>setAbierto(v=>!v)}>Acciones<ChevronDown className="size-4"/></Button>
