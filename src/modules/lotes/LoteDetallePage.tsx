@@ -88,7 +88,7 @@ export default function LoteDetallePage() {
             <td className="px-5 py-4"><div className="w-36"><div className="mb-1 flex justify-between text-xs"><span className="font-semibold">{Number(e.porcentajeAvance).toFixed(0)}%</span><span className="text-[var(--text-secondary)]">{e.resultadosRegistrados}/{e.totalParametros}</span></div><div className="h-1.5 overflow-hidden rounded-full bg-slate-200"><div className="h-full rounded-full bg-emerald-500" style={{width:`${Math.min(100,Number(e.porcentajeAvance))}%`}}/></div></div></td>
             <td className="px-5 py-4">{e.usuarioEvaluador || "—"}</td>
             <td className="px-5 py-4 text-xs"><div>{formatDate(e.fechaInicio)}</div><div className="mt-1 text-[var(--text-secondary)]">{e.fechaFin ? `Fin: ${formatDate(e.fechaFin)}` : "En curso"}</div></td>
-            <td className="px-5 py-4 text-right"><Button variant="outline" size="sm" onClick={() => navigate(`/operacion/evaluaciones/${e.evaluacionId}`)}><Eye size={15}/>Ver evaluación<ChevronRight size={14}/></Button></td>
+            <td className="px-5 py-4 text-right"><Button variant="outline" size="sm" onClick={() => navigate(`/operacion/evaluaciones/${e.evaluacionId}`, { state: { loteId: lote.loteId } })}><Eye size={15}/>Ver evaluación<ChevronRight size={14}/></Button></td>
           </tr>)}</tbody>
         </table></div>
       </CardContent></Card>
