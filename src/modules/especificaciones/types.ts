@@ -42,3 +42,9 @@ export type EspecificacionTecnicaListado={versionId:number;documentoId:number;do
 export type CrearEtSeccion={seccionId:number;orden:number};
 export type CrearEspecificacionTecnica={documentoCodigo:string;documentoDescripcionDocumento:string;productoCodigo:string;versionNumero:number;versionInicioVigencia:string|null;versionReemplazaAId:number|null;versionNroPaginas:number|null;secciones:CrearEtSeccion[];usuario:string};
 export type CrearEspecificacionTecnicaResponse=OperacionEt&{documentoId?:number|null;versionId?:number|null;documentoCodigo?:string|null;productoCodigo?:string|null;versionNumero?:number|null;estadoVersion?:string|null};
+
+export type SeccionDisponibleEt={seccionId:number;seccionDescripcion:string;idTipoSeccion:number|null;tipoSeccion:string|null;ordenDefault:number;esBase:boolean;puedeEliminarse:boolean;permiteReordenar:boolean;icono:string|null};
+export type TipoSeccionEt={idTipoSeccion:number;descripcion:string};
+export type SeccionesEtCatalogo={secciones:SeccionDisponibleEt[];tiposSeccion:TipoSeccionEt[]};
+export type CrearSeccionEt={seccionDescripcion:string;idTipoSeccion:number;usuario:string};
+export type CrearSeccionEtResponse=OperacionEt&{seccionId?:number|null;seccionDescripcion?:string|null;idTipoSeccion?:number|null;ordenDefault?:number|null;esBase?:boolean|null;puedeEliminarse?:boolean|null;permiteReordenar?:boolean|null};
