@@ -34,6 +34,20 @@ function normalizarTexto(value: string | null | undefined) {
   return (value ?? "").trim().toLocaleUpperCase("es-PE");
 }
 
+function valorSugerido(item: EvaluacionDetalle): Pick<Draft, "numero" | "texto"> {
+  if (item.resultadoNumerico !== null && item.resultadoNumerico !== undefined) return { numero: String(item.resultadoNumerico), texto: "" };
+  if (item.resultadoTexto?.trim()) return { numero: "", texto: item.resultadoTexto };
+
+  const criterio = (item.tipoCriterio ?? "").toUpperCase();
+  const especificacion = item.especificacion ?? "";
+  if (item.tipoResultado === "TEXTO") return { numero: "", texto: especificacion };
+
+  const numeros = especificacion.match(/-?\d+(?:[.,]\d+)?/g)?.map((v) => Number(v.replace(",", "."))) ?? [];
+  if (criterio === "RANGO" && numeros.length >= 2) return { numero: String((numeros[0] + numeros[1]) / 2), texto: "" };
+  if ((criterio === "MINIMO" || criterio === "MAXIMO" || criterio === "IGUAL") && numeros[0] !== undefined) return { numero: String(numeros[0]), texto: "" };
+  return { numero: "", texto: "" };
+}
+
 function calcularCumpleLocal(item: EvaluacionDetalle, draft: Draft): boolean | null {
   const criterio = (item.tipoCriterio ?? "").toUpperCase();
 
@@ -133,11 +147,13 @@ export default function EvaluacionEnLineaPage() {
     if (!data) return;
     const next: DraftMap = {};
     for (const item of data.detalle) {
+      const sugerido = valorSugerido(item);
+      const tieneResultadoPersistido = item.evaluacionResultadoId !== null;
       next[item.versCaractId] = {
-        texto: item.resultadoTexto ?? (item.tipoResultado === "TEXTO" ? item.especificacion ?? "" : ""),
-        numero: item.resultadoNumerico === null ? "" : String(item.resultadoNumerico),
+        texto: sugerido.texto,
+        numero: sugerido.numero,
         cumple: item.cumple,
-        dirty: false,
+        dirty: !tieneResultadoPersistido && (sugerido.numero !== "" || sugerido.texto.trim() !== ""),
       };
     }
     setDrafts(next);
