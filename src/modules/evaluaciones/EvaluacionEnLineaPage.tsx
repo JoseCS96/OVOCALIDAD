@@ -1,7 +1,7 @@
 import { Fragment, useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, FlaskConical, Save, ShieldCheck } from "lucide-react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useLocation, useParams } from "react-router-dom";
 import PageContainer from "@/components/common/PageContainer";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -153,6 +153,7 @@ function ResultadoControl({ item, draft, onChange }: { item: EvaluacionDetalle; 
 
 export default function EvaluacionEnLineaPage() {
   const { evaluacionId } = useParams();
+  const location = useLocation();
   const id = Number(evaluacionId);
   const queryClient = useQueryClient();
   const [drafts, setDrafts] = useState<DraftMap>({});
@@ -293,12 +294,15 @@ export default function EvaluacionEnLineaPage() {
   const { cabecera, avance } = data;
   const estaEnProceso = cabecera.estadoEvaluacion === "EN_PROCESO";
   const puedeCerrar = estaEnProceso && avance.totalObligatorias > 0 && avance.obligatoriasCompletas === avance.totalObligatorias;
+  const origenLoteId = (location.state as { loteId?: number } | null)?.loteId;
+  const volverA = origenLoteId ? `/operacion/lotes/${origenLoteId}` : "/operacion/lotes";
+  const volverTexto = origenLoteId ? "Volver al detalle del lote" : "Volver a lotes";
 
   return (
     <PageContainer className="space-y-2">
       <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
-        <Link to="/operacion/lotes" className="inline-flex items-center gap-1 text-xs font-medium text-[var(--primary)] hover:underline">
-          <ArrowLeft size={14} /> Volver a lotes
+        <Link to={volverA} className="inline-flex items-center gap-1 text-xs font-medium text-[var(--primary)] hover:underline">
+          <ArrowLeft size={14} /> {volverTexto}
         </Link>
         <span className="hidden h-4 w-px bg-[var(--border)] sm:block" />
         <div className="flex min-w-0 items-baseline gap-2">
@@ -318,11 +322,19 @@ export default function EvaluacionEnLineaPage() {
         </CardContent>
       </Card>
 
-      <div className="flex items-center gap-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-1 text-[11px] leading-none text-amber-900">
-        <FlaskConical className="h-4 w-4 shrink-0" />
-        <span className="font-semibold">Registro parcial habilitado.</span>
-        <span className="text-amber-800">Puedes guardar avances sin cerrar la evaluación.</span>
-      </div>
+      {estaEnProceso ? (
+        <div className="flex items-center gap-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-1 text-[11px] leading-none text-amber-900">
+          <FlaskConical className="h-4 w-4 shrink-0" />
+          <span className="font-semibold">Registro parcial habilitado.</span>
+          <span className="text-amber-800">Puedes guardar avances sin cerrar la evaluación.</span>
+        </div>
+      ) : (
+        <div className="flex items-center gap-2 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-1 text-[11px] leading-none text-emerald-900">
+          <ShieldCheck className="h-4 w-4 shrink-0" />
+          <span className="font-semibold">Evaluación cerrada.</span>
+          <span className="text-emerald-800">Los resultados están bloqueados para edición. Resultado final: {cabecera.resultadoGeneral === true ? "CONFORME" : cabecera.resultadoGeneral === false ? "NO CONFORME" : "SIN DEFINIR"}.</span>
+        </div>
+      )}
 
       <Card className="overflow-hidden border-[var(--border)] shadow-[var(--shadow-card)]">
         <CardContent className="p-0">
