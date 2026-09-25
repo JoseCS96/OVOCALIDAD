@@ -71,6 +71,28 @@ function calcularCumpleLocal(item: EvaluacionDetalle, draft: Draft): boolean | n
   return null;
 }
 
+function resultadoCambio(item: EvaluacionDetalle, draft: Draft): boolean {
+  const criterio = (item.tipoCriterio ?? "").toUpperCase();
+  const esTexto = criterio === "AUSENCIA" || criterio === "CUALITATIVO";
+
+  // Si nunca fue evaluada, cualquier valor visible válido debe insertarse.
+  if (item.evaluacionResultadoId === null) {
+    return esTexto ? draft.texto.trim() !== "" : draft.numero.trim() !== "";
+  }
+
+  // Si ya existe, solo se envía cuando el valor realmente cambió.
+  if (esTexto) {
+    return normalizarTexto(draft.texto) !== normalizarTexto(item.resultadoTexto);
+  }
+
+  if (draft.numero.trim() === "") return item.resultadoNumerico !== null;
+  const actual = Number(draft.numero);
+  const persistido = item.resultadoNumerico;
+  if (!Number.isFinite(actual)) return true;
+  if (persistido === null || persistido === undefined) return true;
+  return Math.abs(actual - Number(persistido)) > 0.000001;
+}
+
 function ResultadoControl({ item, draft, onChange }: { item: EvaluacionDetalle; draft: Draft; onChange: (next: Partial<Draft>) => void }) {
   const criterio = (item.tipoCriterio ?? "").toUpperCase();
   const cumpleLocal = calcularCumpleLocal(item, draft);
@@ -203,7 +225,8 @@ export default function EvaluacionEnLineaPage() {
 
     for (const item of data.detalle) {
       const draft = drafts[item.versCaractId];
-      if (!draft?.dirty) continue;
+      if (!draft) continue;
+      if (!resultadoCambio(item, draft)) continue;
       const criterio = (item.tipoCriterio ?? "").toUpperCase();
       if (["MINIMO", "MAXIMO", "RANGO"].includes(criterio) && draft.numero === "") {
         setSaveError(`Ingresa un resultado para ${item.caracteristica}.`);
@@ -213,15 +236,11 @@ export default function EvaluacionEnLineaPage() {
         setSaveError(`Ingresa un resultado para ${item.caracteristica}.`);
         return;
       }
-      if (criterio === "CUALITATIVO" && draft.cumple === null) {
-        setSaveError(`Indica Cumple/No cumple para ${item.caracteristica}.`);
-        return;
-      }
       requests.push({
         versCaractId: item.versCaractId,
         resultadoTexto: ["AUSENCIA", "CUALITATIVO"].includes(criterio) ? draft.texto.trim() : null,
         resultadoNumerico: ["MINIMO", "MAXIMO", "RANGO"].includes(criterio) ? Number(draft.numero) : null,
-        cumple: criterio === "CUALITATIVO" ? calcularCumpleLocal(item, draft) : null,
+        cumple: ["CUALITATIVO", "AUSENCIA"].includes(criterio) ? calcularCumpleLocal(item, draft) : null,
         observacion: null,
         usuario: "USUARIO_WEB",
       });
