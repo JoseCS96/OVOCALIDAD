@@ -1,5 +1,5 @@
 import axios from "axios";
-import type { CatalogosEt, DetalleEt, GuardarCaracteristicaEt, OperacionEt, EspecificacionTecnicaListado, CrearEspecificacionTecnica, CrearEspecificacionTecnicaResponse, SeccionesEtCatalogo, CrearSeccionEt, CrearSeccionEtResponse } from "./types";
+import type { CatalogosEt, DetalleEt, GuardarCaracteristicaEt, OperacionEt, EspecificacionTecnicaListado, CrearEspecificacionTecnica, CrearEspecificacionTecnicaResponse, SeccionesEtCatalogo, CrearSeccionEt, CrearSeccionEtResponse, ContenidoSeccionEt, AgregarSeccionVersionEt, ReordenarSeccionesVersionEt } from "./types";
 const api=axios.create({baseURL:import.meta.env.VITE_API_URL??""});
 function validar(data:OperacionEt){if(data.codigoResultado!==0)throw new Error(data.mensaje);return data}
 export async function obtenerEt(versionId:number){const {data}=await api.get<DetalleEt>(`/api/especificaciones-tecnicas/${versionId}`);return data}
@@ -13,3 +13,9 @@ export async function crearEt(request:CrearEspecificacionTecnica){const {data}=a
 
 export async function obtenerSeccionesEt(){const {data}=await api.get<SeccionesEtCatalogo>("/api/especificaciones-tecnicas/secciones");return data}
 export async function crearSeccionEt(request:CrearSeccionEt){const {data}=await api.post<CrearSeccionEtResponse>("/api/especificaciones-tecnicas/secciones",request);return validar(data) as CrearSeccionEtResponse}
+
+export async function obtenerContenidoSeccionesEt(versionId:number){const {data}=await api.get<ContenidoSeccionEt[]>(`/api/especificaciones-tecnicas/${versionId}/secciones/contenido`);return data}
+export async function agregarSeccionVersionEt(versionId:number,request:AgregarSeccionVersionEt){const {data}=await api.post<OperacionEt>(`/api/especificaciones-tecnicas/${versionId}/secciones`,request);return validar(data)}
+export async function quitarSeccionVersionEt(versionId:number,versSeccId:number){const {data}=await api.delete<OperacionEt>(`/api/especificaciones-tecnicas/${versionId}/secciones/${versSeccId}`,{data:{usuario:"USUARIO_WEB"}});return validar(data)}
+export async function reordenarSeccionesVersionEt(versionId:number,request:ReordenarSeccionesVersionEt){const {data}=await api.put<OperacionEt>(`/api/especificaciones-tecnicas/${versionId}/secciones/orden`,request);return validar(data)}
+export async function guardarContenidoSeccionEt(versionId:number,versSeccId:number,contenido:string){const {data}=await api.put<OperacionEt>(`/api/especificaciones-tecnicas/${versionId}/secciones/${versSeccId}/contenido`,{contenido,usuario:"USUARIO_WEB"});return validar(data)}
