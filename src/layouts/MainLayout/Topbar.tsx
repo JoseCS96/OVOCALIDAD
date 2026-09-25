@@ -29,7 +29,7 @@ function Topbar({ sidebarCollapsed, onSidebarToggle }: TopbarProps) {
   const [modalAbierto,setModalAbierto]=useState(false);
   const pendientes=useMemo(()=>notificaciones.filter(n=>!n.leida),[notificaciones]);
 
-  useEffect(()=>{if(!acceso)return;obtenerNotificaciones().then(data=>{setNotificaciones(data);setModalAbierto(data.some(n=>!n.mostradaModal));}).catch(()=>{});},[acceso?.usuario.nombreUsuario]);
+  useEffect(()=>{if(!acceso)return;obtenerNotificaciones().then(data=>{setNotificaciones(data);setModalAbierto(data.some((n: Notificacion)=>!n.mostradaModal));}).catch(()=>{});},[acceso?.usuario.nombreUsuario]);
 
   async function cerrarModal(){setModalAbierto(false);try{await marcarModalMostrado();setNotificaciones(ns=>ns.map(n=>({...n,mostradaModal:true})));}catch{}}
   async function abrirNotificacion(n:Notificacion){try{if(!n.leida){await marcarNotificacionLeida(n.notificacionId);setNotificaciones(ns=>ns.map(x=>x.notificacionId===n.notificacionId?{...x,leida:true}:x));}}finally{setCampanaAbierta(false);if(n.urlDestino)navigate(n.urlDestino);}}
