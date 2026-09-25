@@ -27,11 +27,11 @@ function Topbar({ sidebarCollapsed, onSidebarToggle }: TopbarProps) {
   const [notificaciones,setNotificaciones]=useState<Notificacion[]>([]);
   const [campanaAbierta,setCampanaAbierta]=useState(false);
   const [modalAbierto,setModalAbierto]=useState(false);
-  const pendientes=useMemo(()=>notificaciones.filter(n=>!n.leida),[notificaciones]);
+  const pendientes=useMemo(()=>notificaciones.filter(n=>n.mostrarEnCampana&&!n.leida),[notificaciones]);\n  const pendientesModal=useMemo(()=>notificaciones.filter(n=>n.mostrarEnModal),[notificaciones]);
 
-  useEffect(()=>{if(!acceso)return;obtenerNotificaciones().then(data=>{setNotificaciones(data);setModalAbierto(data.some((n: Notificacion)=>!n.mostradaModal));}).catch(()=>{});},[acceso?.usuario.nombreUsuario]);
+  useEffect(()=>{if(!acceso)return;obtenerNotificaciones().then(data=>{setNotificaciones(data);setModalAbierto(data.some((n: Notificacion)=>n.mostrarEnModal));}).catch(()=>{});},[acceso?.usuario.nombreUsuario]);
 
-  async function cerrarModal(){setModalAbierto(false);try{await marcarModalMostrado();setNotificaciones(ns=>ns.map(n=>({...n,mostradaModal:true})));}catch{}}
+  async function cerrarModal(){setModalAbierto(false);try{await marcarModalMostrado();setNotificaciones(ns=>ns.map(n=>n.mostrarEnModal?{...n,mostradaModal:true,cantidadVecesModal:n.cantidadVecesModal+1}:n));}catch{}}
   async function abrirNotificacion(n:Notificacion){try{if(!n.leida){await marcarNotificacionLeida(n.notificacionId);setNotificaciones(ns=>ns.map(x=>x.notificacionId===n.notificacionId?{...x,leida:true}:x));}}finally{setCampanaAbierta(false);if(n.urlDestino)navigate(n.urlDestino);}}
   async function verSolicitudes(){await cerrarModal();navigate("/documentos/especificaciones");}
   const navigate = useNavigate();
@@ -90,7 +90,7 @@ function Topbar({ sidebarCollapsed, onSidebarToggle }: TopbarProps) {
           </div>
         </div>
       </div>
-      {modalAbierto&&<div className="fixed inset-0 z-[100] flex h-screen w-screen items-center justify-center bg-black/45 p-4"><div className="relative max-h-[80vh] w-full max-w-xl overflow-hidden rounded-2xl bg-white p-6 shadow-2xl"><div className="flex items-start justify-between gap-4"><div><p className="text-xs font-semibold uppercase tracking-[.15em] text-amber-600">Atención requerida</p><h2 className="mt-1 text-xl font-semibold">Solicitudes de verificación pendientes</h2></div><Button variant="ghost" size="icon" onClick={()=>void cerrarModal()}><X size={18}/></Button></div><p className="mt-3 text-sm text-slate-600">Tienes <b>{notificaciones.filter(n=>!n.mostradaModal).length}</b> nueva{notificaciones.filter(n=>!n.mostradaModal).length===1?"":"s"} solicitud{notificaciones.filter(n=>!n.mostradaModal).length===1?"":"es"} de especificación técnica por revisar.</p><div className="mt-4 max-h-64 overflow-y-auto rounded-xl border">{notificaciones.filter(n=>!n.mostradaModal).map(n=><button key={n.notificacionId} onClick={()=>void abrirNotificacion(n)} className="block w-full border-b px-4 py-3 text-left last:border-0 hover:bg-slate-50"><p className="text-sm font-semibold">{n.mensaje}</p></button>)}</div><div className="mt-5 flex justify-end gap-2"><Button variant="outline" onClick={()=>void cerrarModal()}>Cerrar</Button><Button onClick={()=>void verSolicitudes()}>Ver solicitudes</Button></div></div></div>}
+      {modalAbierto&&<div className="fixed inset-0 z-[100] flex h-screen w-screen items-center justify-center bg-black/45 p-4"><div className="relative max-h-[80vh] w-full max-w-xl overflow-hidden rounded-2xl bg-white p-6 shadow-2xl"><div className="flex items-start justify-between gap-4"><div><p className="text-xs font-semibold uppercase tracking-[.15em] text-amber-600">Atención requerida</p><h2 className="mt-1 text-xl font-semibold">Solicitudes de verificación pendientes</h2></div><Button variant="ghost" size="icon" onClick={()=>void cerrarModal()}><X size={18}/></Button></div><p className="mt-3 text-sm text-slate-600">Tienes <b>{pendientesModal.length}</b> nueva{pendientesModal.length===1?"":"s"} solicitud{pendientesModal.length===1?"":"es"} de especificación técnica por revisar.</p><div className="mt-4 max-h-64 overflow-y-auto rounded-xl border">{pendientesModal.map(n=><button key={n.notificacionId} onClick={()=>void abrirNotificacion(n)} className="block w-full border-b px-4 py-3 text-left last:border-0 hover:bg-slate-50"><p className="text-sm font-semibold">{n.mensaje}</p></button>)}</div><div className="mt-5 flex justify-end gap-2"><Button variant="outline" onClick={()=>void cerrarModal()}>Cerrar</Button><Button onClick={()=>void verSolicitudes()}>Ver solicitudes</Button></div></div></div>}
     </header>
   );
 }
