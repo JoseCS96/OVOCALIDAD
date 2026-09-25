@@ -39,5 +39,6 @@ export type OperacionEt={codigoResultado:number;mensaje:string;versCaractId?:num
 
 export type EspecificacionTecnicaListado={versionId:number;documentoId:number;documentoCodigo:string;documentoDescripcionDocumento:string;productoCodigo:string;productoDescripcion:string|null;versionNumero:number|null;versionInicioVigencia:string|null;versionNroPaginas:number|null;estVerId:number;estadoVersion:string;audUsuarioCreacion:string|null;audFechaCreacion:string;audUsuarioModificacion:string|null;audFechaActualizacion:string|null;permiteEditar:boolean};
 
-export type CrearEspecificacionTecnica={documentoCodigo:string;documentoDescripcionDocumento:string;productoCodigo:string;versionNumero:number;versionInicioVigencia:string|null;versionReemplazaAId:number|null;versionNroPaginas:number|null;usuario:string};
+export type CrearEtSeccion={seccionId:number;orden:number};
+export type CrearEspecificacionTecnica={documentoCodigo:string;documentoDescripcionDocumento:string;productoCodigo:string;versionNumero:number;versionInicioVigencia:string|null;versionReemplazaAId:number|null;versionNroPaginas:number|null;secciones:CrearEtSeccion[];usuario:string};
 export type CrearEspecificacionTecnicaResponse=OperacionEt&{documentoId?:number|null;versionId?:number|null;documentoCodigo?:string|null;productoCodigo?:string|null;versionNumero?:number|null;estadoVersion?:string|null};
