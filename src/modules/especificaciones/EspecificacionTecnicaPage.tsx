@@ -6,8 +6,8 @@ import PageContainer from "@/components/common/PageContainer";
 import {Button} from "@/components/ui/button";
 import {Card,CardContent} from "@/components/ui/card";
 import {Input} from "@/components/ui/input";
-import {agregarSeccionVersionEt,eliminarCaracteristica,guardarCaracteristica,guardarContenidoSeccionEt,guardarInformacionGeneralEt,obtenerCatalogosEt,obtenerContenidoSeccionesEt,obtenerEt,obtenerSeccionesEt,quitarSeccionVersionEt,reordenarSeccionesVersionEt} from "./api";
-import type {CaracteristicaEt,GuardarCaracteristicaEt} from "./types";
+import {agregarSeccionVersionEt,cambiarEstadoEt,eliminarCaracteristica,guardarCaracteristica,guardarContenidoSeccionEt,guardarInformacionGeneralEt,obtenerCatalogosEt,obtenerContenidoSeccionesEt,obtenerEt,obtenerSeccionesEt,quitarSeccionVersionEt,reordenarSeccionesVersionEt} from "./api";
+import type {AccionWorkflowEt,CaracteristicaEt,GuardarCaracteristicaEt} from "./types";
 import EtEditorHeader from "./components/EtEditorHeader";
 import EstructuraEtPanel from "./components/EstructuraEtPanel";
 import InformacionGeneralEditor from "./components/secciones/InformacionGeneralEditor";
@@ -30,6 +30,7 @@ export default function EspecificacionTecnicaPage(){
  const removeSec=useMutation({mutationFn:(versSeccId:number)=>quitarSeccionVersionEt(id,versSeccId),onSuccess:async()=>{setSeccionActiva(null);await refrescar();marcarGuardado()},onError:(e:Error)=>setError(e.message)});
  const saveContenido=useMutation({mutationFn:()=>guardarContenidoSeccionEt(id,seccionActiva!,contenido),onSuccess:async()=>{await refrescar();marcarGuardado()},onError:(e:Error)=>setError(e.message)});
  const moverSeccion=async(idx:number,dir:-1|1)=>{const s=[...(et.data?.secciones??[])].sort((a,b)=>(a.orden??0)-(b.orden??0));const j=idx+dir;if(j<1||j>=s.length)return;[s[idx],s[j]]=[s[j],s[idx]];try{setGuardandoEstructura(true);await reordenarSeccionesVersionEt(id,{secciones:s.map((x,i)=>({versSeccId:x.versSeccId,orden:i+1})),usuario:"USUARIO_WEB"});await refrescar();marcarGuardado()}catch(e){setError(e instanceof Error?e.message:"No se pudo reordenar la estructura.")}finally{setGuardandoEstructura(false)}};
+ const workflow=useMutation({mutationFn:({accion,comentario}:{accion:AccionWorkflowEt;comentario:string|null})=>cambiarEstadoEt(id,{accion,comentario,usuario:"USUARIO_WEB"}),onSuccess:async()=>{setError("");await refrescar();marcarGuardado()},onError:(e:Error)=>setError(e.message)});
  const guardarBorrador=async()=>{try{setConfirmandoBorrador(true);setError("");await refrescar();marcarGuardado();setBorradorGuardado(true)}catch(e){setError(e instanceof Error?e.message:"No se pudo confirmar el borrador.")}finally{setConfirmandoBorrador(false)}};
  useEffect(()=>{if(et.data?.secciones.length&&!seccionActiva)setSeccionActiva([...et.data.secciones].sort((a,b)=>(a.orden??0)-(b.orden??0))[0].versSeccId)},[et.data?.secciones,seccionActiva]);
  useEffect(()=>{const x=contenidos.data?.find(x=>x.versSeccId===seccionActiva);setContenido(x?.contenido??"")},[contenidos.data,seccionActiva]);
@@ -44,7 +45,7 @@ export default function EspecificacionTecnicaPage(){
  const disponibles=(secCat.data?.secciones??[]).filter(x=>!estructura.some(y=>y.seccionId===x.seccionId));
  const criterio=cat.data.tiposCriterio.find(x=>x.tipoCriterioId===form?.tipoCriterioId)?.tipoCriterio;
  return <PageContainer className="space-y-4">
-  <EtEditorHeader info={info} guardando={guardandoEstructura||addSec.isPending||removeSec.isPending||saveContenido.isPending||saveInfo.isPending||save.isPending||del.isPending} ultimoGuardado={ultimoGuardado} confirmando={confirmandoBorrador} onVolver={()=>nav("/documentos/especificaciones")} onGuardarBorrador={guardarBorrador}/>
+  <EtEditorHeader info={info} guardando={guardandoEstructura||addSec.isPending||removeSec.isPending||saveContenido.isPending||saveInfo.isPending||save.isPending||del.isPending} ultimoGuardado={ultimoGuardado} confirmando={confirmandoBorrador} workflowBusy={workflow.isPending} onWorkflow={(accion,comentario)=>workflow.mutate({accion,comentario})} onVolver={()=>nav("/documentos/especificaciones")} onGuardarBorrador={guardarBorrador}/>
   {error&&<div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>}
   <Card><CardContent className="p-5"><div className="grid gap-4 md:grid-cols-4"><Info l="Estado" v={info.estadoVersion}/><Info l="Producto" v={info.productoCodigo}/><Info l="Inicio vigencia" v={info.versionInicioVigencia?.slice(0,10)??"—"}/><Info l="Páginas" v={String(info.versionNroPaginas??"—")}/></div>{info.versionDescripcion&&<p className="mt-4 border-t pt-4 text-sm text-[var(--text-secondary)]">{info.versionDescripcion}</p>}</CardContent></Card>
   <div className="grid gap-4 lg:grid-cols-[300px_minmax(0,1fr)]">
