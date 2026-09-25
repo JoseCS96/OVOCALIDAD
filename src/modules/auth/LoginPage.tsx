@@ -1,18 +1,16 @@
 import { useState, type FormEvent } from "react";
 import axios from "axios";
 import { LockKeyhole, ShieldCheck, UserRound } from "lucide-react";
-import { Navigate, useLocation, useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import AppLogo from "@/components/branding/AppLogo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "./AuthContext";
 
-type LoginLocationState = { from?: string };
 
 export default function LoginPage() {
   const { autenticado, login } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
   const [nombreUsuario, setNombreUsuario] = useState("");
   const [password, setPassword] = useState("");
   const [enviando, setEnviando] = useState(false);
@@ -27,8 +25,7 @@ export default function LoginPage() {
 
     try {
       await login({ nombreUsuario: nombreUsuario.trim(), password });
-      const from = (location.state as LoginLocationState | null)?.from;
-      navigate(from && from !== "/login" ? from : "/", { replace: true });
+      navigate("/", { replace: true });
     } catch (loginError) {
       if (axios.isAxiosError(loginError) && loginError.response?.status === 401) {
         setError("Usuario o contraseña incorrectos.");
