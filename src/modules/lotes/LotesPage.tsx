@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowDownUp, ChevronLeft, ChevronRight, Eye, FilterX, Plus, RefreshCw, Search } from "lucide-react";
+import { ArrowDownUp, ChevronLeft, ChevronRight, Eye, FilterX, MoreHorizontal, Play, Plus, RefreshCw, Search } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import PageContainer from "@/components/common/PageContainer";
 import PageHeader from "@/components/common/PageHeader";
 import { Badge } from "@/components/ui/badge";
@@ -8,6 +10,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { listarLotes } from "./api";
+import { iniciarEvaluacion } from "@/modules/evaluaciones/api";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import GenerarLoteModal from "./GenerarLoteModal";
 import type { LotesFiltros } from "./types";
 
@@ -57,6 +61,18 @@ function formatDate(value: string | null) {
 }
 
 export default function LotesPage() {
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const [actionError, setActionError] = useState<string | null>(null);
+  const iniciarMutation = useMutation({
+    mutationFn: (evaluacionId: number) => iniciarEvaluacion(evaluacionId),
+    onSuccess: async (_, evaluacionId) => {
+      setActionError(null);
+      await queryClient.invalidateQueries({ queryKey: ["lotes"] });
+      navigate(`/operacion/evaluaciones/${evaluacionId}`);
+    },
+    onError: (error) => setActionError(error instanceof Error ? error.message : "No se pudo iniciar la evaluación."),
+  });
   const [draft, setDraft] = useState<LotesFiltros>({});
   const [filtros, setFiltros] = useState<LotesFiltros>({});
   const [generarOpen, setGenerarOpen] = useState(false);
@@ -219,16 +235,18 @@ export default function LotesPage() {
                   <th className="px-5 py-3"><button type="button" onClick={() => sortBy("lineaOrigenCodigo")} className="group inline-flex items-center gap-1.5 whitespace-nowrap font-semibold uppercase tracking-[0.08em] hover:text-[var(--primary)]">Línea<ArrowDownUp size={13} className={sortKey === "lineaOrigenCodigo" ? "text-[var(--primary)]" : "opacity-45 group-hover:opacity-100"} /></button></th>
                   <th className="px-5 py-3"><button type="button" onClick={() => sortBy("estadoLoteDescripcion")} className="group inline-flex items-center gap-1.5 whitespace-nowrap font-semibold uppercase tracking-[0.08em] hover:text-[var(--primary)]">Estado lote<ArrowDownUp size={13} className={sortKey === "estadoLoteDescripcion" ? "text-[var(--primary)]" : "opacity-45 group-hover:opacity-100"} /></button></th>
                   <th className="px-5 py-3"><button type="button" onClick={() => sortBy("estadoEvaluacionDescripcion")} className="group inline-flex items-center gap-1.5 whitespace-nowrap font-semibold uppercase tracking-[0.08em] hover:text-[var(--primary)]">Evaluación<ArrowDownUp size={13} className={sortKey === "estadoEvaluacionDescripcion" ? "text-[var(--primary)]" : "opacity-45 group-hover:opacity-100"} /></button></th>
+                  <th className="px-5 py-3">Avance evaluación</th>
+                  <th className="px-5 py-3">Avance evaluación</th>
                   <th className="px-5 py-3 text-right">Acciones</th>
                 </tr>
               </thead>
               <tbody>
                 {isLoading ? (
-                  <tr><td colSpan={8} className="px-5 py-12 text-center text-[var(--text-secondary)]">Cargando lotes...</td></tr>
+                  <tr><td colSpan={9} className="px-5 py-12 text-center text-[var(--text-secondary)]">Cargando lotes...</td></tr>
                 ) : isError ? (
-                  <tr><td colSpan={8} className="px-5 py-12 text-center text-red-600">No se pudo consultar la API de lotes.</td></tr>
+                  <tr><td colSpan={9} className="px-5 py-12 text-center text-red-600">No se pudo consultar la API de lotes.</td></tr>
                 ) : data.length === 0 ? (
-                  <tr><td colSpan={8} className="px-5 py-12 text-center text-[var(--text-secondary)]">No hay lotes para los filtros seleccionados.</td></tr>
+                  <tr><td colSpan={9} className="px-5 py-12 text-center text-[var(--text-secondary)]">No hay lotes para los filtros seleccionados.</td></tr>
                 ) : pagedData.map((lote) => (
                   <tr key={lote.loteId} className="border-t border-[var(--border)] hover:bg-[var(--surface-muted)]/70">
                     <td className="px-5 py-4">
@@ -259,11 +277,63 @@ export default function LotesPage() {
                         </div>
                       )}
                     </td>
+                    <td className="px-5 py-4">
+                      <div className="min-w-[180px]">
+                        <div className="mb-1.5 flex items-center justify-between gap-3 text-xs">
+                          <span className="font-semibold text-[var(--text)]">{Number(lote.porcentajeAvance ?? 0).toFixed(0)}%</span>
+                          <span className="text-[var(--text-secondary)]">{lote.resultadosRegistrados}/{lote.totalParametrosEvaluacion} evaluados</span>
+                        </div>
+                        <div className="h-2 overflow-hidden rounded-full bg-slate-200">
+                          <div className="h-full rounded-full bg-emerald-500 transition-all" style={{ width: `${Math.min(100, Math.max(0, Number(lote.porcentajeAvance ?? 0)))}%` }} />
+                        </div>
+                        <div className="mt-1 flex justify-between text-[10px] text-[var(--text-secondary)]">
+                          <span>{lote.totalEvaluaciones === 0 ? "Sin iniciar" : `${lote.totalEvaluaciones} eval.`}</span>
+                          <span>{Number(lote.porcentajeFaltante ?? 100).toFixed(0)}% faltante</span>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-5 py-4">
+                      <div className="min-w-[180px]">
+                        <div className="mb-1.5 flex items-center justify-between gap-3 text-xs">
+                          <span className="font-semibold text-[var(--text)]">{Number(lote.porcentajeAvance ?? 0).toFixed(0)}%</span>
+                          <span className="text-[var(--text-secondary)]">{lote.resultadosRegistrados}/{lote.totalParametrosEvaluacion} evaluados</span>
+                        </div>
+                        <div className="h-2 overflow-hidden rounded-full bg-slate-200">
+                          <div className="h-full rounded-full bg-emerald-500 transition-all" style={{ width: `${Math.min(100, Math.max(0, Number(lote.porcentajeAvance ?? 0)))}%` }} />
+                        </div>
+                        <div className="mt-1 flex justify-between text-[10px] text-[var(--text-secondary)]">
+                          <span>{lote.totalEvaluaciones === 0 ? "Sin iniciar" : `${lote.totalEvaluaciones} eval.`}</span>
+                          <span>{Number(lote.porcentajeFaltante ?? 100).toFixed(0)}% faltante</span>
+                        </div>
+                      </div>
+                    </td>
                     <td className="px-5 py-4 text-right">
-                      <Button variant="outline" size="sm" disabled>
-                        <Eye size={15} />
-                        Ver detalle
-                      </Button>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger
+                          render={<Button variant="outline" size="sm" aria-label={`Acciones del lote ${lote.codigoLote}`} />}
+                        >
+                          <MoreHorizontal size={16} />
+                          Acciones
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-52">
+                          {lote.evaluacionId !== null && lote.estadoEvaluacionCodigo === "PENDIENTE" && (
+                            <DropdownMenuItem onClick={() => iniciarMutation.mutate(lote.evaluacionId!)}>
+                              <Play size={15} />
+                              Iniciar evaluación
+                            </DropdownMenuItem>
+                          )}
+                          {lote.evaluacionId !== null && lote.estadoEvaluacionCodigo === "EN_PROCESO" && (
+                            <DropdownMenuItem onClick={() => navigate(`/operacion/evaluaciones/${lote.evaluacionId}`)}>
+                              <Play size={15} />
+                              Continuar evaluación
+                            </DropdownMenuItem>
+                          )}
+                          <DropdownMenuItem onClick={() => navigate(`/operacion/lotes/${lote.loteId}`)}>
+                            <Eye size={15} />
+                            Ver detalle
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </td>
                   </tr>
                 ))}
@@ -284,6 +354,7 @@ export default function LotesPage() {
           )}
         </CardContent>
       </Card>
+      {actionError && <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{actionError}</div>}
       <GenerarLoteModal open={generarOpen} onClose={() => setGenerarOpen(false)} onCreated={() => refetch()} />
     </PageContainer>
   );
