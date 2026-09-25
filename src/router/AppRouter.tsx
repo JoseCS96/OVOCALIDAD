@@ -3,6 +3,8 @@ import { BarChart3, Boxes, ClipboardCheck, FileCheck2, Package, Settings, Shield
 import MainLayout from "@/layouts/MainLayout/MainLayout";
 import ModulePlaceholder from "@/components/common/ModulePlaceholder";
 import Dashboard from "@/modules/dashboard/Dashboard";
+import LoginPage from "@/modules/auth/LoginPage";
+import ProtectedRoute from "@/modules/auth/ProtectedRoute";
 import LotesPage from "@/modules/lotes/LotesPage";
 import LoteDetallePage from "@/modules/lotes/LoteDetallePage";
 import EvaluacionEnLineaPage from "@/modules/evaluaciones/EvaluacionEnLineaPage";
@@ -27,16 +29,19 @@ const pages = [
 export default function AppRouter() {
   return (
     <Routes>
-      <Route element={<MainLayout />}>
-        <Route index element={<Dashboard />} />
-        <Route path="/operacion/lotes" element={<LotesPage />} />
-        <Route path="/operacion/lotes/:loteId" element={<LoteDetallePage />} />
-        <Route path="/operacion/evaluaciones/:evaluacionId" element={<EvaluacionEnLineaPage />} />
-        <Route path="/documentos/especificaciones/nueva" element={<NuevaEspecificacionTecnicaPage />} />
-        <Route path="/documentos/especificaciones/:versionId" element={<EspecificacionTecnicaDetallePage />} />
-        <Route path="/documentos/especificaciones/:versionId/editar" element={<EspecificacionTecnicaPage />} />
-        <Route path="/documentos/especificaciones" element={<EspecificacionesTecnicasPage />} />
-        {pages.map((page) => <Route key={page.path} path={page.path} element={<ModulePlaceholder {...page} />} />)}
+      <Route path="/login" element={<LoginPage />} />
+      <Route element={<ProtectedRoute />}>
+        <Route element={<MainLayout />}>
+          <Route index element={<Dashboard />} />
+          <Route path="/operacion/lotes" element={<LotesPage />} />
+          <Route path="/operacion/lotes/:loteId" element={<LoteDetallePage />} />
+          <Route path="/operacion/evaluaciones/:evaluacionId" element={<EvaluacionEnLineaPage />} />
+          <Route path="/documentos/especificaciones/nueva" element={<NuevaEspecificacionTecnicaPage />} />
+          <Route path="/documentos/especificaciones/:versionId" element={<EspecificacionTecnicaDetallePage />} />
+          <Route path="/documentos/especificaciones/:versionId/editar" element={<EspecificacionTecnicaPage />} />
+          <Route path="/documentos/especificaciones" element={<EspecificacionesTecnicasPage />} />
+          {pages.map((page) => <Route key={page.path} path={page.path} element={<ModulePlaceholder {...page} />} />)}
+        </Route>
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
