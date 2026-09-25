@@ -10,6 +10,9 @@ export type LoteListado = {
   intentoEvaluacion: number | null; estadoEvaluacionId: number | null; estadoEvaluacionCodigo: string | null;
   estadoEvaluacionDescripcion: string | null; resultadoGeneral: boolean | null;
   fechaInicioEvaluacion: string | null; fechaFinEvaluacion: string | null; usuarioEvaluador: string | null;
+  totalEvaluaciones: number; evaluacionesTerminadas: number; totalParametrosEvaluacion: number;
+  resultadosRegistrados: number; parametrosPendientes: number;
+  porcentajeAvance: number; porcentajeFaltante: number;
   observacion: string | null; estado: string; audFechaCreacion: string; audFechaActualizacion: string | null;
 };
 
