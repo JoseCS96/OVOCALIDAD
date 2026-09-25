@@ -1,6 +1,6 @@
 import { Fragment, useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, CheckCircle2, CircleAlert, FlaskConical, Save, ShieldCheck } from "lucide-react";
+import { ArrowLeft, FlaskConical, Save, ShieldCheck } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 import PageContainer from "@/components/common/PageContainer";
 import { Badge } from "@/components/ui/badge";
@@ -24,10 +24,10 @@ function labelGrupo(value: string) {
 }
 
 function EstadoResultado({ cumple, tieneResultado }: { cumple: boolean | null; tieneResultado: boolean }) {
-  if (!tieneResultado) return <Badge variant="outline" className="border-slate-200 bg-slate-50 text-slate-600">Pendiente</Badge>;
-  if (cumple === true) return <Badge variant="outline" className="border-emerald-200 bg-emerald-50 text-emerald-700"><CheckCircle2 size={13} /> Cumple</Badge>;
-  if (cumple === false) return <Badge variant="outline" className="border-red-200 bg-red-50 text-red-700"><CircleAlert size={13} /> No cumple</Badge>;
-  return <Badge variant="outline" className="border-amber-200 bg-amber-50 text-amber-700">Por definir</Badge>;
+  if (!tieneResultado) return <span className="inline-flex whitespace-nowrap rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-xs font-medium text-slate-600">Pendiente</span>;
+  if (cumple === true) return <span className="inline-flex whitespace-nowrap rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700">✓ Cumple</span>;
+  if (cumple === false) return <span className="inline-flex whitespace-nowrap rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-800">! No cumple</span>;
+  return <span className="inline-flex whitespace-nowrap rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700">Por definir</span>;
 }
 
 function normalizarTexto(value: string | null | undefined) {
