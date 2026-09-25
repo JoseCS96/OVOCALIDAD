@@ -27,7 +27,8 @@ function Topbar({ sidebarCollapsed, onSidebarToggle }: TopbarProps) {
   const [notificaciones,setNotificaciones]=useState<Notificacion[]>([]);
   const [campanaAbierta,setCampanaAbierta]=useState(false);
   const [modalAbierto,setModalAbierto]=useState(false);
-  const pendientes=useMemo(()=>notificaciones.filter(n=>n.mostrarEnCampana&&!n.leida),[notificaciones]);\n  const pendientesModal=useMemo(()=>notificaciones.filter(n=>n.mostrarEnModal),[notificaciones]);
+  const pendientes=useMemo(()=>notificaciones.filter(n=>n.mostrarEnCampana&&!n.leida),[notificaciones]);
+  const pendientesModal=useMemo(()=>notificaciones.filter(n=>n.mostrarEnModal),[notificaciones]);
 
   useEffect(()=>{if(!acceso)return;obtenerNotificaciones().then(data=>{setNotificaciones(data);setModalAbierto(data.some((n: Notificacion)=>n.mostrarEnModal));}).catch(()=>{});},[acceso?.usuario.nombreUsuario]);
 
