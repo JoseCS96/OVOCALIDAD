@@ -69,4 +69,11 @@ export type OperacionResponse = {
   estadoEvaluacion?: string | null;
   estadoLote?: string | null;
   cumple?: boolean | null;
+  resultadoGeneral?: boolean | null;
+  resultadoDescripcion?: string | null;
+  totalParametros?: number | null;
+  totalObligatorios?: number | null;
+  obligatoriosEvaluados?: number | null;
+  cumplen?: number | null;
+  noCumplen?: number | null;
 };
