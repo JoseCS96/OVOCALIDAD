@@ -1,4 +1,4 @@
-import api from "@/lib/api";
+import { api } from "@/lib/api";
 import type {Notificacion,OperacionNotificacion} from "./types";
 
 export async function obtenerNotificaciones(){
