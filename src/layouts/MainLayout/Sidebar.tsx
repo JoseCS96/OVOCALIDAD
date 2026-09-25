@@ -8,12 +8,15 @@ import SidebarItem from "./SidebarItem";
 type SidebarProps = { collapsed: boolean; onToggle: () => void };
 
 function Sidebar({ collapsed, onToggle }: SidebarProps) {
-  const { tieneModulo } = useAuth();
+  const { tieneModulo, tienePermiso } = useAuth();
 
   const groups = navigationGroups
     .map((group) => ({
       ...group,
-      items: group.items.filter((item) => !item.moduloCodigo || tieneModulo(item.moduloCodigo)),
+      items: group.items.filter((item) =>
+        (!item.moduloCodigo || tieneModulo(item.moduloCodigo)) &&
+        (!item.permiso || tienePermiso(item.permiso))
+      ),
     }))
     .filter((group) => group.items.length > 0);
 
