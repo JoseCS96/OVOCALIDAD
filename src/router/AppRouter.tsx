@@ -7,6 +7,7 @@ import LotesPage from "@/modules/lotes/LotesPage";
 import LoteDetallePage from "@/modules/lotes/LoteDetallePage";
 import EvaluacionEnLineaPage from "@/modules/evaluaciones/EvaluacionEnLineaPage";
 import EspecificacionTecnicaPage from "@/modules/especificaciones/EspecificacionTecnicaPage";
+import EspecificacionTecnicaDetallePage from "@/modules/especificaciones/EspecificacionTecnicaDetallePage";
 import EspecificacionesTecnicasPage from "@/modules/especificaciones/EspecificacionesTecnicasPage";
 
 const pages = [
@@ -30,7 +31,8 @@ export default function AppRouter() {
         <Route path="/operacion/lotes" element={<LotesPage />} />
         <Route path="/operacion/lotes/:loteId" element={<LoteDetallePage />} />
         <Route path="/operacion/evaluaciones/:evaluacionId" element={<EvaluacionEnLineaPage />} />
-        <Route path="/documentos/especificaciones/:versionId" element={<EspecificacionTecnicaPage />} />
+        <Route path="/documentos/especificaciones/:versionId" element={<EspecificacionTecnicaDetallePage />} />
+        <Route path="/documentos/especificaciones/:versionId/editar" element={<EspecificacionTecnicaPage />} />
         <Route path="/documentos/especificaciones" element={<EspecificacionesTecnicasPage />} />
         {pages.map((page) => <Route key={page.path} path={page.path} element={<ModulePlaceholder {...page} />} />)}
       </Route>
