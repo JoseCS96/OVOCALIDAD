@@ -235,16 +235,17 @@ export default function LotesPage() {
                   <th className="px-5 py-3"><button type="button" onClick={() => sortBy("lineaOrigenCodigo")} className="group inline-flex items-center gap-1.5 whitespace-nowrap font-semibold uppercase tracking-[0.08em] hover:text-[var(--primary)]">Línea<ArrowDownUp size={13} className={sortKey === "lineaOrigenCodigo" ? "text-[var(--primary)]" : "opacity-45 group-hover:opacity-100"} /></button></th>
                   <th className="px-5 py-3"><button type="button" onClick={() => sortBy("estadoLoteDescripcion")} className="group inline-flex items-center gap-1.5 whitespace-nowrap font-semibold uppercase tracking-[0.08em] hover:text-[var(--primary)]">Estado lote<ArrowDownUp size={13} className={sortKey === "estadoLoteDescripcion" ? "text-[var(--primary)]" : "opacity-45 group-hover:opacity-100"} /></button></th>
                   <th className="px-5 py-3"><button type="button" onClick={() => sortBy("estadoEvaluacionDescripcion")} className="group inline-flex items-center gap-1.5 whitespace-nowrap font-semibold uppercase tracking-[0.08em] hover:text-[var(--primary)]">Evaluación<ArrowDownUp size={13} className={sortKey === "estadoEvaluacionDescripcion" ? "text-[var(--primary)]" : "opacity-45 group-hover:opacity-100"} /></button></th>
+                  <th className="px-5 py-3">Avance evaluación</th>
                   <th className="px-5 py-3 text-right">Acciones</th>
                 </tr>
               </thead>
               <tbody>
                 {isLoading ? (
-                  <tr><td colSpan={8} className="px-5 py-12 text-center text-[var(--text-secondary)]">Cargando lotes...</td></tr>
+                  <tr><td colSpan={9} className="px-5 py-12 text-center text-[var(--text-secondary)]">Cargando lotes...</td></tr>
                 ) : isError ? (
-                  <tr><td colSpan={8} className="px-5 py-12 text-center text-red-600">No se pudo consultar la API de lotes.</td></tr>
+                  <tr><td colSpan={9} className="px-5 py-12 text-center text-red-600">No se pudo consultar la API de lotes.</td></tr>
                 ) : data.length === 0 ? (
-                  <tr><td colSpan={8} className="px-5 py-12 text-center text-[var(--text-secondary)]">No hay lotes para los filtros seleccionados.</td></tr>
+                  <tr><td colSpan={9} className="px-5 py-12 text-center text-[var(--text-secondary)]">No hay lotes para los filtros seleccionados.</td></tr>
                 ) : pagedData.map((lote) => (
                   <tr key={lote.loteId} className="border-t border-[var(--border)] hover:bg-[var(--surface-muted)]/70">
                     <td className="px-5 py-4">
@@ -274,6 +275,21 @@ export default function LotesPage() {
                           <div className="mt-1 text-xs text-[var(--text-secondary)]">Intento {lote.intentoEvaluacion ?? "—"}</div>
                         </div>
                       )}
+                    </td>
+                    <td className="px-5 py-4">
+                      <div className="min-w-[180px]">
+                        <div className="mb-1.5 flex items-center justify-between gap-3 text-xs">
+                          <span className="font-semibold text-[var(--text)]">{Number(lote.porcentajeAvance ?? 0).toFixed(0)}%</span>
+                          <span className="text-[var(--text-secondary)]">{lote.resultadosRegistrados}/{lote.totalParametrosEvaluacion} evaluados</span>
+                        </div>
+                        <div className="h-2 overflow-hidden rounded-full bg-slate-200">
+                          <div className="h-full rounded-full bg-emerald-500 transition-all" style={{ width: `${Math.min(100, Math.max(0, Number(lote.porcentajeAvance ?? 0)))}%` }} />
+                        </div>
+                        <div className="mt-1 flex justify-between text-[10px] text-[var(--text-secondary)]">
+                          <span>{lote.totalEvaluaciones === 0 ? "Sin iniciar" : `${lote.totalEvaluaciones} eval.`}</span>
+                          <span>{Number(lote.porcentajeFaltante ?? 100).toFixed(0)}% faltante</span>
+                        </div>
+                      </div>
                     </td>
                     <td className="px-5 py-4 text-right">
                       <DropdownMenu>
