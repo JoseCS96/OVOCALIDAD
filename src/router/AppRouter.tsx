@@ -6,10 +6,10 @@ import Dashboard from "@/modules/dashboard/Dashboard";
 import LotesPage from "@/modules/lotes/LotesPage";
 import LoteDetallePage from "@/modules/lotes/LoteDetallePage";
 import EvaluacionEnLineaPage from "@/modules/evaluaciones/EvaluacionEnLineaPage";
+import EspecificacionTecnicaPage from "@/modules/especificaciones/EspecificacionTecnicaPage";
 
 const pages = [
   { path: "/productos", title: "Productos", eyebrow: "Gestión documental", description: "Maestro de productos y códigos asociados al proceso de calidad.", icon: Package },
-  { path: "/documentos/especificaciones", title: "Especificaciones técnicas", eyebrow: "Gestión documental", description: "Administración estructurada de ET, versiones, criterios y características.", icon: FileText },
   { path: "/documentos/fichas-tecnicas", title: "Fichas técnicas", eyebrow: "Gestión documental", description: "Consulta y control de fichas técnicas utilizadas para certificación.", icon: FileCheck2 },
   { path: "/documentos/versiones", title: "Versiones documentales", eyebrow: "Gestión documental", description: "Historial y vigencia de documentos de calidad.", icon: Boxes },
   { path: "/operacion/evaluaciones", title: "Evaluaciones", eyebrow: "Operación", description: "Evaluación de cumplimiento, reevaluaciones y decisiones de calidad.", icon: ClipboardCheck },
@@ -29,6 +29,8 @@ export default function AppRouter() {
         <Route path="/operacion/lotes" element={<LotesPage />} />
         <Route path="/operacion/lotes/:loteId" element={<LoteDetallePage />} />
         <Route path="/operacion/evaluaciones/:evaluacionId" element={<EvaluacionEnLineaPage />} />
+        <Route path="/documentos/especificaciones/:versionId" element={<EspecificacionTecnicaPage />} />
+        <Route path="/documentos/especificaciones" element={<Navigate to="/documentos/especificaciones/5" replace />} />
         {pages.map((page) => <Route key={page.path} path={page.path} element={<ModulePlaceholder {...page} />} />)}
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
