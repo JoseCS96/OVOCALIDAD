@@ -4,6 +4,7 @@ import MainLayout from "@/layouts/MainLayout/MainLayout";
 import ModulePlaceholder from "@/components/common/ModulePlaceholder";
 import Dashboard from "@/modules/dashboard/Dashboard";
 import LotesPage from "@/modules/lotes/LotesPage";
+import EvaluacionEnLineaPage from "@/modules/evaluaciones/EvaluacionEnLineaPage";
 
 const pages = [
   { path: "/productos", title: "Productos", eyebrow: "Gestión documental", description: "Maestro de productos y códigos asociados al proceso de calidad.", icon: Package },
@@ -25,6 +26,7 @@ export default function AppRouter() {
       <Route element={<MainLayout />}>
         <Route index element={<Dashboard />} />
         <Route path="/operacion/lotes" element={<LotesPage />} />
+        <Route path="/operacion/evaluaciones/:evaluacionId" element={<EvaluacionEnLineaPage />} />
         {pages.map((page) => <Route key={page.path} path={page.path} element={<ModulePlaceholder {...page} />} />)}
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
