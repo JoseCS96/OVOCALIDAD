@@ -36,7 +36,20 @@ function Contenido({d,s}:{d:DetalleEt;s:SeccionEt}){const n=norm(s.seccionDescri
  if(n.includes("CAMBIO"))return <B t="Cambios de esta versión">{d.cambiosVersion.length?<T h={["Revisión","Fecha","Descripción"]} r={d.cambiosVersion.map(x=>[x.cambVersNumeroDeRevision,fecha(x.cambVersFechaDeActualizacion),x.cambVersDescripcion])}/>:<Vacio/>}</B>;
  if(n.includes("ANEX"))return <B t="Anexos"><Lista a={d.anexos.map(x=>x.anexoDescripcion)}/></B>;
  return <B t={s.seccionDescripcion}><Vacio/></B>}
-function Cars({a}:{a:CaracteristicaEt[]}){if(!a.length)return <Vacio/>;return <T h={["Tipo","Característica","Obligatoria","Criterio","Especificación","Unidad","Método"]} r={[...a].sort((x,y)=>(x.tipoCaracteristica??"").localeCompare(y.tipoCaracteristica??"")||ord(x,y)).map(x=>[cap(x.tipoCaracteristica),x.caracteristica,x.esObligatorio?"Sí":"No",x.tipoCriterio??"—",spec(x),x.unidad??"N.A.",x.metodoEnsayo??"N.A."])}/>}
+function Cars({a}:{a:CaracteristicaEt[]}){
+ const [tipo,setTipo]=useState("TODAS");
+ if(!a.length)return <Vacio/>;
+ const tipos=Array.from(new Set(a.map(x=>x.tipoCaracteristica))).filter(Boolean);
+ const visibles=tipo==="TODAS"?a:a.filter(x=>x.tipoCaracteristica===tipo);
+ return <div>
+  <div className="mb-4 flex flex-wrap items-center gap-2">
+   <span className="mr-1 text-xs font-medium text-[var(--text-secondary)]">Filtrar por tipo:</span>
+   <button onClick={()=>setTipo("TODAS")} className={"rounded-full border px-3 py-1.5 text-xs font-medium transition "+(tipo==="TODAS"?"border-slate-900 bg-slate-900 text-white":"bg-white hover:bg-slate-50")}>Todas <span className="ml-1 opacity-70">{a.length}</span></button>
+   {tipos.map(t=><button key={t} onClick={()=>setTipo(t)} className={"rounded-full border px-3 py-1.5 text-xs font-medium transition "+(tipo===t?"border-slate-900 bg-slate-900 text-white":"bg-white hover:bg-slate-50")}>{cap(t)} <span className="ml-1 opacity-70">{a.filter(x=>x.tipoCaracteristica===t).length}</span></button>)}
+  </div>
+  <T h={["Tipo","Característica","Obligatoria","Criterio","Especificación","Unidad","Método"]} r={[...visibles].sort((x,y)=>(x.tipoCaracteristica??"").localeCompare(y.tipoCaracteristica??"")||ord(x,y)).map(x=>[cap(x.tipoCaracteristica),x.caracteristica,x.esObligatorio?"Sí":"No",x.tipoCriterio??"—",spec(x),x.unidad??"N.A.",x.metodoEnsayo??"N.A."])}/>
+ </div>
+}
 function Trat({d}:{d:DetalleEt}){const r=d.tratamientos.flatMap(t=>{const p=d.parametrosTratamiento.filter(x=>x.versTratConsId===t.versTratConsId);return p.length?p.sort(ord).map(x=>[t.tratConservDescripcion,x.paramTratDescripcion,x.tipoCriterio,valTrat(x)]):[[t.tratConservDescripcion,"—","—","—"]]});return r.length?<T h={["Tratamiento","Parámetro","Criterio","Valor"]} r={r}/>:<Vacio/>}
 function B({t,children}:{t:string;children:React.ReactNode}){return <section><h2 className="mb-4 text-lg font-semibold">{t}</h2>{children}</section>}
 function T({h,r}:{h:string[];r:React.ReactNode[][]}){return <div className="overflow-x-auto"><table className="w-full text-sm"><thead className="bg-[var(--surface-muted)] text-left text-xs text-[var(--text-secondary)]"><tr>{h.map(x=><th key={x} className="px-3 py-2">{x}</th>)}</tr></thead><tbody>{r.map((x,i)=><tr key={i} className="border-b">{x.map((v,j)=><td key={j} className="px-3 py-2.5">{v}</td>)}</tr>)}</tbody></table></div>}
