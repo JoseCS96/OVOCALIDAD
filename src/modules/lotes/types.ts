@@ -39,3 +39,26 @@ export type GenerarLoteResponse = {
   resultado: { codigoResultado: number; mensaje: string };
   lote: { loteId: number; codigoLote: string; productoCodigo: string; productoDescripcion: string } | null;
 };
+
+
+export type LoteEvaluacion = {
+  evaluacionId: number; loteId: number; evaluacionPadreId: number | null;
+  tipoEvaluacionId: number; tipoEvaluacionCodigo: string; tipoEvaluacionDescripcion: string;
+  estadoEvaluacionId: number; estadoEvaluacionCodigo: string; estadoEvaluacionDescripcion: string;
+  intento: number; resultadoGeneral: boolean | null; resultadoDescripcion: string;
+  fechaInicio: string; fechaFin: string | null; motivoReevaluacion: string | null; observacion: string | null;
+  usuarioEvaluador: string | null; resultadosRegistrados: number; totalParametros: number;
+  parametrosPendientes: number; porcentajeAvance: number; estado: string;
+  audFechaCreacion: string; audFechaActualizacion: string | null;
+};
+
+export type LoteEvaluacionesResumen = {
+  totalEvaluaciones: number; evaluacionesPendientes: number; evaluacionesEnProceso: number;
+  evaluacionesTerminadas: number; evaluacionesConformes: number; evaluacionesNoConformes: number;
+};
+
+export type DetalleLote = {
+  lote: LoteListado;
+  evaluaciones: LoteEvaluacion[];
+  resumen: LoteEvaluacionesResumen;
+};
