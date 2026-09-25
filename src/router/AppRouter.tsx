@@ -1,5 +1,5 @@
 import { Navigate, Route, Routes } from "react-router-dom";
-import { BarChart3, Boxes, ClipboardCheck, FileCheck2, FileText, Package, Settings, ShieldCheck } from "lucide-react";
+import { BarChart3, Boxes, ClipboardCheck, FileCheck2, Package, Settings, ShieldCheck } from "lucide-react";
 import MainLayout from "@/layouts/MainLayout/MainLayout";
 import ModulePlaceholder from "@/components/common/ModulePlaceholder";
 import Dashboard from "@/modules/dashboard/Dashboard";
