@@ -365,7 +365,7 @@ export default function EvaluacionEnLineaPage() {
             <div className="text-sm">{saveError && <span className="text-red-600">{saveError}</span>}{savedMessage && <span className="text-emerald-700">{savedMessage}</span>}</div>
             <div className="flex gap-2">
               <Button variant="outline" disabled={!puedeCerrar || mutation.isPending || closeMutation.isPending} onClick={closeEvaluation}><ShieldCheck size={16} />{closeMutation.isPending ? "Cerrando..." : "Cerrar evaluación"}</Button>
-              <Button onClick={save} disabled={mutation.isPending}><Save size={16} />{mutation.isPending ? "Guardando..." : "Guardar avance"}</Button>
+              <Button onClick={save} disabled={!estaEnProceso || mutation.isPending || closeMutation.isPending}><Save size={16} />{mutation.isPending ? "Guardando..." : "Guardar avance"}</Button>
             </div>
           </div>
         </CardContent>
