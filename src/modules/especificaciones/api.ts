@@ -1,5 +1,5 @@
 import axios from "axios";
-import type { CatalogosEt, DetalleEt, GuardarCaracteristicaEt, OperacionEt, EspecificacionTecnicaListado, CrearEspecificacionTecnica, CrearEspecificacionTecnicaResponse } from "./types";
+import type { CatalogosEt, DetalleEt, GuardarCaracteristicaEt, OperacionEt, EspecificacionTecnicaListado, CrearEspecificacionTecnica, CrearEspecificacionTecnicaResponse, SeccionesEtCatalogo, CrearSeccionEt, CrearSeccionEtResponse } from "./types";
 const api=axios.create({baseURL:import.meta.env.VITE_API_URL??""});
 function validar(data:OperacionEt){if(data.codigoResultado!==0)throw new Error(data.mensaje);return data}
 export async function obtenerEt(versionId:number){const {data}=await api.get<DetalleEt>(`/api/especificaciones-tecnicas/${versionId}`);return data}
@@ -10,3 +10,6 @@ export async function eliminarCaracteristica(versionId:number,versCaractId:numbe
 export async function listarEt(params?:{busqueda?:string;productoCodigo?:string;estVerId?:number}){const {data}=await api.get<EspecificacionTecnicaListado[]>("/api/especificaciones-tecnicas",{params});return data}
 
 export async function crearEt(request:CrearEspecificacionTecnica){const {data}=await api.post<CrearEspecificacionTecnicaResponse>("/api/especificaciones-tecnicas",request);return validar(data) as CrearEspecificacionTecnicaResponse}
+
+export async function obtenerSeccionesEt(){const {data}=await api.get<SeccionesEtCatalogo>("/api/especificaciones-tecnicas/secciones");return data}
+export async function crearSeccionEt(request:CrearSeccionEt){const {data}=await api.post<CrearSeccionEtResponse>("/api/especificaciones-tecnicas/secciones",request);return validar(data) as CrearSeccionEtResponse}
