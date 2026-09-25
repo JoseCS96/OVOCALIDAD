@@ -9,6 +9,7 @@ import EvaluacionEnLineaPage from "@/modules/evaluaciones/EvaluacionEnLineaPage"
 import EspecificacionTecnicaPage from "@/modules/especificaciones/EspecificacionTecnicaPage";
 import EspecificacionTecnicaDetallePage from "@/modules/especificaciones/EspecificacionTecnicaDetallePage";
 import EspecificacionesTecnicasPage from "@/modules/especificaciones/EspecificacionesTecnicasPage";
+import NuevaEspecificacionTecnicaPage from "@/modules/especificaciones/NuevaEspecificacionTecnicaPage";
 
 const pages = [
   { path: "/productos", title: "Productos", eyebrow: "Gestión documental", description: "Maestro de productos y códigos asociados al proceso de calidad.", icon: Package },
@@ -31,6 +32,7 @@ export default function AppRouter() {
         <Route path="/operacion/lotes" element={<LotesPage />} />
         <Route path="/operacion/lotes/:loteId" element={<LoteDetallePage />} />
         <Route path="/operacion/evaluaciones/:evaluacionId" element={<EvaluacionEnLineaPage />} />
+        <Route path="/documentos/especificaciones/nueva" element={<NuevaEspecificacionTecnicaPage />} />
         <Route path="/documentos/especificaciones/:versionId" element={<EspecificacionTecnicaDetallePage />} />
         <Route path="/documentos/especificaciones/:versionId/editar" element={<EspecificacionTecnicaPage />} />
         <Route path="/documentos/especificaciones" element={<EspecificacionesTecnicasPage />} />
