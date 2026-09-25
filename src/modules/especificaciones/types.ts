@@ -52,3 +52,5 @@ export type CrearSeccionEtResponse=OperacionEt&{seccionId?:number|null;seccionDe
 export type ContenidoSeccionEt={versionSeccionContenidoId:number;versSeccId:number;seccionId:number;seccionDescripcion:string;idTipoSeccion:number|null;contenido:string|null};
 export type AgregarSeccionVersionEt={seccionId:number;orden:number|null;usuario:string};
 export type ReordenarSeccionesVersionEt={secciones:Array<{versSeccId:number;orden:number}>;usuario:string};
+
+export type GuardarInformacionGeneralEt={documentoDescripcionDocumento:string;productoCodigo:string;versionNumero:number|null;versionInicioVigencia:string|null;versionReemplazaAId:number|null;versionNroPaginas:number|null;versionDescripcion:string|null;usuario:string};
