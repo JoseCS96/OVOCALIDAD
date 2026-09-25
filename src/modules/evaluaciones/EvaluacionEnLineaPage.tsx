@@ -245,18 +245,18 @@ export default function EvaluacionEnLineaPage() {
         <Link to="/operacion/lotes" className="inline-flex items-center gap-2 text-sm font-medium text-[var(--primary)] hover:underline">
           <ArrowLeft size={16} /> Volver a lotes
         </Link>
-        <div className="mt-1.5 flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between">
+        <div className="flex flex-col gap-1 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--text-secondary)]">Operación · Control de calidad</p>
-            <h1 className="text-2xl font-semibold tracking-tight">Evaluación en Línea</h1>
-            <p className="text-xs text-[var(--text-secondary)]">Registro de resultados contra la especificación técnica vigente del lote.</p>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--text-secondary)]">Operación · Control de calidad</p>
+            <h1 className="text-xl font-semibold leading-tight tracking-tight">Evaluación en Línea</h1>
+            <p className="text-[11px] leading-tight text-[var(--text-secondary)]">Registro de resultados contra la especificación técnica vigente del lote.</p>
           </div>
           <Badge variant="outline" className="w-fit border-blue-200 bg-blue-50 px-3 py-1 text-blue-700">{cabecera.estadoEvaluacion.replaceAll("_", " ")}</Badge>
         </div>
       </div>
 
       <Card className="border-[var(--border)] shadow-[var(--shadow-card)]">
-        <CardContent className="grid gap-3 px-4 py-3 md:grid-cols-2 xl:grid-cols-5">
+        <CardContent className="grid gap-2 px-4 py-2 md:grid-cols-2 xl:grid-cols-5">
           <div><p className="text-xs font-semibold uppercase text-[var(--text-secondary)]">Lote</p><p className="font-semibold">{cabecera.codigoLote}</p></div>
           <div><p className="text-xs font-semibold uppercase text-[var(--text-secondary)]">Producto</p><p className="mt-1 font-semibold">{cabecera.productoCodigo}</p><p className="text-xs text-[var(--text-secondary)]">{cabecera.productoDescripcion}</p></div>
           <div><p className="text-xs font-semibold uppercase text-[var(--text-secondary)]">Especificación técnica</p><p className="mt-1 font-semibold">{cabecera.documentoCodigo}</p><p className="text-xs text-[var(--text-secondary)]">Versión {cabecera.versionNumero}</p></div>
@@ -265,7 +265,7 @@ export default function EvaluacionEnLineaPage() {
         </CardContent>
       </Card>
 
-      <div className="flex gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
+      <div className="flex gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs text-amber-900">
         <FlaskConical className="mt-0.5 h-5 w-5 shrink-0" />
         <div className="flex flex-wrap items-center gap-x-2"><p className="font-semibold">Registro parcial habilitado.</p><p className="text-amber-800">Puedes guardar avances sin cerrar la evaluación.</p></div>
       </div>
@@ -277,7 +277,7 @@ export default function EvaluacionEnLineaPage() {
             <div className="text-sm font-medium text-[var(--text-secondary)]">{avance.totalCaracteristicas} características</div>
           </div>
 
-          <div className="max-h-[calc(100vh-390px)] min-h-[330px] overflow-auto">
+          <div className="max-h-[calc(100vh-315px)] min-h-[390px] overflow-auto">
             <table className="w-full min-w-[1120px] border-collapse text-sm">
               <thead className="sticky top-0 z-20 bg-[var(--surface-muted)] text-left text-xs uppercase tracking-[0.08em] text-[var(--text-secondary)] shadow-[0_1px_0_var(--border)]">
                 <tr><th className="px-5 py-3">Tipo</th><th className="px-5 py-3">Característica</th><th className="px-5 py-3">Obligatoria</th><th className="px-5 py-3">Especificación</th><th className="px-5 py-3">Resultado / validación</th><th className="px-5 py-3">Unidad</th></tr>
