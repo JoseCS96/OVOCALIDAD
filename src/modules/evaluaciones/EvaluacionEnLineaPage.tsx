@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { guardarResultado, obtenerEvaluacion } from "./api";
+import { cerrarEvaluacion, guardarResultado, obtenerEvaluacion } from "./api";
 import type { EvaluacionDetalle, GuardarResultadoRequest } from "./types";
 
 type Draft = { texto: string; numero: string; cumple: boolean | null; dirty: boolean };
@@ -195,6 +195,20 @@ export default function EvaluacionEnLineaPage() {
     });
   }, [data]);
 
+  const closeMutation = useMutation({
+    mutationFn: () => cerrarEvaluacion(id),
+    onSuccess: async (response) => {
+      setSaveError(null);
+      setSavedMessage(response.mensaje);
+      await queryClient.invalidateQueries({ queryKey: ["evaluacion", id] });
+      await queryClient.invalidateQueries({ queryKey: ["lotes"] });
+    },
+    onError: (error) => {
+      setSavedMessage(null);
+      setSaveError(error instanceof Error ? error.message : "No se pudo cerrar la evaluación.");
+    },
+  });
+
   const mutation = useMutation({
     mutationFn: async (items: GuardarResultadoRequest[]) => {
       for (const item of items) await guardarResultado(id, item);
@@ -253,10 +267,32 @@ export default function EvaluacionEnLineaPage() {
     mutation.mutate(requests);
   }
 
+  function closeEvaluation() {
+    if (!data) return;
+    if (data.avance.obligatoriasCompletas !== data.avance.totalObligatorias) {
+      setSaveError("Completa todos los parámetros obligatorios antes de cerrar la evaluación.");
+      return;
+    }
+    const pendientes = data.detalle.some((item) => {
+      const draft = drafts[item.versCaractId];
+      return draft ? resultadoCambio(item, draft) : false;
+    });
+    if (pendientes) {
+      setSaveError("Hay cambios pendientes. Guarda el avance antes de cerrar la evaluación.");
+      return;
+    }
+    if (!window.confirm("¿Cerrar evaluación? Una vez cerrada, los resultados quedarán bloqueados para edición.")) return;
+    setSaveError(null);
+    setSavedMessage(null);
+    closeMutation.mutate();
+  }
+
   if (isLoading) return <PageContainer><div className="py-20 text-center text-[var(--text-secondary)]">Cargando evaluación...</div></PageContainer>;
   if (isError || !data) return <PageContainer><div className="py-20 text-center text-red-600">No se pudo cargar la evaluación.</div></PageContainer>;
 
   const { cabecera, avance } = data;
+  const estaEnProceso = cabecera.estadoEvaluacion === "EN_PROCESO";
+  const puedeCerrar = estaEnProceso && avance.totalObligatorias > 0 && avance.obligatoriasCompletas === avance.totalObligatorias;
 
   return (
     <PageContainer className="space-y-2">
@@ -328,7 +364,7 @@ export default function EvaluacionEnLineaPage() {
           <div className="flex flex-col gap-3 border-t border-[var(--border)] bg-white px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="text-sm">{saveError && <span className="text-red-600">{saveError}</span>}{savedMessage && <span className="text-emerald-700">{savedMessage}</span>}</div>
             <div className="flex gap-2">
-              <Button variant="outline" disabled><ShieldCheck size={16} />Cerrar evaluación</Button>
+              <Button variant="outline" disabled={!puedeCerrar || mutation.isPending || closeMutation.isPending} onClick={closeEvaluation}><ShieldCheck size={16} />{closeMutation.isPending ? "Cerrando..." : "Cerrar evaluación"}</Button>
               <Button onClick={save} disabled={mutation.isPending}><Save size={16} />{mutation.isPending ? "Guardando..." : "Guardar avance"}</Button>
             </div>
           </div>
