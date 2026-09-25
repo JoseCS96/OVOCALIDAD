@@ -10,6 +10,16 @@ export type Notificacion = {
   fechaLectura:string|null;
   mostradaModal:boolean;
   fechaMostradaModal:string|null;
+  cantidadVecesModal:number;
+  atendida:boolean;
+  fechaAtencion:string|null;
+  mostrarCampana:boolean;
+  mostrarModal:boolean;
+  politicaModal:string;
+  maximoVecesModal:number|null;
+  prioridad:string;
+  mostrarEnCampana:boolean;
+  mostrarEnModal:boolean;
   audFechaCreacion:string;
 };
 
