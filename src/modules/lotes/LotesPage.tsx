@@ -328,7 +328,7 @@ export default function LotesPage() {
                               Continuar evaluación
                             </DropdownMenuItem>
                           )}
-                          <DropdownMenuItem disabled>
+                          <DropdownMenuItem onClick={() => navigate(`/operacion/lotes/${lote.loteId}`)}>
                             <Eye size={15} />
                             Ver detalle
                           </DropdownMenuItem>
