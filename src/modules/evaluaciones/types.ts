@@ -59,7 +59,6 @@ export type GuardarResultadoRequest = {
   resultadoNumerico: number | null;
   cumple: boolean | null;
   observacion: string | null;
-  usuario: string;
 };
 
 export type PanelEvaluadorIndicadores = {
