@@ -8,6 +8,7 @@ import ProtectedRoute from "@/modules/auth/ProtectedRoute";
 import LotesPage from "@/modules/lotes/LotesPage";
 import LoteDetallePage from "@/modules/lotes/LoteDetallePage";
 import EvaluacionEnLineaPage from "@/modules/evaluaciones/EvaluacionEnLineaPage";
+import EvaluacionesPage from "@/modules/evaluaciones/EvaluacionesPage";
 import EspecificacionTecnicaPage from "@/modules/especificaciones/EspecificacionTecnicaPage";
 import EspecificacionTecnicaDetallePage from "@/modules/especificaciones/EspecificacionTecnicaDetallePage";
 import EspecificacionesTecnicasPage from "@/modules/especificaciones/EspecificacionesTecnicasPage";
@@ -17,7 +18,6 @@ const pages = [
   { path: "/productos", title: "Productos", eyebrow: "Gestión documental", description: "Maestro de productos y códigos asociados al proceso de calidad.", icon: Package },
   { path: "/documentos/fichas-tecnicas", title: "Fichas técnicas", eyebrow: "Gestión documental", description: "Consulta y control de fichas técnicas utilizadas para certificación.", icon: FileCheck2 },
   { path: "/documentos/versiones", title: "Versiones documentales", eyebrow: "Gestión documental", description: "Historial y vigencia de documentos de calidad.", icon: Boxes },
-  { path: "/operacion/evaluaciones", title: "Evaluaciones", eyebrow: "Operación", description: "Evaluación de cumplimiento, reevaluaciones y decisiones de calidad.", icon: ClipboardCheck },
   { path: "/operacion/resultados", title: "Resultados", eyebrow: "Operación", description: "Registro y consulta de resultados de análisis por lote y característica.", icon: BarChart3 },
   { path: "/certificacion/certificados", title: "Certificados", eyebrow: "Certificación", description: "Generación, aprobación y emisión de certificados de calidad.", icon: ShieldCheck },
   { path: "/certificacion/liberaciones", title: "Liberaciones", eyebrow: "Certificación", description: "Control de liberaciones totales y parciales asociadas a lotes.", icon: FileCheck2 },
@@ -35,6 +35,7 @@ export default function AppRouter() {
           <Route index element={<Dashboard />} />
           <Route path="/operacion/lotes" element={<LotesPage />} />
           <Route path="/operacion/lotes/:loteId" element={<LoteDetallePage />} />
+          <Route path="/operacion/evaluaciones" element={<EvaluacionesPage />} />
           <Route path="/operacion/evaluaciones/:evaluacionId" element={<EvaluacionEnLineaPage />} />
           <Route path="/documentos/especificaciones/nueva" element={<NuevaEspecificacionTecnicaPage />} />
           <Route path="/documentos/especificaciones/:versionId" element={<EspecificacionTecnicaDetallePage />} />
