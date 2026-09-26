@@ -24,9 +24,7 @@ export async function guardarResultado(evaluacionId: number, request: GuardarRes
 }
 
 export async function cerrarEvaluacion(evaluacionId: number) {
-  const { data } = await api.post<OperacionResponse>(`/api/evaluaciones/${evaluacionId}/cerrar`, {
-    usuario: "USUARIO_WEB",
-  });
+  const { data } = await api.post<OperacionResponse>(`/api/evaluaciones/${evaluacionId}/cerrar`);
   if (data.codigoResultado !== 0) throw new Error(data.mensaje);
   return data;
 }
