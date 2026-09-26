@@ -1,181 +1,87 @@
-import {
-  AlertTriangle,
-  ArrowRight,
-  CheckCircle2,
-  ClipboardCheck,
-  FileText,
-  FlaskConical,
-  ShieldCheck,
-  TimerReset,
-} from "lucide-react";
-
+import { useQuery } from "@tanstack/react-query";
+import { ArrowRight, CheckCircle2, ClipboardCheck, FlaskConical, PlayCircle } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import MetricCard from "@/components/dashboard/MetricCard";
 import PageContainer from "@/components/common/PageContainer";
 import PageHeader from "@/components/common/PageHeader";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useAuth } from "@/modules/auth/AuthContext";
+import { obtenerPanelEvaluador } from "@/modules/evaluaciones/api";
 
-const activity = [
-  { lot: "C19541L3", product: "CL06-B", status: "Liberado", time: "Hace 18 min" },
-  { lot: "H161738L3", product: "HL01", status: "En evaluación", time: "Hace 42 min" },
-  { lot: "Y19539L2", product: "YL11", status: "Liberado", time: "Hace 1 h" },
-  { lot: "C461716D2", product: "CFD08", status: "Observado", time: "Hace 2 h" },
-];
+function DashboardEvaluador() {
+  const navigate = useNavigate();
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ["evaluaciones", "mi-panel"],
+    queryFn: obtenerPanelEvaluador,
+  });
 
-const pending = [
-  { title: "Evaluaciones pendientes", value: "18", hint: "Requieren revisión de Calidad", icon: ClipboardCheck },
-  { title: "Resultados por registrar", value: "6", hint: "Análisis con datos pendientes", icon: FlaskConical },
-  { title: "Certificados por aprobar", value: "4", hint: "Listos para validación final", icon: ShieldCheck },
-];
+  if (isLoading) return <PageContainer><div className="py-20 text-center text-[var(--text-secondary)]">Cargando jornada...</div></PageContainer>;
+  if (isError || !data) return <PageContainer><div className="py-20 text-center text-red-600">No se pudo cargar tu jornada.</div></PageContainer>;
 
-function Dashboard() {
+  const { indicadores } = data;
   return (
     <PageContainer className="space-y-6">
       <PageHeader
-        eyebrow="OVOCALIDAD 2.0"
-        title="Dashboard ejecutivo"
-        description="Visión operativa consolidada de documentos, lotes, evaluaciones y certificación de calidad."
-        actions={
-          <>
-            <Button variant="outline">Ver reportes</Button>
-            <Button className="bg-[var(--primary)] text-white hover:bg-[var(--primary-strong)]">
-              Nueva evaluación
-            </Button>
-          </>
-        }
+        eyebrow="OVOCALIDAD 2.0 · CALIDAD"
+        title="Mi jornada"
+        description="Resumen de tu actividad de evaluación y carga operativa del día."
+        actions={<Button onClick={() => navigate("/operacion/evaluaciones")}>Ir a evaluaciones <ArrowRight size={15} /></Button>}
       />
 
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <MetricCard
-          title="ET vigentes"
-          value={32}
-          description="Especificaciones activas"
-          icon={FileText}
-          trend="+2 este mes"
-        />
-        <MetricCard
-          title="Lotes pendientes"
-          value={18}
-          description="Pendientes de evaluación"
-          icon={FlaskConical}
-          tone="warning"
-          trend="6 prioritarios"
-        />
-        <MetricCard
-          title="Evaluaciones"
-          value={6}
-          description="En proceso actualmente"
-          icon={ClipboardCheck}
-          tone="success"
-          trend="83% al día"
-        />
-        <MetricCard
-          title="Certificados"
-          value={186}
-          description="Emitidos en el periodo"
-          icon={ShieldCheck}
-          tone="info"
-          trend="+12.4%"
-        />
+        <MetricCard title="Disponibles" value={indicadores.pendientesDisponibles} description="Evaluaciones por tomar" icon={ClipboardCheck} />
+        <MetricCard title="En proceso" value={indicadores.enProceso} description="Actualmente a tu cargo" icon={FlaskConical} tone="info" />
+        <MetricCard title="Iniciadas hoy" value={indicadores.iniciadasHoy} description="Tomadas en tu jornada" icon={PlayCircle} tone="warning" />
+        <MetricCard title="Atendidas hoy" value={indicadores.atendidasHoy} description="Evaluaciones terminadas" icon={CheckCircle2} tone="success" />
       </section>
 
-      <section className="grid gap-5 xl:grid-cols-[1.45fr_0.85fr]">
+      <section className="grid gap-5 lg:grid-cols-2">
         <Card className="border-[var(--border)] shadow-[var(--shadow-card)]">
-          <CardHeader className="flex flex-row items-center justify-between border-b border-[var(--border)]">
-            <div>
-              <CardTitle className="text-base">Actividad reciente de lotes</CardTitle>
-              <p className="mt-1 text-xs text-[var(--text-secondary)]">Últimos movimientos registrados en el flujo de calidad</p>
-            </div>
-            <Button variant="ghost" size="sm" className="gap-1 text-[var(--primary)]">
-              Ver todos <ArrowRight size={14} />
-            </Button>
-          </CardHeader>
-          <CardContent className="p-0">
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[640px] text-left">
-                <thead className="bg-[var(--surface-muted)] text-[11px] uppercase tracking-[0.12em] text-[var(--text-secondary)]">
-                  <tr>
-                    <th className="px-5 py-3 font-semibold">Lote</th>
-                    <th className="px-5 py-3 font-semibold">Producto</th>
-                    <th className="px-5 py-3 font-semibold">Estado</th>
-                    <th className="px-5 py-3 font-semibold">Actualización</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {activity.map((item) => (
-                    <tr key={item.lot} className="border-t border-[var(--border)] text-sm">
-                      <td className="px-5 py-4 font-semibold text-[var(--text)]">{item.lot}</td>
-                      <td className="px-5 py-4 text-[var(--text-secondary)]">{item.product}</td>
-                      <td className="px-5 py-4">
-                        <Badge
-                          variant="outline"
-                          className={
-                            item.status === "Liberado"
-                              ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                              : item.status === "Observado"
-                                ? "border-amber-200 bg-amber-50 text-amber-700"
-                                : "border-blue-200 bg-blue-50 text-blue-700"
-                          }
-                        >
-                          {item.status}
-                        </Badge>
-                      </td>
-                      <td className="px-5 py-4 text-[var(--text-secondary)]">{item.time}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+          <CardHeader><CardTitle className="text-base">Estado de mi jornada</CardTitle><p className="text-xs text-[var(--text-secondary)]">Distribución de tu carga operativa actual.</p></CardHeader>
+          <CardContent className="space-y-3">
+            {data.resumenEstados.length === 0 ? <p className="py-8 text-center text-sm text-[var(--text-secondary)]">No tienes actividad asignada actualmente.</p> : data.resumenEstados.map((item) => (
+              <div key={item.estadoCodigo} className="flex items-center justify-between rounded-xl border border-[var(--border)] bg-[var(--surface-muted)] px-4 py-3">
+                <div><p className="text-sm font-semibold">{item.estadoCodigo.replaceAll("_", " ")}</p><p className="text-xs text-[var(--text-secondary)]">{item.estadoDescripcion}</p></div>
+                <span className="text-xl font-semibold">{item.cantidad}</span>
+              </div>
+            ))}
           </CardContent>
         </Card>
 
-        <div className="space-y-5">
-          <Card className="border-[var(--border)] shadow-[var(--shadow-card)]">
-            <CardHeader>
-              <CardTitle className="text-base">Carga operativa</CardTitle>
-              <p className="text-xs text-[var(--text-secondary)]">Pendientes que requieren atención</p>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {pending.map(({ title, value, hint, icon: Icon }) => (
-                <div key={title} className="flex items-center gap-3 rounded-xl border border-[var(--border)] bg-[var(--surface-muted)] p-3.5">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white text-[var(--primary)] shadow-sm">
-                    <Icon size={17} />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-semibold text-[var(--text)]">{title}</p>
-                    <p className="mt-0.5 truncate text-xs text-[var(--text-secondary)]">{hint}</p>
-                  </div>
-                  <span className="text-lg font-semibold text-[var(--text)]">{value}</span>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-
-          <Card className="border-[var(--border)] shadow-[var(--shadow-card)]">
-            <CardHeader>
-              <CardTitle className="text-base">Estado del proceso</CardTitle>
-            </CardHeader>
-            <CardContent className="grid grid-cols-3 gap-3 text-center">
-              <div className="rounded-xl bg-emerald-50 p-3">
-                <CheckCircle2 className="mx-auto text-emerald-600" size={20} />
-                <p className="mt-2 text-xl font-semibold text-emerald-700">92%</p>
-                <p className="text-[11px] text-emerald-700/70">Cumplimiento</p>
-              </div>
-              <div className="rounded-xl bg-amber-50 p-3">
-                <TimerReset className="mx-auto text-amber-600" size={20} />
-                <p className="mt-2 text-xl font-semibold text-amber-700">45 min</p>
-                <p className="text-[11px] text-amber-700/70">Ciclo objetivo</p>
-              </div>
-              <div className="rounded-xl bg-rose-50 p-3">
-                <AlertTriangle className="mx-auto text-rose-600" size={20} />
-                <p className="mt-2 text-xl font-semibold text-rose-700">3</p>
-                <p className="text-[11px] text-rose-700/70">Observados</p>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+        <Card className="border-[var(--border)] shadow-[var(--shadow-card)]">
+          <CardHeader><CardTitle className="text-base">Actividad del día</CardTitle><p className="text-xs text-[var(--text-secondary)]">Indicadores personales de tu jornada.</p></CardHeader>
+          <CardContent className="grid grid-cols-2 gap-3">
+            <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-muted)] p-4"><p className="text-xs text-[var(--text-secondary)]">Iniciadas</p><p className="mt-1 text-2xl font-semibold">{indicadores.iniciadasHoy}</p></div>
+            <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-muted)] p-4"><p className="text-xs text-[var(--text-secondary)]">Atendidas</p><p className="mt-1 text-2xl font-semibold">{indicadores.atendidasHoy}</p></div>
+            <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-muted)] p-4"><p className="text-xs text-[var(--text-secondary)]">En proceso</p><p className="mt-1 text-2xl font-semibold">{indicadores.enProceso}</p></div>
+            <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-muted)] p-4"><p className="text-xs text-[var(--text-secondary)]">Disponibles</p><p className="mt-1 text-2xl font-semibold">{indicadores.pendientesDisponibles}</p></div>
+          </CardContent>
+        </Card>
       </section>
+
+      <Card className="border-[var(--border)] shadow-[var(--shadow-card)]">
+        <CardContent className="flex flex-col items-start justify-between gap-4 p-5 sm:flex-row sm:items-center">
+          <div><p className="font-semibold">Centro de evaluaciones</p><p className="mt-1 text-sm text-[var(--text-secondary)]">Consulta los lotes pendientes, toma una evaluación o continúa las que ya tienes en proceso.</p></div>
+          <Button variant="outline" onClick={() => navigate("/operacion/evaluaciones")}>Ver evaluaciones <ArrowRight size={14} /></Button>
+        </CardContent>
+      </Card>
+    </PageContainer>
+  );
+}
+
+function Dashboard() {
+  const { tienePermiso } = useAuth();
+  const esDashboardEvaluador = tienePermiso("EVALUACION.VER") && tienePermiso("RESULTADO.REGISTRAR") && !tienePermiso("LOTE.VER") && !tienePermiso("ET.VER");
+
+  if (esDashboardEvaluador) return <DashboardEvaluador />;
+
+  return (
+    <PageContainer className="space-y-6">
+      <PageHeader eyebrow="OVOCALIDAD 2.0" title="Dashboard ejecutivo" description="Visión operativa consolidada de documentos, lotes, evaluaciones y certificación de calidad." />
+      <Card className="border-[var(--border)] shadow-[var(--shadow-card)]">
+        <CardContent className="p-8 text-sm text-[var(--text-secondary)]">Dashboard consolidado disponible para perfiles con alcance transversal. Sus indicadores se conectarán progresivamente a información real del proceso.</CardContent>
+      </Card>
     </PageContainer>
   );
 }
