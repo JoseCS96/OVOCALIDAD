@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { cerrarEvaluacion, guardarResultado, obtenerEvaluacion } from "./api";
+import { useAuth } from "@/modules/auth/AuthContext";
 import type { EvaluacionDetalle, GuardarResultadoRequest } from "./types";
 
 type Draft = { texto: string; numero: string; cumple: boolean | null; dirty: boolean };
@@ -93,7 +94,7 @@ function resultadoCambio(item: EvaluacionDetalle, draft: Draft): boolean {
   return Math.abs(actual - Number(persistido)) > 0.000001;
 }
 
-function ResultadoControl({ item, draft, onChange }: { item: EvaluacionDetalle; draft: Draft; onChange: (next: Partial<Draft>) => void }) {
+function ResultadoControl({ item, draft, onChange, puedeRegistrar }: { item: EvaluacionDetalle; draft: Draft; onChange: (next: Partial<Draft>) => void; puedeRegistrar: boolean }) {
   const criterio = (item.tipoCriterio ?? "").toUpperCase();
   const cumpleLocal = calcularCumpleLocal(item, draft);
   const inputClass = cumpleLocal === true
@@ -108,7 +109,7 @@ function ResultadoControl({ item, draft, onChange }: { item: EvaluacionDetalle; 
         <select
           className={`h-9 min-w-36 flex-1 rounded-md border px-3 text-sm outline-none focus:ring-2 ${inputClass || "border-[var(--border)] bg-white focus:ring-[var(--ring)]"}`}
           value={draft.texto}
-          disabled={!item.permiteEditar}
+          disabled={!item.permiteEditar || !puedeRegistrar}
           onChange={(e) => onChange({ texto: e.target.value, numero: "", cumple: null, dirty: true })}
         >
           <option value="">Seleccionar</option>
@@ -126,7 +127,7 @@ function ResultadoControl({ item, draft, onChange }: { item: EvaluacionDetalle; 
         <Input
           className={`min-w-0 flex-1 ${inputClass}`}
           value={draft.texto}
-          disabled={!item.permiteEditar}
+          disabled={!item.permiteEditar || !puedeRegistrar}
           placeholder="Registrar resultado"
           onChange={(e) => onChange({ texto: e.target.value, cumple: null, dirty: true })}
         />
@@ -142,7 +143,7 @@ function ResultadoControl({ item, draft, onChange }: { item: EvaluacionDetalle; 
         step="any"
         className={`min-w-0 flex-1 ${inputClass}`}
         value={draft.numero}
-        disabled={!item.permiteEditar}
+        disabled={!item.permiteEditar || !puedeRegistrar}
         placeholder="0.00"
         onChange={(e) => onChange({ numero: e.target.value, texto: "", cumple: null, dirty: true })}
       />
@@ -156,6 +157,9 @@ export default function EvaluacionEnLineaPage() {
   const location = useLocation();
   const id = Number(evaluacionId);
   const queryClient = useQueryClient();
+  const { tienePermiso } = useAuth();
+  const puedeRegistrarResultados = tienePermiso("RESULTADO.REGISTRAR");
+  const tienePermisoCerrar = tienePermiso("EVALUACION.CERRAR");
   const [drafts, setDrafts] = useState<DraftMap>({});
   const [saveError, setSaveError] = useState<string | null>(null);
   const [savedMessage, setSavedMessage] = useState<string | null>(null);
@@ -257,7 +261,6 @@ export default function EvaluacionEnLineaPage() {
         resultadoNumerico: ["MINIMO", "MAXIMO", "RANGO"].includes(criterio) ? Number(draft.numero) : null,
         cumple: ["CUALITATIVO", "AUSENCIA"].includes(criterio) ? calcularCumpleLocal(item, draft) : null,
         observacion: null,
-        usuario: "USUARIO_WEB",
       });
     }
 
@@ -293,10 +296,10 @@ export default function EvaluacionEnLineaPage() {
 
   const { cabecera, avance } = data;
   const estaEnProceso = cabecera.estadoEvaluacion === "EN_PROCESO";
-  const puedeCerrar = estaEnProceso && avance.totalObligatorias > 0 && avance.obligatoriasCompletas === avance.totalObligatorias;
+  const puedeCerrar = tienePermisoCerrar && estaEnProceso && avance.totalObligatorias > 0 && avance.obligatoriasCompletas === avance.totalObligatorias;
   const origenLoteId = (location.state as { loteId?: number } | null)?.loteId;
-  const volverA = origenLoteId ? `/operacion/lotes/${origenLoteId}` : "/operacion/lotes";
-  const volverTexto = origenLoteId ? "Volver al detalle del lote" : "Volver a lotes";
+  const volverA = origenLoteId ? `/operacion/lotes/${origenLoteId}` : "/operacion/evaluaciones";
+  const volverTexto = origenLoteId ? "Volver al detalle del lote" : "Volver a evaluaciones";
 
   return (
     <PageContainer className="space-y-2">
@@ -361,7 +364,7 @@ export default function EvaluacionEnLineaPage() {
                           <td className="px-5 py-4"><p className="font-semibold">{item.caracteristica}</p>{item.metodoEnsayo && <p className="mt-1 text-xs text-[var(--text-secondary)]">{item.metodoEnsayo}</p>}</td>
                           <td className="px-5 py-4">{item.esObligatorio ? <Badge variant="outline">Sí</Badge> : "No"}</td>
                           <td className="px-5 py-4 font-medium">{item.especificacion || "—"}</td>
-                          <td className="px-5 py-4"><ResultadoControl item={item} draft={draft} onChange={(next) => updateDraft(item.versCaractId, next)} /></td>
+                          <td className="px-5 py-4"><ResultadoControl item={item} draft={draft} puedeRegistrar={puedeRegistrarResultados} onChange={(next) => updateDraft(item.versCaractId, next)} /></td>
                           <td className="px-5 py-4">{item.unidad || "—"}</td>
                           <td className="px-5 py-4"><EstadoResultado cumple={draft.dirty ? (item.tipoCriterio?.toUpperCase() === "CUALITATIVO" ? draft.cumple : item.cumple) : item.cumple} tieneResultado={tieneResultado} /></td>
                         </tr>
@@ -376,8 +379,8 @@ export default function EvaluacionEnLineaPage() {
           <div className="flex flex-col gap-3 border-t border-[var(--border)] bg-white px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="text-sm">{saveError && <span className="text-red-600">{saveError}</span>}{savedMessage && <span className="text-emerald-700">{savedMessage}</span>}</div>
             <div className="flex gap-2">
-              <Button variant="outline" disabled={!puedeCerrar || mutation.isPending || closeMutation.isPending} onClick={closeEvaluation}><ShieldCheck size={16} />{closeMutation.isPending ? "Cerrando..." : "Cerrar evaluación"}</Button>
-              <Button onClick={save} disabled={!estaEnProceso || mutation.isPending || closeMutation.isPending}><Save size={16} />{mutation.isPending ? "Guardando..." : "Guardar avance"}</Button>
+              {tienePermisoCerrar && <Button variant="outline" disabled={!puedeCerrar || mutation.isPending || closeMutation.isPending} onClick={closeEvaluation}><ShieldCheck size={16} />{closeMutation.isPending ? "Cerrando..." : "Cerrar evaluación"}</Button>}
+              {puedeRegistrarResultados && <Button onClick={save} disabled={!estaEnProceso || mutation.isPending || closeMutation.isPending}><Save size={16} />{mutation.isPending ? "Guardando..." : "Guardar avance"}</Button>}
             </div>
           </div>
         </CardContent>
