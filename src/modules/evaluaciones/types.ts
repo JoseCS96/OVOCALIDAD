@@ -62,6 +62,55 @@ export type GuardarResultadoRequest = {
   usuario: string;
 };
 
+export type PanelEvaluadorIndicadores = {
+  pendientesDisponibles: number;
+  pendientesAsignadas: number;
+  enProceso: number;
+  atendidasHoy: number;
+  iniciadasHoy: number;
+};
+
+export type PanelEvaluacionItem = {
+  evaluacionId: number;
+  loteId: number;
+  codigoLote: string;
+  productoCodigo: string;
+  productoDescripcion: string;
+  tipoEvaluacionId: number;
+  tipoEvaluacionCodigo: string;
+  tipoEvaluacionDescripcion: string;
+  estadoEvaluacionId: number;
+  estadoEvaluacionCodigo: string;
+  estadoEvaluacionDescripcion: string;
+  estadoLoteId: number;
+  estadoLoteCodigo: string;
+  estadoLoteDescripcion: string;
+  intento: number;
+  fechaHoraProduccion: string;
+  fechaCreacionEvaluacion: string | null;
+  fechaInicio: string | null;
+  fechaFin: string | null;
+  resultadoGeneral: boolean | null;
+  usuarioEvaluador: string | null;
+  motivoReevaluacion: string | null;
+  observacion: string | null;
+  fechaUltimaActualizacion: string | null;
+};
+
+export type PanelEvaluadorResumenEstado = {
+  estadoCodigo: string;
+  estadoDescripcion: string;
+  cantidad: number;
+};
+
+export type PanelEvaluador = {
+  indicadores: PanelEvaluadorIndicadores;
+  pendientesDisponibles: PanelEvaluacionItem[];
+  misEvaluaciones: PanelEvaluacionItem[];
+  atendidasHoy: PanelEvaluacionItem[];
+  resumenEstados: PanelEvaluadorResumenEstado[];
+};
+
 export type OperacionResponse = {
   codigoResultado: number;
   mensaje: string;
