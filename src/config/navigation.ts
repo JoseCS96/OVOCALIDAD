@@ -1,4 +1,4 @@
-import { BarChart3, Boxes, ClipboardCheck, FileCheck2, FileText, FlaskConical, Home, Package, Settings, ShieldCheck, type LucideIcon } from "lucide-react";
+import { BarChart3, Boxes, ClipboardCheck, FileCheck2, FileText, FlaskConical, Home, Package, RotateCcw, Settings, ShieldCheck, type LucideIcon } from "lucide-react";
 
 export type NavigationItem = {
   label: string;
@@ -21,6 +21,7 @@ export const navigationGroups: NavigationGroup[] = [
   { title: "Operación", items: [
     { label: "Lotes", path: "/operacion/lotes", icon: FlaskConical, moduloCodigo: "LOTES", permiso: "LOTE.VER" },
     { label: "Evaluaciones", path: "/operacion/evaluaciones", icon: ClipboardCheck, moduloCodigo: "LABORATORIO", permiso: "EVALUACION.VER" },
+    { label: "Reaperturas", path: "/operacion/evaluaciones/reaperturas", icon: RotateCcw, moduloCodigo: "LABORATORIO", permiso: "EVALUACION.AUTORIZAR_REAPERTURA" },
     { label: "Resultados", path: "/operacion/resultados", icon: BarChart3, moduloCodigo: "LABORATORIO", permiso: "RESULTADO.VER" },
   ]},
   { title: "Certificación", items: [
