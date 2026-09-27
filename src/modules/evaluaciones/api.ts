@@ -1,5 +1,12 @@
 import { api } from "@/lib/api";
-import type { Evaluacion, GuardarResultadoRequest, OperacionResponse, PanelEvaluador } from "./types";
+import type {
+  Evaluacion,
+  GuardarResultadoRequest,
+  OperacionResponse,
+  PanelEvaluador,
+  SolicitarReaperturaResponse,
+  TerminarEvaluacionResponse,
+} from "./types";
 
 export async function obtenerPanelEvaluador() {
   const { data } = await api.get<PanelEvaluador>("/api/evaluaciones/mi-panel");
@@ -23,8 +30,17 @@ export async function guardarResultado(evaluacionId: number, request: GuardarRes
   return data;
 }
 
-export async function cerrarEvaluacion(evaluacionId: number) {
-  const { data } = await api.post<OperacionResponse>(`/api/evaluaciones/${evaluacionId}/cerrar`);
+export async function terminarEvaluacion(evaluacionId: number) {
+  const { data } = await api.post<TerminarEvaluacionResponse>(`/api/evaluaciones/${evaluacionId}/terminar`);
+  if (data.codigoResultado !== 0) throw new Error(data.mensaje);
+  return data;
+}
+
+export async function solicitarReapertura(evaluacionId: number, motivo: string) {
+  const { data } = await api.post<SolicitarReaperturaResponse>(
+    `/api/evaluaciones/${evaluacionId}/solicitudes-reapertura`,
+    { motivo },
+  );
   if (data.codigoResultado !== 0) throw new Error(data.mensaje);
   return data;
 }
