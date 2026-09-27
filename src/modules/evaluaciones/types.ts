@@ -139,3 +139,65 @@ export type SolicitarReaperturaResponse = OperacionResponse & {
   solicitudReaperturaId: number;
   estadoSolicitud: string;
 };
+
+export type SolicitudReaperturaItem = {
+  solicitudReaperturaId: number;
+  evaluacionId: number;
+  loteId: number;
+  codigoLote: string;
+  productoCodigo: string;
+  productoDescripcion: string | null;
+  tipoEvaluacionId: number;
+  intento: number;
+  usuarioEvaluador: string | null;
+  motivoSolicitud: string;
+  estadoSolicitud: string;
+  usuarioSolicitante: string;
+  fechaSolicitud: string;
+  usuarioRespuesta: string | null;
+  fechaRespuesta: string | null;
+  observacionRespuesta: string | null;
+  leidaPorMi: boolean;
+  totalLecturas: number;
+  estadoLote: string | null;
+  estadoEvaluacion: string | null;
+};
+
+export type SolicitudReaperturaLectura = {
+  solicitudReaperturaLecturaId: number;
+  solicitudReaperturaId: number;
+  usuarioLectura: string;
+  fechaLectura: string;
+};
+
+export type SolicitudReaperturaDetalle = {
+  codigoResultado: number;
+  mensaje: string;
+  solicitudReaperturaId: number;
+  evaluacionId: number;
+  loteId: number;
+  codigoLote: string;
+  productoCodigo: string;
+  productoDescripcion: string | null;
+  tipoEvaluacionId: number;
+  intento: number;
+  usuarioEvaluador: string | null;
+  estadoEvaluacion: string | null;
+  estadoLote: string | null;
+  fechaInicio: string | null;
+  fechaFin: string | null;
+  resultadoGeneral: boolean | null;
+  motivoSolicitud: string;
+  estadoSolicitud: string;
+  usuarioSolicitante: string;
+  fechaSolicitud: string;
+  usuarioRespuesta: string | null;
+  fechaRespuesta: string | null;
+  observacionRespuesta: string | null;
+  lecturas: SolicitudReaperturaLectura[];
+};
+
+export type ResolverReaperturaResponse = OperacionResponse & {
+  solicitudReaperturaId: number | null;
+  estadoSolicitud: string | null;
+};
