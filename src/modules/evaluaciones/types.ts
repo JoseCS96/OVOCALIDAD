@@ -127,3 +127,15 @@ export type OperacionResponse = {
   cumplen?: number | null;
   noCumplen?: number | null;
 };
+
+
+export type TerminarEvaluacionResponse = OperacionResponse & {
+  totalParametros?: number | null;
+  resultadosRegistrados?: number | null;
+  resultadosPendientes?: number | null;
+};
+
+export type SolicitarReaperturaResponse = OperacionResponse & {
+  solicitudReaperturaId: number;
+  estadoSolicitud: string;
+};
