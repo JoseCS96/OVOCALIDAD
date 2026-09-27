@@ -1,13 +1,13 @@
 import { Fragment, useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, FlaskConical, Save, ShieldCheck } from "lucide-react";
+import { ArrowLeft, FlaskConical, RotateCcw, Save, ShieldCheck, X } from "lucide-react";
 import { Link, useLocation, useParams } from "react-router-dom";
 import PageContainer from "@/components/common/PageContainer";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { cerrarEvaluacion, guardarResultado, obtenerEvaluacion } from "./api";
+import { guardarResultado, obtenerEvaluacion, solicitarReapertura, terminarEvaluacion } from "./api";
 import { useAuth } from "@/modules/auth/AuthContext";
 import type { EvaluacionDetalle, GuardarResultadoRequest } from "./types";
 
@@ -159,10 +159,13 @@ export default function EvaluacionEnLineaPage() {
   const queryClient = useQueryClient();
   const { tienePermiso } = useAuth();
   const puedeRegistrarResultados = tienePermiso("RESULTADO.REGISTRAR");
-  const tienePermisoCerrar = tienePermiso("EVALUACION.CERRAR");
+  const puedeTerminarEvaluacion = tienePermiso("EVALUACION.TERMINAR");
+  const puedeSolicitarReapertura = tienePermiso("EVALUACION.SOLICITAR_REAPERTURA");
   const [drafts, setDrafts] = useState<DraftMap>({});
   const [saveError, setSaveError] = useState<string | null>(null);
   const [savedMessage, setSavedMessage] = useState<string | null>(null);
+  const [reopenOpen, setReopenOpen] = useState(false);
+  const [reopenReason, setReopenReason] = useState("");
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["evaluacion", id],
@@ -200,17 +203,33 @@ export default function EvaluacionEnLineaPage() {
     });
   }, [data]);
 
-  const closeMutation = useMutation({
-    mutationFn: () => cerrarEvaluacion(id),
+  const finishMutation = useMutation({
+    mutationFn: () => terminarEvaluacion(id),
     onSuccess: async (response) => {
       setSaveError(null);
       setSavedMessage(response.mensaje);
       await queryClient.invalidateQueries({ queryKey: ["evaluacion", id] });
+      await queryClient.invalidateQueries({ queryKey: ["evaluaciones", "mi-panel"] });
       await queryClient.invalidateQueries({ queryKey: ["lotes"] });
     },
     onError: (error) => {
       setSavedMessage(null);
-      setSaveError(error instanceof Error ? error.message : "No se pudo cerrar la evaluación.");
+      setSaveError(error instanceof Error ? error.message : "No se pudo terminar la evaluación.");
+    },
+  });
+
+  const reopenMutation = useMutation({
+    mutationFn: () => solicitarReapertura(id, reopenReason.trim()),
+    onSuccess: async (response) => {
+      setSaveError(null);
+      setSavedMessage(`${response.mensaje} Solicitud #${response.solicitudReaperturaId}.`);
+      setReopenOpen(false);
+      setReopenReason("");
+      await queryClient.invalidateQueries({ queryKey: ["evaluacion", id] });
+    },
+    onError: (error) => {
+      setSavedMessage(null);
+      setSaveError(error instanceof Error ? error.message : "No se pudo solicitar la reapertura.");
     },
   });
 
@@ -271,24 +290,31 @@ export default function EvaluacionEnLineaPage() {
     mutation.mutate(requests);
   }
 
-  function closeEvaluation() {
+  function finishEvaluation() {
     if (!data) return;
-    if (data.avance.obligatoriasCompletas !== data.avance.totalObligatorias) {
-      setSaveError("Completa todos los parámetros obligatorios antes de cerrar la evaluación.");
-      return;
-    }
-    const pendientes = data.detalle.some((item) => {
+    const cambiosSinGuardar = data.detalle.some((item) => {
       const draft = drafts[item.versCaractId];
       return draft ? resultadoCambio(item, draft) : false;
     });
-    if (pendientes) {
-      setSaveError("Hay cambios pendientes. Guarda el avance antes de cerrar la evaluación.");
+    if (cambiosSinGuardar) {
+      setSaveError("Hay cambios sin guardar. Guarda el avance antes de terminar para que esos valores formen parte de la evaluación.");
       return;
     }
-    if (!window.confirm("¿Cerrar evaluación? Una vez cerrada, los resultados quedarán bloqueados para edición.")) return;
+    if (!window.confirm("¿Terminar evaluación? Se bloquearán exactamente los resultados actualmente guardados. Los parámetros pendientes pueden quedar sin resultado y luego solo podrán corregirse mediante una reapertura autorizada.")) return;
     setSaveError(null);
     setSavedMessage(null);
-    closeMutation.mutate();
+    finishMutation.mutate();
+  }
+
+  function sendReopenRequest() {
+    const motivo = reopenReason.trim();
+    if (!motivo) {
+      setSaveError("Ingresa el motivo de la solicitud de reapertura.");
+      return;
+    }
+    setSaveError(null);
+    setSavedMessage(null);
+    reopenMutation.mutate();
   }
 
   if (isLoading) return <PageContainer><div className="py-20 text-center text-[var(--text-secondary)]">Cargando evaluación...</div></PageContainer>;
@@ -296,7 +322,8 @@ export default function EvaluacionEnLineaPage() {
 
   const { cabecera, avance } = data;
   const estaEnProceso = cabecera.estadoEvaluacion === "EN_PROCESO";
-  const puedeCerrar = tienePermisoCerrar && estaEnProceso && avance.totalObligatorias > 0 && avance.obligatoriasCompletas === avance.totalObligatorias;
+  const estaTerminada = cabecera.estadoEvaluacion === "TERMINADA";
+  const puedeTerminar = puedeTerminarEvaluacion && estaEnProceso;
   const origenLoteId = (location.state as { loteId?: number } | null)?.loteId;
   const volverA = origenLoteId ? `/operacion/lotes/${origenLoteId}` : "/operacion/evaluaciones";
   const volverTexto = origenLoteId ? "Volver al detalle del lote" : "Volver a evaluaciones";
@@ -334,8 +361,8 @@ export default function EvaluacionEnLineaPage() {
       ) : (
         <div className="flex items-center gap-2 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-1 text-[11px] leading-none text-emerald-900">
           <ShieldCheck className="h-4 w-4 shrink-0" />
-          <span className="font-semibold">Evaluación cerrada.</span>
-          <span className="text-emerald-800">Los resultados están bloqueados para edición. Resultado final: {cabecera.resultadoGeneral === true ? "CONFORME" : cabecera.resultadoGeneral === false ? "NO CONFORME" : "SIN DEFINIR"}.</span>
+          <span className="font-semibold">Evaluación terminada.</span>
+          <span className="text-emerald-800">La captura está bloqueada. Terminar no libera el lote ni determina el resultado final de Calidad.</span>
         </div>
       )}
 
@@ -379,12 +406,41 @@ export default function EvaluacionEnLineaPage() {
           <div className="flex flex-col gap-3 border-t border-[var(--border)] bg-white px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="text-sm">{saveError && <span className="text-red-600">{saveError}</span>}{savedMessage && <span className="text-emerald-700">{savedMessage}</span>}</div>
             <div className="flex gap-2">
-              {tienePermisoCerrar && <Button variant="outline" disabled={!puedeCerrar || mutation.isPending || closeMutation.isPending} onClick={closeEvaluation}><ShieldCheck size={16} />{closeMutation.isPending ? "Cerrando..." : "Cerrar evaluación"}</Button>}
-              {puedeRegistrarResultados && <Button onClick={save} disabled={!estaEnProceso || mutation.isPending || closeMutation.isPending}><Save size={16} />{mutation.isPending ? "Guardando..." : "Guardar avance"}</Button>}
+              {puedeSolicitarReapertura && estaTerminada && <Button variant="outline" disabled={reopenMutation.isPending} onClick={() => { setSaveError(null); setSavedMessage(null); setReopenOpen(true); }}><RotateCcw size={16} />Solicitar reapertura</Button>}
+              {puedeTerminarEvaluacion && <Button variant="outline" disabled={!puedeTerminar || mutation.isPending || finishMutation.isPending} onClick={finishEvaluation}><ShieldCheck size={16} />{finishMutation.isPending ? "Terminando..." : "Terminar evaluación"}</Button>}
+              {puedeRegistrarResultados && <Button onClick={save} disabled={!estaEnProceso || mutation.isPending || finishMutation.isPending}><Save size={16} />{mutation.isPending ? "Guardando..." : "Guardar avance"}</Button>}
             </div>
           </div>
         </CardContent>
       </Card>
+      {reopenOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4" role="dialog" aria-modal="true" aria-labelledby="reopen-title">
+          <div className="w-full max-w-lg rounded-xl border border-[var(--border)] bg-white p-5 shadow-2xl">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h2 id="reopen-title" className="text-lg font-semibold">Solicitar reapertura</h2>
+                <p className="mt-1 text-sm text-[var(--text-secondary)]">La evaluación permanecerá bloqueada hasta que Calidad autorice la solicitud.</p>
+              </div>
+              <button type="button" className="rounded-md p-1 text-slate-500 hover:bg-slate-100" onClick={() => setReopenOpen(false)} aria-label="Cerrar"><X size={18} /></button>
+            </div>
+            <label className="mt-4 block text-sm font-medium" htmlFor="reopen-reason">Motivo de la reapertura</label>
+            <textarea
+              id="reopen-reason"
+              className="mt-2 min-h-28 w-full resize-y rounded-md border border-[var(--border)] bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[var(--ring)]"
+              value={reopenReason}
+              maxLength={1000}
+              placeholder="Describe qué resultado necesitas completar o corregir."
+              onChange={(e) => setReopenReason(e.target.value)}
+              autoFocus
+            />
+            <div className="mt-1 text-right text-xs text-[var(--text-secondary)]">{reopenReason.length}/1000</div>
+            <div className="mt-4 flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setReopenOpen(false)} disabled={reopenMutation.isPending}>Cancelar</Button>
+              <Button onClick={sendReopenRequest} disabled={!reopenReason.trim() || reopenMutation.isPending}>{reopenMutation.isPending ? "Enviando..." : "Enviar solicitud"}</Button>
+            </div>
+          </div>
+        </div>
+      )}
     </PageContainer>
   );
 }
