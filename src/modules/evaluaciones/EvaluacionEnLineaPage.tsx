@@ -330,10 +330,10 @@ export default function EvaluacionEnLineaPage() {
 
   const { cabecera, avance } = data;
   const estaEnProceso = cabecera.estadoEvaluacion === "EN_PROCESO";
+  const estaTerminada = cabecera.estadoEvaluacion === "TERMINADA";
   const estadoLoteCodigo = detalleLote?.lote.estadoLoteCodigo?.toUpperCase() ?? "";
   const loteEnEtapaPosterior = ["LIBERADO", "NO_CONFORME", "CERTIFICADO", "ANULADO"].includes(estadoLoteCodigo);
   const mostrarSolicitarReapertura = puedeSolicitarReapertura && estaTerminada && !loteEnEtapaPosterior;
-  const estaTerminada = cabecera.estadoEvaluacion === "TERMINADA";
   const puedeTerminar = puedeTerminarEvaluacion && estaEnProceso;
   const origenLoteId = (location.state as { loteId?: number } | null)?.loteId;
   const volverA = origenLoteId ? `/operacion/lotes/${origenLoteId}` : "/operacion/evaluaciones";
