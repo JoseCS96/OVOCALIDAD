@@ -32,7 +32,7 @@ export type CatalogosLote = {
 
 export type GenerarLoteRequest = {
   productoCodigo: string; naturalezaId: number; faseId: number;
-  lineaOrigenId: number; observacion?: string | null; usuario: string;
+  lineaOrigenId: number; observacion?: string | null;
 };
 
 export type GenerarLoteResponse = {
