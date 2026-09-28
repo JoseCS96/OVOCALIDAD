@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { guardarResultado, obtenerEvaluacion, solicitarReapertura, terminarEvaluacion } from "./api";
 import { useAuth } from "@/modules/auth/AuthContext";
 import type { EvaluacionDetalle, GuardarResultadoRequest } from "./types";
+import { obtenerDetalleLote } from "@/modules/lotes/api";
 
 type Draft = { texto: string; numero: string; cumple: boolean | null; dirty: boolean };
 type DraftMap = Record<number, Draft>;
@@ -173,6 +174,13 @@ export default function EvaluacionEnLineaPage() {
     enabled: Number.isFinite(id) && id > 0,
   });
 
+  const loteId = data?.cabecera.loteId ?? 0;
+  const { data: detalleLote } = useQuery({
+    queryKey: ["lote", loteId],
+    queryFn: () => obtenerDetalleLote(loteId),
+    enabled: loteId > 0,
+  });
+
   useEffect(() => {
     if (!data) return;
     const next: DraftMap = {};
@@ -322,6 +330,9 @@ export default function EvaluacionEnLineaPage() {
 
   const { cabecera, avance } = data;
   const estaEnProceso = cabecera.estadoEvaluacion === "EN_PROCESO";
+  const estadoLoteCodigo = detalleLote?.lote.estadoLoteCodigo?.toUpperCase() ?? "";
+  const loteEnEtapaPosterior = ["LIBERADO", "NO_CONFORME", "CERTIFICADO", "ANULADO"].includes(estadoLoteCodigo);
+  const mostrarSolicitarReapertura = puedeSolicitarReapertura && estaTerminada && !loteEnEtapaPosterior;
   const estaTerminada = cabecera.estadoEvaluacion === "TERMINADA";
   const puedeTerminar = puedeTerminarEvaluacion && estaEnProceso;
   const origenLoteId = (location.state as { loteId?: number } | null)?.loteId;
@@ -406,7 +417,7 @@ export default function EvaluacionEnLineaPage() {
           <div className="flex flex-col gap-3 border-t border-[var(--border)] bg-white px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="text-sm">{saveError && <span className="text-red-600">{saveError}</span>}{savedMessage && <span className="text-emerald-700">{savedMessage}</span>}</div>
             <div className="flex gap-2">
-              {puedeSolicitarReapertura && estaTerminada && <Button variant="outline" disabled={reopenMutation.isPending} onClick={() => { setSaveError(null); setSavedMessage(null); setReopenOpen(true); }}><RotateCcw size={16} />Solicitar reapertura</Button>}
+              {mostrarSolicitarReapertura && <Button variant="outline" disabled={reopenMutation.isPending} onClick={() => { setSaveError(null); setSavedMessage(null); setReopenOpen(true); }}><RotateCcw size={16} />Solicitar reapertura</Button>}
               {puedeTerminarEvaluacion && <Button variant="outline" disabled={!puedeTerminar || mutation.isPending || finishMutation.isPending} onClick={finishEvaluation}><ShieldCheck size={16} />{finishMutation.isPending ? "Terminando..." : "Terminar evaluación"}</Button>}
               {puedeRegistrarResultados && <Button onClick={save} disabled={!estaEnProceso || mutation.isPending || finishMutation.isPending}><Save size={16} />{mutation.isPending ? "Guardando..." : "Guardar avance"}</Button>}
             </div>
