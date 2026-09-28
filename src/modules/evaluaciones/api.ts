@@ -9,6 +9,9 @@ import type {
   SolicitudReaperturaDetalle,
   SolicitudReaperturaItem,
   ResolverReaperturaResponse,
+  EvaluacionPendienteCalculo,
+  PrecalculoEvaluacionesResponse,
+  ConsolidacionEvaluacionResultado,
 } from "./types";
 
 export async function obtenerPanelEvaluador() {
@@ -71,5 +74,27 @@ export async function resolverSolicitudReapertura(
     request,
   );
   if (data.codigoResultado !== 0) throw new Error(data.mensaje);
+  return data;
+}
+
+
+export async function listarEvaluacionesPendientesCalculo() {
+  const { data } = await api.get<EvaluacionPendienteCalculo[]>("/api/evaluaciones/pendientes-calculo");
+  return data;
+}
+
+export async function precalcularDisposicion(evaluacionIds: number[]) {
+  const { data } = await api.post<PrecalculoEvaluacionesResponse>(
+    "/api/evaluaciones/precalcular-disposicion",
+    { evaluacionIds },
+  );
+  return data;
+}
+
+export async function consolidarEvaluaciones(evaluacionIds: number[], observacion?: string | null) {
+  const { data } = await api.post<ConsolidacionEvaluacionResultado[]>(
+    "/api/evaluaciones/consolidar",
+    { evaluacionIds, observacion: observacion?.trim() || null },
+  );
   return data;
 }
