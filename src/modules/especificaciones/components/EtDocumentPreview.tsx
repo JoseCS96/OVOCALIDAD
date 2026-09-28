@@ -2,7 +2,7 @@ import type {CaracteristicaEt,DetalleEt} from "../types";
 
 export default function EtDocumentPreview({data}:{data:DetalleEt}){
  const i=data.informacionGeneral;
- return <div className="mx-auto w-full max-w-[1120px] bg-white shadow-sm print:max-w-none print:shadow-none">
+ return <div className="w-full bg-white shadow-sm print:shadow-none">
   <article className="border border-slate-300 text-[13px] text-slate-900">
    <header className="grid grid-cols-[1fr_1.6fr_1fr] border-b border-slate-300">
     <div className="flex items-center px-5 py-4 text-2xl font-bold italic">Ovosur</div>
