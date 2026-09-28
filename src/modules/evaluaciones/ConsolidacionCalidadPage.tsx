@@ -29,6 +29,7 @@ export default function ConsolidacionCalidadPage() {
   const [seleccionados, setSeleccionados] = useState<number[]>([]);
   const [preview, setPreview] = useState<PrecalculoEvaluacionesResponse | null>(null);
   const [resultadoGuardado, setResultadoGuardado] = useState<string | null>(null);
+  const [filtro, setFiltro] = useState<"TODOS" | "CUMPLE" | "NO_CUMPLE">("TODOS");
 
   const { data = [], isLoading, isError, refetch, isFetching } = useQuery({
     queryKey: ["evaluaciones", "pendientes-calculo"],
@@ -36,7 +37,13 @@ export default function ConsolidacionCalidadPage() {
     enabled: tienePermiso("EVALUACION.CONSOLIDAR"),
   });
 
-  const seleccionCompleta = data.length > 0 && data.every(x => seleccionados.includes(x.evaluacionId));
+  const dataFiltrada = useMemo(() => data.filter(item =>
+    filtro === "TODOS" || item.precalculo === filtro
+  ), [data, filtro]);
+
+  const seleccionCompleta = dataFiltrada.length > 0 && dataFiltrada.every(x => seleccionados.includes(x.evaluacionId));
+  const totalCumplen = data.filter(x => x.precalculo === "CUMPLE").length;
+  const totalNoCumplen = data.filter(x => x.precalculo === "NO_CUMPLE").length;
 
   const calcularMutation = useMutation({
     mutationFn: () => precalcularDisposicion(seleccionados),
@@ -91,8 +98,17 @@ export default function ConsolidacionCalidadPage() {
       <Card className="overflow-hidden border-[var(--border)] shadow-[var(--shadow-card)]">
         <CardHeader className="flex flex-row items-center justify-between gap-4 border-b border-[var(--border)]">
           <div><CardTitle className="text-base">Pendientes de decisión</CardTitle><p className="mt-1 text-xs text-[var(--text-secondary)]">{data.length} evaluación(es) terminada(s) pendientes de consolidar.</p></div>
-          <div className="flex gap-2">
-            <Button variant="outline" disabled={data.length === 0} onClick={() => { setSeleccionados(seleccionCompleta ? [] : data.map(x => x.evaluacionId)); setPreview(null); }}>
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="flex rounded-lg border border-[var(--border)] bg-[var(--surface-muted)] p-1">
+              <button type="button" onClick={() => setFiltro("TODOS")} className={`rounded-md px-3 py-1.5 text-xs font-medium transition ${filtro === "TODOS" ? "bg-white shadow-sm text-[var(--text-primary)]" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"}`}>Todos <span className="ml-1">{data.length}</span></button>
+              <button type="button" onClick={() => setFiltro("CUMPLE")} className={`rounded-md px-3 py-1.5 text-xs font-medium transition ${filtro === "CUMPLE" ? "bg-white shadow-sm text-emerald-700" : "text-[var(--text-secondary)] hover:text-emerald-700"}`}>Cumplen <span className="ml-1">{totalCumplen}</span></button>
+              <button type="button" onClick={() => setFiltro("NO_CUMPLE")} className={`rounded-md px-3 py-1.5 text-xs font-medium transition ${filtro === "NO_CUMPLE" ? "bg-white shadow-sm text-red-700" : "text-[var(--text-secondary)] hover:text-red-700"}`}>No cumplen <span className="ml-1">{totalNoCumplen}</span></button>
+            </div>
+            <Button variant="outline" disabled={dataFiltrada.length === 0} onClick={() => {
+              const idsVisibles = dataFiltrada.map(x => x.evaluacionId);
+              setSeleccionados(v => seleccionCompleta ? v.filter(id => !idsVisibles.includes(id)) : Array.from(new Set([...v, ...idsVisibles])));
+              setPreview(null);
+            }}>
               {seleccionCompleta ? "Quitar selección" : "Seleccionar todos"}
             </Button>
             <Button disabled={seleccionados.length === 0 || calcularMutation.isPending} onClick={() => calcularMutation.mutate()}>
@@ -104,11 +120,12 @@ export default function ConsolidacionCalidadPage() {
           {isLoading ? <div className="py-14 text-center text-sm text-[var(--text-secondary)]">Cargando evaluaciones...</div> :
           isError ? <div className="py-14 text-center text-sm text-red-600">No se pudieron cargar las evaluaciones pendientes.</div> :
           data.length === 0 ? <div className="flex flex-col items-center gap-2 py-14 text-center text-sm text-[var(--text-secondary)]"><CheckCircle2 className="text-emerald-600" /><span>No hay evaluaciones pendientes de consolidación.</span></div> :
+          dataFiltrada.length === 0 ? <div className="py-14 text-center text-sm text-[var(--text-secondary)]">No hay evaluaciones para el filtro seleccionado.</div> :
           <div className="overflow-x-auto"><table className="w-full min-w-[1000px] text-left text-sm">
             <thead className="bg-[var(--surface-muted)] text-[11px] uppercase tracking-[.08em] text-[var(--text-secondary)]"><tr>
               <th className="px-5 py-3 w-12"></th><th className="px-5 py-3">Lote / producto</th><th className="px-5 py-3">Evaluación</th><th className="px-5 py-3">Resultados</th><th className="px-5 py-3">Precalculo</th><th className="px-5 py-3">Finalizada</th><th className="px-5 py-3 text-right">Acción</th>
             </tr></thead>
-            <tbody>{data.map(item => <tr key={item.evaluacionId} className="border-t border-[var(--border)]">
+            <tbody>{dataFiltrada.map(item => <tr key={item.evaluacionId} className="border-t border-[var(--border)]">
               <td className="px-5 py-4"><input type="checkbox" className="h-4 w-4" checked={seleccionados.includes(item.evaluacionId)} onChange={() => { setSeleccionados(v => v.includes(item.evaluacionId) ? v.filter(id => id !== item.evaluacionId) : [...v, item.evaluacionId]); setPreview(null); }} /></td>
               <td className="px-5 py-4"><p className="font-semibold">{item.codigoLote}</p><p className="text-xs text-[var(--text-secondary)]">{item.productoCodigo} · {item.productoDescripcion}</p></td>
               <td className="px-5 py-4"><p className="font-medium">Evaluación #{item.evaluacionId}</p><p className="text-xs text-[var(--text-secondary)]">Intento {item.intento} · {item.usuarioEvaluador ?? "—"}</p></td>
