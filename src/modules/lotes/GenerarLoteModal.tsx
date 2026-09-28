@@ -3,6 +3,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { AlertCircle, CheckCircle2, Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useAuth } from "@/modules/auth/AuthContext";
 import { generarLote, obtenerCatalogosLote } from "./api";
 import type { GenerarLoteRequest } from "./types";
 import SearchableSelect from "./SearchableSelect";
@@ -19,10 +20,10 @@ const emptyForm: GenerarLoteRequest = {
   faseId: 0,
   lineaOrigenId: 0,
   observacion: "",
-  usuario: "USUARIO_WEB",
 };
 
 export default function GenerarLoteModal({ open, onClose, onCreated }: Props) {
+  const { acceso } = useAuth();
   const [form, setForm] = useState<GenerarLoteRequest>(emptyForm);
   const [resultado, setResultado] = useState<{ codigo?: string; mensaje: string } | null>(null);
 
@@ -60,6 +61,7 @@ export default function GenerarLoteModal({ open, onClose, onCreated }: Props) {
   if (!open) return null;
 
   const valido = form.productoCodigo && form.naturalezaId > 0 && form.faseId > 0 && form.lineaOrigenId > 0;
+  const usuarioSesion = acceso?.usuario.nombresApellidos?.trim() || acceso?.usuario.nombreUsuario || "";
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -125,7 +127,7 @@ export default function GenerarLoteModal({ open, onClose, onCreated }: Props) {
                   <textarea className="min-h-24 w-full resize-y rounded-lg border border-[var(--border)] bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[var(--ring)]" maxLength={500} placeholder="Observación opcional del lote" value={form.observacion ?? ""} onChange={(e) => setForm((x) => ({ ...x, observacion: e.target.value }))} />
                 </Field>
                 <Field label="Registrado por">
-                  <Input value={form.usuario} disabled className="cursor-not-allowed bg-[var(--surface-muted)] text-[var(--text-secondary)] disabled:opacity-100" />
+                  <Input value={usuarioSesion} disabled className="cursor-not-allowed bg-[var(--surface-muted)] text-[var(--text-secondary)] disabled:opacity-100" />
                 </Field>
               </>
             )}
