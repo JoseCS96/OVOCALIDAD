@@ -10,7 +10,7 @@ export default function EtDocumentPreview({data}:{data:DetalleEt}){
     <div className="grid grid-rows-3 text-xs"><Meta l="Código" v={i.documentoCodigo}/><Meta l="Versión" v={version(i.versionNumero)}/><Meta l="Vigencia" v={fecha(i.versionInicioVigencia)}/></div>
    </header>
    <div className="grid grid-cols-3 border-b border-slate-300">{["ELABORADO POR","REVISADO POR","APROBADO POR"].map(tipo=><div key={tipo} className="min-h-20 border-r border-slate-300 p-3 last:border-r-0"><p className="text-[10px] font-bold text-slate-500">{tipo}</p>{data.responsables.filter(x=>norm(x.tipoResponsabilidad).includes(tipo.split(" ")[0])).map(x=><p key={x.idRelacion} className="mt-1 text-xs font-medium">{x.usuarioNombresApellidos}</p>)}</div>)}</div>
-   <main className="px-8 py-5">
+   <main className="w-1/2 px-8 py-5">
     <Section n="1" t="Descripción"><Text v={i.versionDescripcion}/></Section>
     <Section n="2" t="Ingredientes">{data.ingredientes.length?<table className="doc-table"><thead><tr><Th>Ingrediente</Th><Th>Cantidad</Th><Th>Unidad</Th></tr></thead><tbody>{[...data.ingredientes].sort(ord).map(x=><tr key={x.versIngrId}><Td>{x.ingredienteDescripcion}</Td><Td>{x.versIngrValor??"—"}</Td><Td>{x.unidadDeMedida??"—"}</Td></tr>)}</tbody></table>:<Empty/>}</Section>
     <Section n="3" t="Recetas"><List a={[...data.recetas].sort(ord).map(x=>x.recetaDescripcion)}/></Section>
