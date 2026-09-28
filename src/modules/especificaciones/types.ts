@@ -4,6 +4,7 @@ export type InformacionGeneralEt = {
   versionId: number; versionNumero: number | null; estadoVersion: string; versionInicioVigencia: string | null;
   versionReemplazaAId: number | null; versionNroPaginas: number | null; versionDescripcion: string | null;
   envyEmbDescripcion?: string|null; almacyDistDescripcion?: string|null; vidaUtilDescripcion?: string|null; descongelamientoDescripcion?: string|null;
+  archivoOriginalUrl?: string|null; archivoOriginalNombre?: string|null;
   permiteEditar: boolean; permiteEnviarRevision: boolean; permiteRevisar: boolean; permitePublicar: boolean;
 };
 export type CaracteristicaEt = {
