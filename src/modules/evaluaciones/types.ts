@@ -201,3 +201,76 @@ export type ResolverReaperturaResponse = OperacionResponse & {
   solicitudReaperturaId: number | null;
   estadoSolicitud: string | null;
 };
+
+
+export type EvaluacionPendienteCalculo = {
+  evaluacionId: number;
+  loteId: number;
+  codigoLote: string;
+  productoCodigo: string;
+  productoDescripcion: string;
+  tipoEvaluacionId: number;
+  intento: number;
+  usuarioEvaluador: string | null;
+  fechaInicio: string | null;
+  fechaFin: string | null;
+  estadoEvaluacion: string;
+  estadoLote: string;
+  totalParametros: number;
+  resultadosRegistrados: number;
+  totalObligatorios: number;
+  obligatoriosRegistrados: number;
+  parametrosCumplen: number;
+  parametrosNoCumplen: number;
+  precalculo: string;
+  resultadosPendientes: number;
+};
+
+export type PrecalculoEvaluacion = EvaluacionPendienteCalculo & {
+  accionPropuesta: string;
+  esCalculable: boolean;
+};
+
+export type PrecalculoDetalle = {
+  evaluacionId: number;
+  loteId: number;
+  codigoLote: string;
+  versCaractId: number;
+  caracteristicaId: number;
+  caracteristicaDescripcion: string;
+  tipoCaractId: number;
+  tipoCaractDescripcion: string;
+  tipoCriterioId: number;
+  tipoCriterio: string;
+  valorCuantitativoInicial: number | null;
+  valorCuantitativoFinal: number | null;
+  valorCuantitativoIgual: number | null;
+  valorCualitativo: string | null;
+  unidad: string | null;
+  esObligatorio: boolean;
+  orden: number | null;
+  evaluacionResultadoId: number | null;
+  resultadoNumerico: number | null;
+  resultadoTexto: string | null;
+  cumple: boolean | null;
+  observacion: string | null;
+  estadoResultado: string;
+  especificacion: string | null;
+};
+
+export type PrecalculoEvaluacionesResponse = {
+  evaluaciones: PrecalculoEvaluacion[];
+  detalle: PrecalculoDetalle[];
+};
+
+export type ConsolidacionEvaluacionResultado = {
+  evaluacionId: number;
+  loteId: number | null;
+  codigoLote: string | null;
+  productoCodigo: string | null;
+  precalculo: string | null;
+  accion: string | null;
+  procesado: boolean;
+  codigoResultado: number;
+  mensaje: string;
+};
