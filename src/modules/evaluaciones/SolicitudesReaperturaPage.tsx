@@ -59,7 +59,7 @@ export default function SolicitudesReaperturaPage() {
   return <PageContainer className="space-y-5">
     <PageHeader eyebrow="Operación · Calidad" title="Solicitudes de reapertura" description="Revisa, autoriza o rechaza solicitudes. Cada apertura y decisión queda auditada." actions={<Button variant="outline" onClick={() => lista.refetch()} disabled={lista.isFetching}><RefreshCw size={15} className={lista.isFetching ? "animate-spin" : ""}/>Actualizar</Button>} />
 
-    <div className="flex flex-wrap gap-2">{["PENDIENTE","APROBADA","RECHAZADA"].map(x => <Button key={x} size="sm" variant={estado === x ? "default" : "outline"} onClick={() => { setEstado(x); setSeleccionada(null); }}>{x}</Button>)}</div>
+    <div className="inline-flex flex-wrap gap-1 rounded-xl border border-[var(--border)] bg-[var(--surface-muted)] p-1">{["PENDIENTE","APROBADA","RECHAZADA"].map(x => <Button key={x} size="sm" variant="ghost" aria-pressed={estado === x} className={estado === x ? "bg-white text-[var(--primary)] shadow-sm hover:bg-white" : "text-[var(--text-secondary)] hover:bg-white/70"} onClick={() => { setEstado(x); setSeleccionada(null); }}>{x}</Button>)}</div>
 
     <Card className="overflow-hidden border-[var(--border)] shadow-[var(--shadow-card)]">
       <CardHeader className="border-b border-[var(--border)]"><CardTitle className="text-base">Bandeja de reaperturas</CardTitle><p className="text-xs text-[var(--text-secondary)]">Usuarios con permiso EVALUACION.AUTORIZAR_REAPERTURA.</p></CardHeader>
