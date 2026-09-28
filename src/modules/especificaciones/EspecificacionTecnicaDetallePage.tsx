@@ -1,6 +1,6 @@
 import {useMemo,useState} from "react";
 import {useQuery} from "@tanstack/react-query";
-import {ArrowLeft} from "lucide-react";
+import {ArrowLeft,ExternalLink,FileText,Layers3} from "lucide-react";
 import {useNavigate,useParams} from "react-router-dom";
 import PageContainer from "@/components/common/PageContainer";
 import {Badge} from "@/components/ui/badge";
@@ -8,15 +8,19 @@ import {Button} from "@/components/ui/button";
 import {Card,CardContent} from "@/components/ui/card";
 import {obtenerEt} from "./api";
 import type {CaracteristicaEt,DetalleEt,SeccionEt} from "./types";
+import EtDocumentPreview from "./components/EtDocumentPreview";
 export default function EspecificacionTecnicaDetallePage(){
- const nav=useNavigate(),{versionId}=useParams(),id=Number(versionId),q=useQuery({queryKey:["et",id],queryFn:()=>obtenerEt(id),enabled:id>0}),[sel,setSel]=useState<number|null>(null);
+ const nav=useNavigate(),{versionId}=useParams(),id=Number(versionId),q=useQuery({queryKey:["et",id],queryFn:()=>obtenerEt(id),enabled:id>0}),[sel,setSel]=useState<number|null>(null),[vista,setVista]=useState<"secciones"|"documento"|"pdf">("documento");
  const secs=useMemo(()=>presentacionSecciones(q.data?.secciones??[]),[q.data]),act=secs.find(x=>x.seccionId===(sel??secs[0]?.seccionId));
  if(q.isLoading)return <PageContainer><div className="py-16 text-center">Cargando Especificación Técnica...</div></PageContainer>;
  if(q.isError||!q.data)return <PageContainer><div className="py-16 text-center text-red-600">No se pudo cargar la Especificación Técnica.</div></PageContainer>;
  const d=q.data,i=d.informacionGeneral;
  return <PageContainer className="space-y-4"><Button variant="ghost" size="sm" className="-ml-2" onClick={()=>nav("/documentos/especificaciones")}><ArrowLeft/>Volver a especificaciones</Button>
- <Card className="border-t-4 border-t-slate-800"><CardContent className="p-6"><Badge variant="outline">{i.estadoVersion}</Badge><h1 className="mt-3 text-2xl font-semibold">{i.productoCodigo} · {i.productoDescripcion}</h1><p className="mt-2 text-sm text-[var(--text-secondary)]">{i.documentoCodigo} · Versión {fv(i.versionNumero)} · {i.versionInicioVigencia?"Vigencia "+fecha(i.versionInicioVigencia):"Sin fecha de vigencia"}</p></CardContent></Card>
- <Card><CardContent className="p-0"><div className="flex overflow-x-auto border-b px-3">{secs.map(s=><button key={s.versSeccId} onClick={()=>setSel(s.seccionId)} className={"whitespace-nowrap border-b-2 px-4 py-3 text-sm "+(act?.seccionId===s.seccionId?"border-amber-500 font-semibold":"border-transparent text-[var(--text-secondary)]")}>{title(s.seccionDescripcion)}</button>)}</div><div className="min-h-[260px] p-6">{act?<Contenido d={d} s={act}/>:<Vacio/>}</div></CardContent></Card></PageContainer>
+ <Card className="border-t-4 border-t-slate-800"><CardContent className="p-6"><div className="flex flex-wrap items-start justify-between gap-4"><div><Badge variant="outline">{i.estadoVersion}</Badge><h1 className="mt-3 text-2xl font-semibold">{i.productoCodigo} · {i.productoDescripcion}</h1><p className="mt-2 text-sm text-[var(--text-secondary)]">{i.documentoCodigo} · Versión {fv(i.versionNumero)} · {i.versionInicioVigencia?"Vigencia "+fecha(i.versionInicioVigencia):"Sin fecha de vigencia"}</p></div><div className="flex flex-wrap gap-2"><Button variant={vista==="documento"?"default":"outline"} size="sm" onClick={()=>setVista("documento")}><FileText/>Vista estructurada</Button><Button variant={vista==="secciones"?"default":"outline"} size="sm" onClick={()=>setVista("secciones")}><Layers3/>Ver por secciones</Button><Button variant={vista==="pdf"?"default":"outline"} size="sm" onClick={()=>setVista("pdf")}><ExternalLink/>PDF original</Button></div></div></CardContent></Card>
+ {vista==="documento"&&<EtDocumentPreview data={d}/>}
+ {vista==="secciones"&&<Card><CardContent className="p-0"><div className="flex overflow-x-auto border-b px-3">{secs.map(s=><button key={s.versSeccId} onClick={()=>setSel(s.seccionId)} className={"whitespace-nowrap border-b-2 px-4 py-3 text-sm "+(act?.seccionId===s.seccionId?"border-amber-500 font-semibold":"border-transparent text-[var(--text-secondary)]")}>{title(s.seccionDescripcion)}</button>)}</div><div className="min-h-[260px] p-6">{act?<Contenido d={d} s={act}/>:<Vacio/>}</div></CardContent></Card>}
+ {vista==="pdf"&&<Card><CardContent className="p-6">{i.archivoOriginalUrl?<div className="space-y-4"><div><h2 className="text-lg font-semibold">PDF oficial original</h2><p className="mt-1 text-sm text-[var(--text-secondary)]">{i.archivoOriginalNombre??"Documento oficial vinculado a esta versión."}</p></div><div className="overflow-hidden rounded-lg border bg-slate-100"><iframe title="PDF original" src={i.archivoOriginalUrl} className="h-[72vh] w-full bg-white"/></div><div className="flex justify-end"><Button variant="outline" onClick={()=>window.open(i.archivoOriginalUrl!,"_blank","noopener,noreferrer")}><ExternalLink/>Abrir PDF en otra pestaña</Button></div></div>:<div className="py-16 text-center"><FileText className="mx-auto size-10 text-slate-300"/><h2 className="mt-4 text-lg font-semibold">PDF original no vinculado</h2><p className="mx-auto mt-2 max-w-lg text-sm text-[var(--text-secondary)]">Esta versión todavía no tiene registrada la ruta o URL del archivo PDF oficial de Calidad. La vista estructurada continúa disponible con la información almacenada en la base de datos.</p></div>}</CardContent></Card>}
+ </PageContainer>
 }
 function Contenido({d,s}:{d:DetalleEt;s:SeccionEt}){const n=norm(s.seccionDescripcion),i=d.informacionGeneral;
  if(n.includes("INFORMACION GENERAL"))return <B t="Información general"><div className="grid gap-5 md:grid-cols-4"><Info l="Código" v={i.documentoCodigo}/><Info l="Producto" v={i.productoCodigo}/><Info l="Versión" v={fv(i.versionNumero)}/><Info l="Páginas" v={String(i.versionNroPaginas??"—")}/></div></B>;
