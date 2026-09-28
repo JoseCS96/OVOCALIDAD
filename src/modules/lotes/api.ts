@@ -1,7 +1,5 @@
-import axios from "axios";
+import { api } from "@/lib/api";
 import type { CatalogosLote, DetalleLote, GenerarLoteRequest, GenerarLoteResponse, LoteListado, LotesFiltros } from "./types";
-
-const api = axios.create({ baseURL: import.meta.env.VITE_API_URL ?? "" });
 
 export async function listarLotes(filtros: LotesFiltros = {}) {
   const params = Object.fromEntries(Object.entries(filtros).filter(([, value]) => value !== undefined && value !== ""));
