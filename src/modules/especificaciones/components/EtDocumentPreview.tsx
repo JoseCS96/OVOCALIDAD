@@ -10,7 +10,7 @@ export default function EtDocumentPreview({data}:{data:DetalleEt}){
     <div className="grid grid-rows-3 text-xs"><Meta l="Código" v={i.documentoCodigo}/><Meta l="Versión" v={version(i.versionNumero)}/><Meta l="Vigencia" v={fecha(i.versionInicioVigencia)}/></div>
    </header>
    <div className="grid grid-cols-3 border-b border-slate-300">{["ELABORADO POR","REVISADO POR","APROBADO POR"].map(tipo=><div key={tipo} className="min-h-20 border-r border-slate-300 p-3 last:border-r-0"><p className="text-[10px] font-bold text-slate-500">{tipo}</p>{data.responsables.filter(x=>norm(x.tipoResponsabilidad).includes(tipo.split(" ")[0])).map(x=><p key={x.idRelacion} className="mt-1 text-xs font-medium">{x.usuarioNombresApellidos}</p>)}</div>)}</div>
-   <div className="grid items-start lg:grid-cols-[minmax(0,72fr)_minmax(260px,28fr)]">
+   <div className="grid items-start lg:grid-cols-[minmax(0,1fr)_320px]">
     <main className="min-w-0 px-8 py-5">
      <Section id={"et-seccion-1"} n="1" t="Descripción"><Text v={i.versionDescripcion}/></Section>
      <Section id={"et-seccion-2"} n="2" t="Ingredientes">{data.ingredientes.length?<table className="doc-table"><thead><tr><Th>Ingrediente</Th><Th>Cantidad</Th><Th>Unidad</Th></tr></thead><tbody>{[...data.ingredientes].sort(ord).map(x=><tr key={x.versIngrId}><Td>{x.ingredienteDescripcion}</Td><Td>{x.versIngrValor??"—"}</Td><Td>{x.unidadDeMedida??"—"}</Td></tr>)}</tbody></table>:<Empty/>}</Section>
@@ -28,8 +28,8 @@ export default function EtDocumentPreview({data}:{data:DetalleEt}){
      {data.anexos.length>0&&<Section id={"et-seccion-14"} n="14" t="Anexos"><List a={data.anexos.map(x=>x.anexoDescripcion)}/></Section>}
     </main>
 
-    <aside className="hidden border-l border-slate-200 bg-slate-50/70 p-5 lg:block print:hidden">
-     <div className="sticky top-20 space-y-5">
+    <aside className="hidden self-stretch border-l border-slate-200 bg-slate-50/70 lg:block print:hidden">
+     <div className="sticky top-20 max-h-[calc(100vh-6rem)] space-y-5 overflow-y-auto p-5">
       <div><p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Resumen documental</p><div className="mt-3 space-y-2 text-xs"><SideMeta l="Estado" v={i.estadoVersion}/><SideMeta l="Código" v={i.documentoCodigo}/><SideMeta l="Versión" v={version(i.versionNumero)}/><SideMeta l="Vigencia" v={fecha(i.versionInicioVigencia)}/></div></div>
       <div className="border-t border-slate-200 pt-4"><p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Documento original</p>{i.archivoOriginalUrl?<button type="button" onClick={()=>window.open(i.archivoOriginalUrl!,"_blank","noopener,noreferrer")} className="mt-3 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-left text-xs font-semibold hover:bg-slate-100">Abrir PDF oficial ↗</button>:<p className="mt-2 text-xs leading-5 text-slate-500">PDF oficial todavía no vinculado a esta versión.</p>}</div>
       <div className="border-t border-slate-200 pt-4"><p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Navegación</p><nav className="mt-2 space-y-0.5">{navItems(i.descongelamientoDescripcion, data.anexos.length>0).map(x=><button key={x.n} type="button" onClick={()=>document.getElementById("et-seccion-"+x.n)?.scrollIntoView({behavior:"smooth",block:"start"})} className="block w-full rounded px-2 py-1.5 text-left text-xs text-slate-600 hover:bg-white hover:text-slate-950"><span className="mr-2 font-semibold text-slate-400">{x.n.padStart(2,"0")}</span>{x.t}</button>)}</nav></div>
