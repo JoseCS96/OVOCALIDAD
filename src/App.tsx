@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter } from "react-router-dom";
+import { AuthProvider } from "@/modules/auth/AuthContext";
 import AppRouter from "@/router/AppRouter";
 
 const queryClient = new QueryClient({
@@ -15,7 +16,9 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        <AppRouter />
+        <AuthProvider>
+          <AppRouter />
+        </AuthProvider>
       </BrowserRouter>
     </QueryClientProvider>
   );
