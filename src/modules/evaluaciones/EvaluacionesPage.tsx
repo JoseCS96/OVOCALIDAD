@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowRight, CheckCircle2, ClipboardCheck, Clock3, FlaskConical, PlayCircle, RefreshCw } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import ConsolidacionCalidadPage from "./ConsolidacionCalidadPage";
 import PageContainer from "@/components/common/PageContainer";
 import PageHeader from "@/components/common/PageHeader";
 import { Badge } from "@/components/ui/badge";
@@ -25,12 +26,14 @@ export default function EvaluacionesPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { tienePermiso } = useAuth();
+  const puedeConsolidar = tienePermiso("EVALUACION.CONSOLIDAR");
   const puedeIniciar = tienePermiso("EVALUACION.INICIAR");
   const puedeVer = tienePermiso("EVALUACION.VER");
 
   const { data, isLoading, isError, refetch, isFetching } = useQuery({
     queryKey: ["evaluaciones", "mi-panel"],
     queryFn: obtenerPanelEvaluador,
+    enabled: !puedeConsolidar,
   });
 
   const iniciarMutation = useMutation({
@@ -44,6 +47,8 @@ export default function EvaluacionesPage() {
   function abrir(item: PanelEvaluacionItem) {
     navigate(`/operacion/evaluaciones/${item.evaluacionId}`);
   }
+
+  if (puedeConsolidar) return <ConsolidacionCalidadPage />;
 
   if (isLoading) return <PageContainer><div className="py-20 text-center text-[var(--text-secondary)]">Cargando jornada...</div></PageContainer>;
   if (isError || !data) return <PageContainer><div className="py-20 text-center text-red-600">No se pudo cargar el panel de evaluaciones.</div></PageContainer>;
