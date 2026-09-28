@@ -8,7 +8,7 @@ function SidebarItem({ icon: Icon, text, to, collapsed = false }: Props) {
   return (
     <NavLink
       to={to}
-      end={to === "/"}
+      end={to === "/" || to === "/operacion/evaluaciones"}
       title={collapsed ? text : undefined}
       className={({ isActive }) => [
         "group flex w-full items-center rounded-xl px-3 py-2.5 text-left transition-all duration-200",
