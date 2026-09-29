@@ -52,6 +52,9 @@ export type GuardarIngredientesEt={ingredientes:GuardarIngredienteEt[]};
 export type GuardarRecetaEt={descripcion:string;idTipoContenido:number|null;orden:number};
 export type GuardarRecetasEt={recetas:GuardarRecetaEt[]};
 
+export type GuardarProcedimientoEt={descripcion:string;idTipoContenido:number|null;orden:number};
+export type GuardarProcedimientosEt={procedimientos:GuardarProcedimientoEt[]};
+
 export type GuardarCaracteristicaEt={versCaractId:number|null;caracteristicaId:number;tipoCriterioId:number;valorCuantitativoInicial:number|null;valorCuantitativoFinal:number|null;valorCuantitativoIgual:number|null;valorCualitativo:string|null;faseId:number|null;esObligatorio:boolean;orden:number};
 export type OperacionEt={codigoResultado:number;mensaje:string;versCaractId?:number|null};
 
