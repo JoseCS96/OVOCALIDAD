@@ -69,6 +69,9 @@ export type GuardarInstruccionesEt={instrucciones:GuardarInstruccionEt[]};
 export type ContenidoRotuladoCatalogo={contRotuladoId:number;contRotuladoDescripcion:string};
 export type GuardarContenidoRotuladoEt={contenidoRotulado:{contRotuladoId:number;orden:number}[]};
 
+export type GuardarCambioEt={numeroRevision:number;fechaActualizacion:string;descripcion:string};
+export type GuardarCambiosEt={cambios:GuardarCambioEt[]};
+
 export type GuardarCaracteristicaEt={versCaractId:number|null;caracteristicaId:number;tipoCriterioId:number;valorCuantitativoInicial:number|null;valorCuantitativoFinal:number|null;valorCuantitativoIgual:number|null;valorCualitativo:string|null;faseId:number|null;esObligatorio:boolean;orden:number};
 export type OperacionEt={codigoResultado:number;mensaje:string;versCaractId?:number|null};
 
