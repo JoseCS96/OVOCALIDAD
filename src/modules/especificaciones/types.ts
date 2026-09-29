@@ -21,6 +21,7 @@ export type ProcedimientoEt={versProcId:number;procPrepId:number;procPrepDescrip
 export type TratamientoEt={versTratConsId:number;tratConservId:number;tratConservDescripcion:string};
 export type ParametroTratamientoEt={versParamTratId:number;versTratConsId:number;parametroTratId:number;paramTratDescripcion:string;paramTratUnidadDeMedida:string|null;tipoCriterioId:number;tipoCriterio:string;valorCuantitativoInicial:number|null;valorCuantitativoFinal:number|null;valorCuantitativoIgual:number|null;valorCualitativo:string|null;orden:number|null};
 export type TextoOrdenadoEt={orden:number|null;[key:string]:unknown};
+export type PresentacionGenesisDetalleEt={versionKardexId:number;versionId:number;kardex:number;codigoGenesis:string;nombreGenesis:string|null;descripcionGenesis:string|null;estadoGenesis:number|null;estado:string|null};
 export type DetalleEt = {
  informacionGeneral:InformacionGeneralEt;secciones:SeccionEt[];responsables:ResponsableEt[];ingredientes:IngredienteEt[];recetas:RecetaEt[];procedimientos:ProcedimientoEt[];
  tratamientos:TratamientoEt[];parametrosTratamiento:ParametroTratamientoEt[];caracteristicas:CaracteristicaEt[];
@@ -29,6 +30,7 @@ export type DetalleEt = {
  cambiosVersion:Array<{versCambId:number;cambVersiId:number;cambVersNumeroDeRevision:number;cambVersFechaDeActualizacion:string|null;cambVersDescripcion:string}>;
  anexos:Array<{versionAnexoId:number;anexoId:number;anexoDescripcion:string}>;
  historial:Array<{versionHistorialEstadoId:number;estadoOrigen:string|null;estadoDestino:string;accion:string;comentario:string|null;usuario:string;fecha:string}>;
+ presentacionesGenesis:PresentacionGenesisDetalleEt[];
 };
 export type ProductoEt={productoCodigo:string;productoDescripcion:string};
 export type CaracteristicaCatalogoEt={caracteristicaId:number;caracteristicaDescripcion:string;unidad:string|null;tipoCaractId:number;tipoCaracteristica:string;metEnsayoId:number|null;metodoEnsayo:string|null};
