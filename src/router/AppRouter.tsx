@@ -16,6 +16,7 @@ import EspecificacionTecnicaDetallePage from "@/modules/especificaciones/Especif
 import EspecificacionesTecnicasPage from "@/modules/especificaciones/EspecificacionesTecnicasPage";
 import NuevaEspecificacionTecnicaPage from "@/modules/especificaciones/NuevaEspecificacionTecnicaPage";
 import IngredientesMantenimientoPage from "@/modules/mantenimientos/IngredientesMantenimientoPage";
+import CaracteristicasMantenimientoPage from "@/modules/mantenimientos/CaracteristicasMantenimientoPage";
 
 const pages = [
   { path: "/productos", title: "Productos", eyebrow: "Gestión documental", description: "Maestro de productos y códigos asociados al proceso de calidad.", icon: Package },
@@ -47,6 +48,7 @@ export default function AppRouter() {
           <Route path="/documentos/especificaciones/:versionId/editar" element={<EspecificacionTecnicaPage />} />
           <Route path="/documentos/especificaciones" element={<EspecificacionesTecnicasPage />} />
           <Route path="/mantenimientos/ingredientes" element={<IngredientesMantenimientoPage />} />
+          <Route path="/mantenimientos/caracteristicas" element={<CaracteristicasMantenimientoPage />} />
           {pages.map((page) => <Route key={page.path} path={page.path} element={<ModulePlaceholder {...page} />} />)}
         </Route>
       </Route>
