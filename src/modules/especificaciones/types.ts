@@ -14,7 +14,7 @@ export type CaracteristicaEt = {
   valorCualitativo:string|null; faseId:number|null; faseCodigo:string|null; fase:string|null; esObligatorio:boolean; orden:number|null;
 };
 export type SeccionEt={versSeccId:number;versionId:number;seccionId:number;seccionDescripcion:string;orden:number|null;idTipoSeccion:number|null;tipoSeccionDescripcion:string|null;esBase:boolean;puedeEliminarse:boolean;permiteReordenar:boolean;icono:string|null};
-export type ResponsableEt={tipoResponsabilidad:string;idRelacion:number;usuarioDni:string;usuarioNombresApellidos:string;cargoId:number|null};
+export type ResponsableEt={tipoResponsabilidad:string;idRelacion:number;usuarioDni:string;usuarioNombresApellidos:string;cargoId:number|null;usuarioCargoHistorialId:number|null;cargoDescripcion?:string|null;cargoActual?:boolean|null};
 export type IngredienteEt={versIngrId:number;ingredienteId:number;ingredienteDescripcion:string;unidadDeMedida:string|null;versIngrValor:number|null;idTipoContenido:number|null;tipoContenidoCodigo:string|null;tipoContenido:string|null;orden:number|null};
 export type RecetaEt={versRectId:number;recetaId:number;recetaDescripcion:string;idTipoContenido:number|null;tipoContenidoCodigo:string|null;tipoContenido:string|null;orden:number|null};
 export type ProcedimientoEt={versProcId:number;procPrepId:number;procPrepDescripcion:string;idTipoContenido:number|null;tipoContenidoCodigo:string|null;tipoContenido:string|null;orden:number|null};
@@ -40,8 +40,8 @@ export type CatalogosEt={caracteristicas:CaracteristicaCatalogoEt[];tiposCriteri
 export type TipoContenidoBaseEt="DESCRIPCION"|"ENVASE_EMBALAJE"|"ALMACENAMIENTO_DISTRIBUCION"|"VIDA_UTIL"|"DESCONGELAMIENTO";
 export type GuardarContenidoBaseEt={tipoContenido:TipoContenidoBaseEt;contenido:string|null};
 
-export type ResponsableCatalogoEt={usuarioDni:string;usuarioNombresApellidos:string;cargoId:number;cargoDescripcion:string};
-export type GuardarResponsablesEt={elaboradoPor:string[];revisadoPor:string[];aprobadoPor:string[]};
+export type ResponsableCatalogoEt={usuarioCargoHistorialId:number;usuarioDni:string;usuarioNombresApellidos:string;cargoId:number;cargoDescripcion:string;cargoActual:boolean;fechaInicio:string|null;fechaFin:string|null};
+export type GuardarResponsablesEt={elaboradoPor:number[];revisadoPor:number[];aprobadoPor:number[]};
 
 export type IngredienteCatalogoEt={ingredienteId:number;ingredienteDescripcion:string;unidadDeMedida:string|null};
 export type TipoContenidoCatalogoEt={idTipoContenido:number;codigo:string;nombre:string;descripcion:string|null};
