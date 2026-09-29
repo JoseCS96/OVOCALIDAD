@@ -1,6 +1,6 @@
 import { api } from "@/lib/api";
 import type { ProductoGenesis } from "../lotes/types";
-import type { CatalogosEt, DetalleEt, GuardarCaracteristicaEt, OperacionEt, EspecificacionTecnicaListado, CrearEspecificacionTecnica, CrearEspecificacionTecnicaResponse, SeccionesEtCatalogo, CrearSeccionEt, CrearSeccionEtResponse, ContenidoSeccionEt, AgregarSeccionVersionEt, ReordenarSeccionesVersionEt, GuardarInformacionGeneralEt, CambiarEstadoEt, CambiarEstadoEtResponse } from "./types";
+import type { CatalogosEt, DetalleEt, GuardarCaracteristicaEt, OperacionEt, EspecificacionTecnicaListado, CrearEspecificacionTecnica, CrearEspecificacionTecnicaResponse, SeccionesEtCatalogo, CrearSeccionEt, CrearSeccionEtResponse, ContenidoSeccionEt, AgregarSeccionVersionEt, ReordenarSeccionesVersionEt, GuardarInformacionGeneralEt, GuardarContenidoBaseEt, CambiarEstadoEt, CambiarEstadoEtResponse } from "./types";
 function validar(data:OperacionEt){if(data.codigoResultado!==0)throw new Error(data.mensaje);return data}
 export async function obtenerEt(versionId:number){
  const {data}=await api.get<DetalleEt>(`/api/especificaciones-tecnicas/${versionId}`);
@@ -29,6 +29,7 @@ export async function reordenarSeccionesVersionEt(versionId:number,request:Reord
 export async function guardarContenidoSeccionEt(versionId:number,versSeccId:number,contenido:string){const {data}=await api.put<OperacionEt>(`/api/especificaciones-tecnicas/${versionId}/secciones/${versSeccId}/contenido`,{contenido});return validar(data)}
 
 export async function guardarInformacionGeneralEt(versionId:number,request:GuardarInformacionGeneralEt){const {data}=await api.put<OperacionEt>(`/api/especificaciones-tecnicas/${versionId}/informacion-general`,request);return validar(data)}
+export async function guardarContenidoBaseEt(versionId:number,request:GuardarContenidoBaseEt){const {data}=await api.put<OperacionEt>(`/api/especificaciones-tecnicas/${versionId}/contenido-base`,request);return validar(data)}
 
 export async function cambiarEstadoEt(versionId:number,request:CambiarEstadoEt){const {data}=await api.post<CambiarEstadoEtResponse>(`/api/especificaciones-tecnicas/${versionId}/cambiar-estado`,request);return validar(data) as CambiarEstadoEtResponse}
 
