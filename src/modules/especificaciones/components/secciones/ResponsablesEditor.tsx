@@ -80,6 +80,17 @@ export default function ResponsablesEditor({responsables,catalogo,editable,guard
   <GrupoEditor grupo="elaboradoPor" titulo="Elaborado por"/>
   <GrupoEditor grupo="revisadoPor" titulo="Revisado por"/>
   <GrupoEditor grupo="aprobadoPor" titulo="Aprobado por"/>
-  <div className="flex justify-end"><Button disabled={!editable||guardando} onClick={()=>onGuardar(form)}><Save/>{guardando?"Guardando...":"Guardar cambios"}</Button></div>
+  <div className="flex justify-end"><Button disabled={!editable||guardando} onClick={()=>{
+   const payload:GuardarResponsablesEt={
+    elaboradoPor:[...form.elaboradoPor],
+    revisadoPor:[...form.revisadoPor],
+    aprobadoPor:[...form.aprobadoPor]
+   };
+   (["elaboradoPor","revisadoPor","aprobadoPor"] as Grupo[]).forEach(g=>{
+    const u=seleccionado(g);
+    if(u&&!payload[g].includes(u.usuarioCargoHistorialId))payload[g].push(u.usuarioCargoHistorialId);
+   });
+   onGuardar(payload);
+  }}><Save/>{guardando?"Guardando...":"Guardar cambios"}</Button></div>
  </CardContent></Card>
 }
