@@ -69,6 +69,8 @@ export type GuardarInstruccionesEt={instrucciones:GuardarInstruccionEt[]};
 export type ContenidoRotuladoCatalogo={contRotuladoId:number;contRotuladoDescripcion:string};
 export type GuardarContenidoRotuladoEt={contenidoRotulado:{contRotuladoId:number;orden:number}[]};
 
+export type GuardarAnexosEt={anexos:{descripcion:string}[]};
+
 export type GuardarCambioEt={numeroRevision:number;fechaActualizacion:string;descripcion:string};
 export type GuardarCambiosEt={cambios:GuardarCambioEt[]};
 
