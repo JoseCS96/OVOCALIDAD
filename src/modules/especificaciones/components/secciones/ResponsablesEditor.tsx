@@ -1,5 +1,5 @@
 import {useEffect,useMemo,useRef,useState} from "react";
-import {Check,ChevronDown,Plus,Save,X} from "lucide-react";
+import {ChevronDown,Plus,Save,X} from "lucide-react";
 import {Button} from "@/components/ui/button";
 import {Card,CardContent} from "@/components/ui/card";
 import type {GuardarResponsablesEt,ResponsableCatalogoEt,ResponsableEt} from "../../types";
