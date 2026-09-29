@@ -18,24 +18,27 @@ function texto(u:ResponsableCatalogoEt){return `${u.usuarioNombresApellidos} —
 
 function ComboResponsable({grupo,catalogo,excluidos,valor,onChange}:{grupo:Grupo;catalogo:ResponsableCatalogoEt[];excluidos:number[];valor:string;onChange:(v:string)=>void}){
  const [abierto,setAbierto]=useState(false);
- const q=valor.trim().toLowerCase();
+ const [busqueda,setBusqueda]=useState("");
  const seleccionado=catalogo.find(u=>String(u.usuarioCargoHistorialId)===valor);
+ const q=busqueda.trim().toLowerCase();
  const opciones=catalogo.filter(u=>!excluidos.includes(u.usuarioCargoHistorialId)&&(!q||texto(u).toLowerCase().includes(q)));
- return <div className="relative min-w-0 flex-1" onFocusCapture={()=>setAbierto(true)} onBlurCapture={e=>{if(!e.currentTarget.contains(e.relatedTarget as Node))setAbierto(false)}}>
+ return <div className="relative min-w-0 flex-1">
   <div className="relative">
    <input
     className="h-10 w-full rounded-md border bg-white px-3 pr-9 text-sm outline-none focus:ring-2 focus:ring-slate-200"
-    value={seleccionado?texto(seleccionado):valor}
-    onChange={e=>{onChange(e.target.value);setAbierto(true)}}
-    onKeyDown={e=>{if(e.key==="Escape")setAbierto(false)}}
+    value={abierto?busqueda:(seleccionado?texto(seleccionado):"")}
+    onFocus={()=>{setBusqueda("");setAbierto(true)}}
+    onChange={e=>{setBusqueda(e.target.value);setAbierto(true)}}
+    onKeyDown={e=>{if(e.key==="Escape"){setAbierto(false);setBusqueda("")}}}
+    onBlur={()=>window.setTimeout(()=>setAbierto(false),150)}
     placeholder="Buscar persona o cargo..."
     autoComplete="off"
     aria-label={`Buscar responsable para ${grupo}`}
    />
-   <button type="button" tabIndex={-1} className="absolute inset-y-0 right-0 flex w-9 items-center justify-center text-slate-500" onMouseDown={e=>e.preventDefault()} onClick={()=>setAbierto(v=>!v)} title="Mostrar opciones"><ChevronDown className="h-4 w-4"/></button>
+   <button type="button" tabIndex={-1} className="absolute inset-y-0 right-0 flex w-9 items-center justify-center text-slate-500" onMouseDown={e=>e.preventDefault()} onClick={()=>{setBusqueda("");setAbierto(v=>!v)}} title="Mostrar opciones"><ChevronDown className="h-4 w-4"/></button>
   </div>
   {abierto&&<div className="absolute z-30 mt-1 max-h-64 w-full overflow-auto rounded-md border bg-white p-1 shadow-lg">
-   {opciones.length?opciones.map(u=><button key={u.usuarioCargoHistorialId} type="button" tabIndex={-1} className="flex w-full items-center justify-between gap-3 rounded px-3 py-2 text-left text-sm hover:bg-slate-50" onMouseDown={e=>{e.preventDefault();onChange(String(u.usuarioCargoHistorialId));setAbierto(false)}}>
+   {opciones.length?opciones.map(u=><button key={u.usuarioCargoHistorialId} type="button" tabIndex={-1} className="flex w-full items-center justify-between gap-3 rounded px-3 py-2 text-left text-sm hover:bg-slate-50" onMouseDown={e=>{e.preventDefault();onChange(String(u.usuarioCargoHistorialId));setBusqueda("");setAbierto(false)}}>
     <span className="min-w-0"><span className="block truncate font-medium">{u.usuarioNombresApellidos}</span><span className="block truncate text-xs text-[var(--text-secondary)]">{u.cargoDescripcion}</span></span>
     {u.cargoActual&&<span className="shrink-0 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700">Actual</span>}
    </button>):<div className="px-3 py-3 text-sm text-[var(--text-secondary)]">No se encontraron coincidencias.</div>}
