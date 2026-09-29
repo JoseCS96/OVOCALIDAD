@@ -12,7 +12,19 @@ export default function TratamientosEditor({tratamientos,parametros,catalogos,ed
  const inicial=useMemo<GuardarTratamientoEt[]>(()=>tratamientos.map(t=>({tratConservId:t.tratConservId,parametros:parametros.filter(p=>p.versTratConsId===t.versTratConsId).sort((a,b)=>(a.orden??0)-(b.orden??0)).map((p,i)=>({parametroTratId:p.parametroTratId,tipoCriterioId:p.tipoCriterioId,valorCuantitativoInicial:p.valorCuantitativoInicial,valorCuantitativoFinal:p.valorCuantitativoFinal,valorCuantitativoIgual:p.valorCuantitativoIgual,valorCualitativo:p.valorCualitativo,orden:p.orden??i+1}))})),[tratamientos,parametros]);
  const [filas,setFilas]=useState<GuardarTratamientoEt[]>(inicial);useEffect(()=>setFilas(inicial),[inicial]);
  const setTrat=(i:number,x:GuardarTratamientoEt)=>setFilas(v=>v.map((a,j)=>j===i?x:a));
- const invalid=filas.some(t=>!t.tratConservId||t.parametros.some(p=>!p.parametroTratId||!p.tipoCriterioId||p.orden<=0||(p.tipoCriterioId===1&&p.valorCuantitativoInicial==null)||(p.tipoCriterioId===2&&p.valorCuantitativoFinal==null)||(p.tipoCriterioId===3&&(p.valorCuantitativoInicial==null||p.valorCuantitativoFinal==null))||([4,5].includes(p.tipoCriterioId)&&!p.valorCualitativo?.trim())))||new Set(t.parametros.map(p=>p.parametroTratId)).size!==t.parametros.length)||new Set(filas.map(t=>t.tratConservId)).size!==filas.length;
+ const invalid=filas.some(t=>{
+  const parametrosInvalidos=t.parametros.some(p=>
+   !p.parametroTratId||
+   !p.tipoCriterioId||
+   p.orden<=0||
+   (p.tipoCriterioId===1&&p.valorCuantitativoInicial==null)||
+   (p.tipoCriterioId===2&&p.valorCuantitativoFinal==null)||
+   (p.tipoCriterioId===3&&(p.valorCuantitativoInicial==null||p.valorCuantitativoFinal==null))||
+   ([4,5].includes(p.tipoCriterioId)&&!p.valorCualitativo?.trim())
+  );
+  const parametrosDuplicados=new Set(t.parametros.map(p=>p.parametroTratId)).size!==t.parametros.length;
+  return !t.tratConservId||parametrosInvalidos||parametrosDuplicados;
+ })||new Set(filas.map(t=>t.tratConservId)).size!==filas.length;
  const n=(v:string)=>v===""?null:Number(v);
  return <Card><CardContent className="p-0">
   <div className="flex items-center justify-between border-b px-5 py-4"><div><h2 className="font-semibold">Tratamientos de conservación</h2><p className="text-xs text-[var(--text-secondary)]">Configura el tratamiento y sus parámetros de control.</p></div><Button disabled={!editable} onClick={()=>setFilas(x=>[...x,{tratConservId:0,parametros:[]}])}><Plus/>Agregar tratamiento</Button></div>
