@@ -43,6 +43,12 @@ export type GuardarContenidoBaseEt={tipoContenido:TipoContenidoBaseEt;contenido:
 export type ResponsableCatalogoEt={usuarioDni:string;usuarioNombresApellidos:string;cargoId:number;cargoDescripcion:string};
 export type GuardarResponsablesEt={elaboradoPor:string[];revisadoPor:string[];aprobadoPor:string[]};
 
+export type IngredienteCatalogoEt={ingredienteId:number;ingredienteDescripcion:string;unidadDeMedida:string|null};
+export type TipoContenidoCatalogoEt={idTipoContenido:number;codigo:string;nombre:string;descripcion:string|null};
+export type CatalogosIngredientesEt={ingredientes:IngredienteCatalogoEt[];tiposContenido:TipoContenidoCatalogoEt[]};
+export type GuardarIngredienteEt={ingredienteId:number;valor:number|null;idTipoContenido:number|null;orden:number};
+export type GuardarIngredientesEt={ingredientes:GuardarIngredienteEt[]};
+
 export type GuardarCaracteristicaEt={versCaractId:number|null;caracteristicaId:number;tipoCriterioId:number;valorCuantitativoInicial:number|null;valorCuantitativoFinal:number|null;valorCuantitativoIgual:number|null;valorCualitativo:string|null;faseId:number|null;esObligatorio:boolean;orden:number};
 export type OperacionEt={codigoResultado:number;mensaje:string;versCaractId?:number|null};
 
