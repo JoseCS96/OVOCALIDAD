@@ -1,6 +1,6 @@
 import { api } from "@/lib/api";
 import type { ProductoGenesis } from "../lotes/types";
-import type { CatalogosEt, DetalleEt, GuardarCaracteristicaEt, OperacionEt, EspecificacionTecnicaListado, CrearEspecificacionTecnica, CrearEspecificacionTecnicaResponse, SeccionesEtCatalogo, CrearSeccionEt, CrearSeccionEtResponse, ContenidoSeccionEt, AgregarSeccionVersionEt, ReordenarSeccionesVersionEt, GuardarInformacionGeneralEt, GuardarContenidoBaseEt, ResponsableCatalogoEt, GuardarResponsablesEt, CatalogosIngredientesEt, GuardarIngredientesEt, GuardarRecetasEt, CambiarEstadoEt, CambiarEstadoEtResponse } from "./types";
+import type { CatalogosEt, DetalleEt, GuardarCaracteristicaEt, OperacionEt, EspecificacionTecnicaListado, CrearEspecificacionTecnica, CrearEspecificacionTecnicaResponse, SeccionesEtCatalogo, CrearSeccionEt, CrearSeccionEtResponse, ContenidoSeccionEt, AgregarSeccionVersionEt, ReordenarSeccionesVersionEt, GuardarInformacionGeneralEt, GuardarContenidoBaseEt, ResponsableCatalogoEt, GuardarResponsablesEt, CatalogosIngredientesEt, GuardarIngredientesEt, GuardarRecetasEt, GuardarProcedimientosEt, CambiarEstadoEt, CambiarEstadoEtResponse } from "./types";
 function validar(data:OperacionEt){if(data.codigoResultado!==0)throw new Error(data.mensaje);return data}
 export async function obtenerEt(versionId:number){
  const {data}=await api.get<DetalleEt>(`/api/especificaciones-tecnicas/${versionId}`);
@@ -38,6 +38,8 @@ export async function obtenerCatalogosIngredientesEt(){const {data}=await api.ge
 export async function guardarIngredientesEt(versionId:number,request:GuardarIngredientesEt){const {data}=await api.put<OperacionEt>(`/api/especificaciones-tecnicas/${versionId}/ingredientes`,request);return validar(data)}
 
 export async function guardarRecetasEt(versionId:number,request:GuardarRecetasEt){const {data}=await api.put<OperacionEt>(`/api/especificaciones-tecnicas/${versionId}/recetas`,request);return validar(data)}
+
+export async function guardarProcedimientosEt(versionId:number,request:GuardarProcedimientosEt){const {data}=await api.put<OperacionEt>(`/api/especificaciones-tecnicas/${versionId}/procedimientos`,request);return validar(data)}
 
 export async function cambiarEstadoEt(versionId:number,request:CambiarEstadoEt){const {data}=await api.post<CambiarEstadoEtResponse>(`/api/especificaciones-tecnicas/${versionId}/cambiar-estado`,request);return validar(data) as CambiarEstadoEtResponse}
 
