@@ -1,6 +1,6 @@
 import { api } from "@/lib/api";
 import type { ProductoGenesis } from "../lotes/types";
-import type { CatalogosEt, DetalleEt, GuardarCaracteristicaEt, OperacionEt, EspecificacionTecnicaListado, CrearEspecificacionTecnica, CrearEspecificacionTecnicaResponse, SeccionesEtCatalogo, CrearSeccionEt, CrearSeccionEtResponse, ContenidoSeccionEt, AgregarSeccionVersionEt, ReordenarSeccionesVersionEt, GuardarInformacionGeneralEt, GuardarContenidoBaseEt, ResponsableCatalogoEt, GuardarResponsablesEt, CatalogosIngredientesEt, GuardarIngredientesEt, GuardarRecetasEt, GuardarProcedimientosEt, CatalogosTratamientosEt, GuardarTratamientosEt, CambiarEstadoEt, CambiarEstadoEtResponse } from "./types";
+import type { CatalogosEt, DetalleEt, GuardarCaracteristicaEt, OperacionEt, EspecificacionTecnicaListado, CrearEspecificacionTecnica, CrearEspecificacionTecnicaResponse, SeccionesEtCatalogo, CrearSeccionEt, CrearSeccionEtResponse, ContenidoSeccionEt, AgregarSeccionVersionEt, ReordenarSeccionesVersionEt, GuardarInformacionGeneralEt, GuardarContenidoBaseEt, ResponsableCatalogoEt, GuardarResponsablesEt, CatalogosIngredientesEt, GuardarIngredientesEt, GuardarRecetasEt, GuardarProcedimientosEt, CatalogosTratamientosEt, GuardarTratamientosEt, GuardarInstruccionesEt, CambiarEstadoEt, CambiarEstadoEtResponse } from "./types";
 function validar(data:OperacionEt){if(data.codigoResultado!==0)throw new Error(data.mensaje);return data}
 export async function obtenerEt(versionId:number){
  const {data}=await api.get<DetalleEt>(`/api/especificaciones-tecnicas/${versionId}`);
@@ -43,6 +43,8 @@ export async function guardarProcedimientosEt(versionId:number,request:GuardarPr
 
 export async function obtenerCatalogosTratamientosEt(){const {data}=await api.get<CatalogosTratamientosEt>("/api/especificaciones-tecnicas/tratamientos/catalogos");return data}
 export async function guardarTratamientosEt(versionId:number,request:GuardarTratamientosEt){const {data}=await api.put<OperacionEt>(`/api/especificaciones-tecnicas/${versionId}/tratamientos`,request);return validar(data)}
+
+export async function guardarInstruccionesEt(versionId:number,request:GuardarInstruccionesEt){const {data}=await api.put<OperacionEt>(`/api/especificaciones-tecnicas/${versionId}/instrucciones`,request);return validar(data)}
 
 export async function cambiarEstadoEt(versionId:number,request:CambiarEstadoEt){const {data}=await api.post<CambiarEstadoEtResponse>(`/api/especificaciones-tecnicas/${versionId}/cambiar-estado`,request);return validar(data) as CambiarEstadoEtResponse}
 
