@@ -40,6 +40,9 @@ export type CatalogosEt={caracteristicas:CaracteristicaCatalogoEt[];tiposCriteri
 export type TipoContenidoBaseEt="DESCRIPCION"|"ENVASE_EMBALAJE"|"ALMACENAMIENTO_DISTRIBUCION"|"VIDA_UTIL"|"DESCONGELAMIENTO";
 export type GuardarContenidoBaseEt={tipoContenido:TipoContenidoBaseEt;contenido:string|null};
 
+export type ResponsableCatalogoEt={usuarioDni:string;usuarioNombresApellidos:string;cargoId:number;cargoDescripcion:string};
+export type GuardarResponsablesEt={elaboradoPor:string[];revisadoPor:string[];aprobadoPor:string[]};
+
 export type GuardarCaracteristicaEt={versCaractId:number|null;caracteristicaId:number;tipoCriterioId:number;valorCuantitativoInicial:number|null;valorCuantitativoFinal:number|null;valorCuantitativoIgual:number|null;valorCualitativo:string|null;faseId:number|null;esObligatorio:boolean;orden:number};
 export type OperacionEt={codigoResultado:number;mensaje:string;versCaractId?:number|null};
 
