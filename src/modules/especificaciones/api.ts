@@ -31,3 +31,6 @@ export async function guardarContenidoSeccionEt(versionId:number,versSeccId:numb
 export async function guardarInformacionGeneralEt(versionId:number,request:GuardarInformacionGeneralEt){const {data}=await api.put<OperacionEt>(`/api/especificaciones-tecnicas/${versionId}/informacion-general`,request);return validar(data)}
 
 export async function cambiarEstadoEt(versionId:number,request:CambiarEstadoEt){const {data}=await api.post<CambiarEstadoEtResponse>(`/api/especificaciones-tecnicas/${versionId}/cambiar-estado`,request);return validar(data) as CambiarEstadoEtResponse}
+
+export async function resetearEt(versionId:number){const {data}=await api.post<OperacionEt>(`/api/especificaciones-tecnicas/${versionId}/resetear`);return validar(data)}
+export async function eliminarEtBorrador(versionId:number){const {data}=await api.delete<OperacionEt>(`/api/especificaciones-tecnicas/${versionId}`);return validar(data)}
