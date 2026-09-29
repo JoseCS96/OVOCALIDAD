@@ -29,7 +29,7 @@ export type DetalleEt = {
  contenidoRotulado:Array<{versContRotId:number;contRotuladoId:number;contRotuladoDescripcion:string;orden:number|null}>;
  cambiosVersion:Array<{versCambId:number;cambVersiId:number;cambVersNumeroDeRevision:number;cambVersFechaDeActualizacion:string|null;cambVersDescripcion:string}>;
  anexos:Array<{versionAnexoId:number;anexoId:number;anexoDescripcion:string}>;
- historial:Array<{versionHistorialEstadoId:number;estadoOrigen:string|null;estadoDestino:string;accion:string;comentario:string|null;usuario:string;fecha:string}>;
+ historial:Array<{versionHistorialEstadoId:number;estadoOrigen:string|null;estadoDestino:string;accion:string;comentario:string|null;fecha:string}>;
  presentacionesGenesis:PresentacionGenesisDetalleEt[];
 };
 export type ProductoEt={productoCodigo:string;productoDescripcion:string};
@@ -37,28 +37,28 @@ export type CaracteristicaCatalogoEt={caracteristicaId:number;caracteristicaDesc
 export type CriterioEt={tipoCriterioId:number;tipoCriterio:string};
 export type FaseEt={faseId:number;faseCodigo:string;faseDescripcion:string;estado:string};
 export type CatalogosEt={caracteristicas:CaracteristicaCatalogoEt[];tiposCriterio:CriterioEt[];fases:FaseEt[];tiposCaracteristica:unknown[];metodosEnsayo:unknown[]};
-export type GuardarCaracteristicaEt={versCaractId:number|null;caracteristicaId:number;tipoCriterioId:number;valorCuantitativoInicial:number|null;valorCuantitativoFinal:number|null;valorCuantitativoIgual:number|null;valorCualitativo:string|null;faseId:number|null;esObligatorio:boolean;orden:number;usuario:string};
+export type GuardarCaracteristicaEt={versCaractId:number|null;caracteristicaId:number;tipoCriterioId:number;valorCuantitativoInicial:number|null;valorCuantitativoFinal:number|null;valorCuantitativoIgual:number|null;valorCualitativo:string|null;faseId:number|null;esObligatorio:boolean;orden:number};
 export type OperacionEt={codigoResultado:number;mensaje:string;versCaractId?:number|null};
 
 export type EspecificacionTecnicaListado={versionId:number;documentoId:number;documentoCodigo:string;documentoDescripcionDocumento:string;productoCodigo:string;productoDescripcion:string|null;versionNumero:number|null;versionInicioVigencia:string|null;versionNroPaginas:number|null;estVerId:number;estadoVersion:string;audUsuarioCreacion:string|null;audFechaCreacion:string;audUsuarioModificacion:string|null;audFechaActualizacion:string|null;permiteEditar:boolean};
 
 export type CrearEtSeccion={seccionId:number;orden:number};
 export type PresentacionGenesisEt={kardex:number;codigoGenesis:string};
-export type CrearEspecificacionTecnica={documentoCodigo:string;documentoDescripcionDocumento:string;presentacionesGenesis:PresentacionGenesisEt[];versionNumero:number;versionInicioVigencia:string|null;versionReemplazaAId:number|null;versionNroPaginas:number|null;secciones:CrearEtSeccion[];usuario:string};
+export type CrearEspecificacionTecnica={documentoCodigo:string;documentoDescripcionDocumento:string;presentacionesGenesis:PresentacionGenesisEt[];versionNumero:number;versionInicioVigencia:string|null;versionReemplazaAId:number|null;versionNroPaginas:number|null;secciones:CrearEtSeccion[]};
 export type CrearEspecificacionTecnicaResponse=OperacionEt&{documentoId?:number|null;versionId?:number|null;documentoCodigo?:string|null;productoCodigo?:string|null;versionNumero?:number|null;estadoVersion?:string|null};
 
 export type SeccionDisponibleEt={seccionId:number;seccionDescripcion:string;idTipoSeccion:number|null;tipoSeccion:string|null;ordenDefault:number;esBase:boolean;puedeEliminarse:boolean;permiteReordenar:boolean;icono:string|null};
 export type TipoSeccionEt={idTipoSeccion:number;descripcion:string};
 export type SeccionesEtCatalogo={secciones:SeccionDisponibleEt[];tiposSeccion:TipoSeccionEt[]};
-export type CrearSeccionEt={seccionDescripcion:string;idTipoSeccion:number;usuario:string};
+export type CrearSeccionEt={seccionDescripcion:string;idTipoSeccion:number};
 export type CrearSeccionEtResponse=OperacionEt&{seccionId?:number|null;seccionDescripcion?:string|null;idTipoSeccion?:number|null;ordenDefault?:number|null;esBase?:boolean|null;puedeEliminarse?:boolean|null;permiteReordenar?:boolean|null};
 
 export type ContenidoSeccionEt={versionSeccionContenidoId:number;versSeccId:number;seccionId:number;seccionDescripcion:string;idTipoSeccion:number|null;contenido:string|null};
-export type AgregarSeccionVersionEt={seccionId:number;orden:number|null;usuario:string};
-export type ReordenarSeccionesVersionEt={secciones:Array<{versSeccId:number;orden:number}>;usuario:string};
+export type AgregarSeccionVersionEt={seccionId:number;orden:number|null};
+export type ReordenarSeccionesVersionEt={secciones:Array<{versSeccId:number;orden:number}>};
 
-export type GuardarInformacionGeneralEt={documentoDescripcionDocumento:string;versionNumero:number|null;versionInicioVigencia:string|null;versionReemplazaAId:number|null;versionNroPaginas:number|null;versionDescripcion:string|null;usuario:string};
+export type GuardarInformacionGeneralEt={documentoDescripcionDocumento:string;versionNumero:number|null;versionInicioVigencia:string|null;versionReemplazaAId:number|null;versionNroPaginas:number|null;versionDescripcion:string|null};
 
 export type AccionWorkflowEt="ENVIAR_REVISION"|"OBSERVAR"|"VERIFICAR"|"PUBLICAR";
-export type CambiarEstadoEt={accion:AccionWorkflowEt;comentario:string|null;usuario:string};
+export type CambiarEstadoEt={accion:AccionWorkflowEt;comentario:string|null};
 export type CambiarEstadoEtResponse=OperacionEt&{versionId?:number|null;estVerOrigenId?:number|null;estadoOrigen?:string|null;estVerDestinoId?:number|null;estadoDestino?:string|null;accion?:string|null;comentario?:string|null};
