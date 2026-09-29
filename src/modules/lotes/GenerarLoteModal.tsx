@@ -4,7 +4,7 @@ import { AlertCircle, CheckCircle2, Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/modules/auth/AuthContext";
-import { generarLote, obtenerCatalogosLote } from "./api";
+import { buscarProductosGenesis, generarLote, obtenerCatalogosLote } from "./api";
 import type { GenerarLoteRequest } from "./types";
 import SearchableSelect from "./SearchableSelect";
 
@@ -15,7 +15,7 @@ type Props = {
 };
 
 const emptyForm: GenerarLoteRequest = {
-  productoCodigo: "",
+  codigoGenesis: "",
   naturalezaId: 0,
   faseId: 0,
   lineaOrigenId: 0,
@@ -26,12 +26,20 @@ export default function GenerarLoteModal({ open, onClose, onCreated }: Props) {
   const { acceso } = useAuth();
   const [form, setForm] = useState<GenerarLoteRequest>(emptyForm);
   const [resultado, setResultado] = useState<{ codigo?: string; mensaje: string } | null>(null);
+  const [busquedaGenesis, setBusquedaGenesis] = useState("");
 
   const catalogos = useQuery({
     queryKey: ["lotes-catalogos"],
     queryFn: obtenerCatalogosLote,
     enabled: open,
     staleTime: 5 * 60 * 1000,
+  });
+
+  const productosGenesis = useQuery({
+    queryKey: ["productos-genesis", busquedaGenesis.trim()],
+    queryFn: () => buscarProductosGenesis(busquedaGenesis.trim()),
+    enabled: open && busquedaGenesis.trim().length >= 2,
+    staleTime: 60 * 1000,
   });
 
   const mutation = useMutation({
@@ -54,13 +62,14 @@ export default function GenerarLoteModal({ open, onClose, onCreated }: Props) {
     if (open) {
       setForm(emptyForm);
       setResultado(null);
+      setBusquedaGenesis("");
       mutation.reset();
     }
   }, [open]);
 
   if (!open) return null;
 
-  const valido = form.productoCodigo && form.naturalezaId > 0 && form.faseId > 0 && form.lineaOrigenId > 0;
+  const valido = form.codigoGenesis && form.naturalezaId > 0 && form.faseId > 0 && form.lineaOrigenId > 0;
   const usuarioSesion = acceso?.usuario.nombresApellidos?.trim() || acceso?.usuario.nombreUsuario || "";
 
   function submit(e: React.FormEvent) {
@@ -93,13 +102,27 @@ export default function GenerarLoteModal({ open, onClose, onCreated }: Props) {
               <div className="flex gap-2 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700"><AlertCircle size={18} />No se pudieron cargar los catálogos de lote.</div>
             ) : (
               <>
-                <Field label="Producto" required>
-                  <SearchableSelect
-                    value={form.productoCodigo}
-                    placeholder="Buscar o seleccionar producto"
-                    options={(catalogos.data?.productos ?? []).map((x) => ({ value: x.codigo, label: `${x.codigo} — ${x.descripcion}` }))}
-                    onChange={(value) => setForm((x) => ({ ...x, productoCodigo: value }))}
-                  />
+                <Field label="Producto / presentación Génesis" required>
+                  <div className="space-y-2">
+                    <Input
+                      value={busquedaGenesis}
+                      onChange={(e) => { setBusquedaGenesis(e.target.value); setForm((x) => ({ ...x, codigoGenesis: "" })); }}
+                      placeholder="Buscar por código de Calidad, ej. CL01"
+                    />
+                    {busquedaGenesis.trim().length > 0 && busquedaGenesis.trim().length < 2 && (
+                      <div className="text-xs text-[var(--text-secondary)]">Escribe al menos 2 caracteres.</div>
+                    )}
+                    {productosGenesis.isFetching && <div className="text-xs text-[var(--text-secondary)]">Buscando presentaciones en Génesis...</div>}
+                    {productosGenesis.isError && <div className="text-xs text-red-600">No se pudieron consultar las presentaciones de Génesis.</div>}
+                    {busquedaGenesis.trim().length >= 2 && !productosGenesis.isFetching && !productosGenesis.isError && (
+                      <SearchableSelect
+                        value={form.codigoGenesis}
+                        placeholder={productosGenesis.data?.length ? "Seleccionar presentación" : "Sin presentaciones encontradas"}
+                        options={(productosGenesis.data ?? []).map((x) => ({ value: x.codigoGenesis, label: `${x.codigoGenesis} — ${x.nombreGenesis} · Kardex ${x.kardex}` }))}
+                        onChange={(value) => setForm((x) => ({ ...x, codigoGenesis: value }))}
+                      />
+                    )}
+                  </div>
                 </Field>
                 <div className="grid gap-4 md:grid-cols-2">
                   <Field label="Naturaleza" required>
