@@ -12,7 +12,7 @@ import EtEditorHeader from "./components/EtEditorHeader";
 import EstructuraEtPanel from "./components/EstructuraEtPanel";
 import InformacionGeneralEditor from "./components/secciones/InformacionGeneralEditor";
 
-const vacio:GuardarCaracteristicaEt={versCaractId:null,caracteristicaId:0,tipoCriterioId:0,valorCuantitativoInicial:null,valorCuantitativoFinal:null,valorCuantitativoIgual:null,valorCualitativo:null,faseId:null,esObligatorio:true,orden:1,usuario:"USUARIO_WEB"};
+const vacio:GuardarCaracteristicaEt={versCaractId:null,caracteristicaId:0,tipoCriterioId:0,valorCuantitativoInicial:null,valorCuantitativoFinal:null,valorCuantitativoIgual:null,valorCualitativo:null,faseId:null,esObligatorio:true,orden:1};
 const num=(v:string)=>v===""?null:Number(v);
 export default function EspecificacionTecnicaPage(){
  const nav=useNavigate(),qc=useQueryClient(),{versionId}=useParams(),id=Number(versionId);
@@ -26,11 +26,11 @@ export default function EspecificacionTecnicaPage(){
  const saveInfo=useMutation({mutationFn:(x:import("./types").GuardarInformacionGeneralEt)=>guardarInformacionGeneralEt(id,x),onSuccess:async()=>{setError("");await qc.invalidateQueries({queryKey:["et",id]});marcarGuardado()},onError:(e:Error)=>setError(e.message)});
  const del=useMutation({mutationFn:(vc:number)=>eliminarCaracteristica(id,vc),onSuccess:async()=>{await qc.invalidateQueries({queryKey:["et",id]});marcarGuardado()},onError:(e:Error)=>setError(e.message)});
  const refrescar=async()=>{await Promise.all([qc.invalidateQueries({queryKey:["et",id]}),qc.invalidateQueries({queryKey:["et-contenidos",id]})])};
- const addSec=useMutation({mutationFn:(seccionId:number)=>agregarSeccionVersionEt(id,{seccionId,orden:null,usuario:"USUARIO_WEB"}),onSuccess:async()=>{setModalAgregar(false);await refrescar();marcarGuardado()},onError:(e:Error)=>setError(e.message)});
+ const addSec=useMutation({mutationFn:(seccionId:number)=>agregarSeccionVersionEt(id,{seccionId,orden:null}),onSuccess:async()=>{setModalAgregar(false);await refrescar();marcarGuardado()},onError:(e:Error)=>setError(e.message)});
  const removeSec=useMutation({mutationFn:(versSeccId:number)=>quitarSeccionVersionEt(id,versSeccId),onSuccess:async()=>{setSeccionActiva(null);await refrescar();marcarGuardado()},onError:(e:Error)=>setError(e.message)});
  const saveContenido=useMutation({mutationFn:()=>guardarContenidoSeccionEt(id,seccionActiva!,contenido),onSuccess:async()=>{await refrescar();marcarGuardado()},onError:(e:Error)=>setError(e.message)});
- const moverSeccion=async(idx:number,dir:-1|1)=>{const s=[...(et.data?.secciones??[])].sort((a,b)=>(a.orden??0)-(b.orden??0));const j=idx+dir;if(j<1||j>=s.length)return;[s[idx],s[j]]=[s[j],s[idx]];try{setGuardandoEstructura(true);await reordenarSeccionesVersionEt(id,{secciones:s.map((x,i)=>({versSeccId:x.versSeccId,orden:i+1})),usuario:"USUARIO_WEB"});await refrescar();marcarGuardado()}catch(e){setError(e instanceof Error?e.message:"No se pudo reordenar la estructura.")}finally{setGuardandoEstructura(false)}};
- const workflow=useMutation({mutationFn:({accion,comentario}:{accion:AccionWorkflowEt;comentario:string|null})=>cambiarEstadoEt(id,{accion,comentario,usuario:"USUARIO_WEB"}),onSuccess:async()=>{setError("");await refrescar();marcarGuardado()},onError:(e:Error)=>setError(e.message)});
+ const moverSeccion=async(idx:number,dir:-1|1)=>{const s=[...(et.data?.secciones??[])].sort((a,b)=>(a.orden??0)-(b.orden??0));const j=idx+dir;if(j<1||j>=s.length)return;[s[idx],s[j]]=[s[j],s[idx]];try{setGuardandoEstructura(true);await reordenarSeccionesVersionEt(id,{secciones:s.map((x,i)=>({versSeccId:x.versSeccId,orden:i+1}))});await refrescar();marcarGuardado()}catch(e){setError(e instanceof Error?e.message:"No se pudo reordenar la estructura.")}finally{setGuardandoEstructura(false)}};
+ const workflow=useMutation({mutationFn:({accion,comentario}:{accion:AccionWorkflowEt;comentario:string|null})=>cambiarEstadoEt(id,{accion,comentario}),onSuccess:async()=>{setError("");await refrescar();marcarGuardado()},onError:(e:Error)=>setError(e.message)});
  useEffect(()=>{if(et.data?.secciones.length&&!seccionActiva)setSeccionActiva([...et.data.secciones].sort((a,b)=>(a.orden??0)-(b.orden??0))[0].versSeccId)},[et.data?.secciones,seccionActiva]);
  useEffect(()=>{const x=contenidos.data?.find(x=>x.versSeccId===seccionActiva);setContenido(x?.contenido??"")},[contenidos.data,seccionActiva]);
  const selected=useMemo(()=>cat.data?.caracteristicas.find(x=>x.caracteristicaId===form?.caracteristicaId),[cat.data,form?.caracteristicaId]);
@@ -40,7 +40,7 @@ export default function EspecificacionTecnicaPage(){
  const info=et.data.informacionGeneral,editable=info.permiteEditar;
  const presentacion=et.data.presentacionesGenesis?.[0]??null;
  const productoGenesis=presentacion?`${presentacion.codigoGenesis} — ${presentacion.nombreGenesis??presentacion.descripcionGenesis??""}`.trim():(info.productoCodigo||"—");
- const editar=(x:CaracteristicaEt)=>setForm({versCaractId:x.versCaractId,caracteristicaId:x.caracteristicaId,tipoCriterioId:x.tipoCriterioId??0,valorCuantitativoInicial:x.valorCuantitativoInicial,valorCuantitativoFinal:x.valorCuantitativoFinal,valorCuantitativoIgual:x.valorCuantitativoIgual,valorCualitativo:x.valorCualitativo,faseId:x.faseId,esObligatorio:x.esObligatorio,orden:x.orden??1,usuario:"USUARIO_WEB"});
+ const editar=(x:CaracteristicaEt)=>setForm({versCaractId:x.versCaractId,caracteristicaId:x.caracteristicaId,tipoCriterioId:x.tipoCriterioId??0,valorCuantitativoInicial:x.valorCuantitativoInicial,valorCuantitativoFinal:x.valorCuantitativoFinal,valorCuantitativoIgual:x.valorCuantitativoIgual,valorCualitativo:x.valorCualitativo,faseId:x.faseId,esObligatorio:x.esObligatorio,orden:x.orden??1});
  const estructura=[...et.data.secciones].sort((a,b)=>(a.orden??0)-(b.orden??0));
  const activa=estructura.find(x=>x.versSeccId===seccionActiva)??estructura[0];
  const disponibles=(secCat.data?.secciones??[]).filter(x=>!estructura.some(y=>y.seccionId===x.seccionId));
