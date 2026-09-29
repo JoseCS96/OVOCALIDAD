@@ -2,10 +2,10 @@ import {useEffect,useState} from "react";
 import {Save} from "lucide-react";
 import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
-import type {GuardarInformacionGeneralEt,InformacionGeneralEt} from "../../types";
+import type {GuardarInformacionGeneralEt,InformacionGeneralEt,PresentacionGenesisDetalleEt} from "../../types";
 
-type Props={info:InformacionGeneralEt;guardando:boolean;onGuardar:(request:GuardarInformacionGeneralEt)=>void};
-export default function InformacionGeneralEditor({info,guardando,onGuardar}:Props){
+type Props={info:InformacionGeneralEt;presentacion:PresentacionGenesisDetalleEt|null;guardando:boolean;onGuardar:(request:GuardarInformacionGeneralEt)=>void};
+export default function InformacionGeneralEditor({info,presentacion,guardando,onGuardar}:Props){
  const [form,setForm]=useState<GuardarInformacionGeneralEt>(()=>toForm(info));
  useEffect(()=>setForm(toForm(info)),[info]);
  const set=<K extends keyof GuardarInformacionGeneralEt>(k:K,v:GuardarInformacionGeneralEt[K])=>setForm(x=>({...x,[k]:v}));
@@ -13,7 +13,7 @@ export default function InformacionGeneralEditor({info,guardando,onGuardar}:Prop
   <div className="border-b px-5 py-4"><h2 className="font-semibold">Información general</h2><p className="text-xs text-[var(--text-secondary)]">Edita los datos principales de la Especificación Técnica.</p></div>
   <div className="grid gap-5 p-5 md:grid-cols-2">
    <Field label="Código ET"><Input value={info.documentoCodigo} disabled/><Hint>El código identifica al documento y no se modifica desde esta sección.</Hint></Field>
-   <Field label="Producto"><Input value={info.productoCodigo||"Gestionado por presentaciones Génesis"} disabled/><Hint>Las presentaciones se administran mediante la relación de la versión con Génesis.</Hint></Field>
+   <Field label="Producto / presentación Génesis"><Input value={presentacion?`${presentacion.codigoGenesis} — ${presentacion.nombreGenesis??presentacion.descripcionGenesis??""}`:info.productoCodigo||"—"} disabled/><Hint>{presentacion?`Kardex ${presentacion.kardex}`:"Sin presentación Génesis asociada."}</Hint></Field>
    <Field label="Nombre / descripción del documento"><Input value={form.documentoDescripcionDocumento} onChange={e=>set("documentoDescripcionDocumento",e.target.value)}/></Field>
    <Field label="Versión"><Input type="number" min="0" step="0.0001" value={form.versionNumero??""} onChange={e=>set("versionNumero",e.target.value===""?null:Number(e.target.value))}/></Field>
    <Field label="Inicio de vigencia"><Input type="date" value={form.versionInicioVigencia??""} onChange={e=>set("versionInicioVigencia",e.target.value||null)}/></Field>
