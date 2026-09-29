@@ -1,4 +1,5 @@
-import {useEffect,useMemo,useState} from "react";
+import {useEffect,useMemo,useRef,useState} from "react";
+import {createPortal} from "react-dom";
 import {Check,ChevronDown,Plus,Save,Trash2} from "lucide-react";
 import {Button} from "@/components/ui/button";
 import {Card,CardContent} from "@/components/ui/card";
@@ -7,16 +8,20 @@ import type {CatalogosIngredientesEt,GuardarIngredienteEt,GuardarIngredientesEt,
 
 type Props={ingredientes:IngredienteEt[];catalogos?:CatalogosIngredientesEt;editable:boolean;guardando:boolean;onGuardar:(x:GuardarIngredientesEt)=>void};
 function ComboIngrediente({maestro,valor,disabled,onChange}:{maestro:CatalogosIngredientesEt["ingredientes"];valor:number;disabled:boolean;onChange:(id:number)=>void}){
- const [abierto,setAbierto]=useState(false),[busqueda,setBusqueda]=useState("");
+ const [abierto,setAbierto]=useState(false),[busqueda,setBusqueda]=useState(""),[rect,setRect]=useState<DOMRect|null>(null);
+ const anchor=useRef<HTMLDivElement>(null);
  const seleccionado=maestro.find(x=>x.ingredienteId===valor);
  const q=busqueda.trim().toLowerCase();
  const opciones=maestro.filter(x=>!q||x.ingredienteDescripcion.toLowerCase().includes(q)||(x.unidadDeMedida??"").toLowerCase().includes(q));
- return <div className="relative min-w-64">
+ const posicionar=()=>anchor.current&&setRect(anchor.current.getBoundingClientRect());
+ useEffect(()=>{if(!abierto)return;posicionar();const fn=()=>posicionar();window.addEventListener("resize",fn);window.addEventListener("scroll",fn,true);return()=>{window.removeEventListener("resize",fn);window.removeEventListener("scroll",fn,true)}},[abierto]);
+ const menu=abierto&&!disabled&&rect?createPortal(<div style={{position:"fixed",left:rect.left,top:rect.bottom+4,width:rect.width,zIndex:9999}} className="max-h-64 overflow-auto rounded-md border bg-white p-1 shadow-2xl">{opciones.length?opciones.map(x=><button key={x.ingredienteId} type="button" tabIndex={-1} className="flex w-full items-center justify-between gap-3 rounded px-3 py-2 text-left text-sm hover:bg-slate-50" onMouseDown={e=>{e.preventDefault();onChange(x.ingredienteId);setBusqueda("");setAbierto(false)}}><span className="min-w-0"><span className="block truncate font-medium">{x.ingredienteDescripcion}</span><span className="block text-xs text-[var(--text-secondary)]">{x.unidadDeMedida??"Sin unidad"}</span></span>{valor===x.ingredienteId&&<Check className="h-4 w-4 shrink-0"/>}</button>):<div className="px-3 py-3 text-sm text-[var(--text-secondary)]">No se encontraron coincidencias.</div>}</div>,document.body):null;
+ return <div ref={anchor} className="relative min-w-64">
   <div className="flex h-9 items-center rounded-md border bg-white px-2 focus-within:ring-2 focus-within:ring-slate-200">
-   <input disabled={disabled} className="min-w-0 flex-1 bg-transparent text-sm outline-none disabled:cursor-not-allowed" value={abierto?busqueda:(seleccionado?.ingredienteDescripcion??"")} placeholder="Buscar ingrediente..." onFocus={()=>{setBusqueda("");setAbierto(true)}} onChange={e=>{setBusqueda(e.target.value);setAbierto(true)}} onBlur={()=>window.setTimeout(()=>setAbierto(false),150)} onKeyDown={e=>{if(e.key==="Escape")setAbierto(false)}} autoComplete="off"/>
-   <button type="button" tabIndex={-1} disabled={disabled} className="ml-1 text-slate-500" onMouseDown={e=>e.preventDefault()} onClick={()=>{setBusqueda("");setAbierto(v=>!v)}}><ChevronDown className="h-4 w-4"/></button>
+   <input disabled={disabled} className="min-w-0 flex-1 bg-transparent text-sm outline-none disabled:cursor-not-allowed" value={abierto?busqueda:(seleccionado?.ingredienteDescripcion??"")} placeholder="Buscar ingrediente..." onFocus={()=>{setBusqueda("");posicionar();setAbierto(true)}} onChange={e=>{setBusqueda(e.target.value);posicionar();setAbierto(true)}} onBlur={()=>window.setTimeout(()=>setAbierto(false),150)} onKeyDown={e=>{if(e.key==="Escape")setAbierto(false)}} autoComplete="off"/>
+   <button type="button" tabIndex={-1} disabled={disabled} className="ml-1 text-slate-500" onMouseDown={e=>e.preventDefault()} onClick={()=>{setBusqueda("");posicionar();setAbierto(v=>!v)}}><ChevronDown className="h-4 w-4"/></button>
   </div>
-  {abierto&&!disabled&&<div className="absolute z-[100] mt-1 max-h-64 w-full overflow-auto rounded-md border bg-white p-1 shadow-xl">{opciones.length?opciones.map(x=><button key={x.ingredienteId} type="button" tabIndex={-1} className="flex w-full items-center justify-between gap-3 rounded px-3 py-2 text-left text-sm hover:bg-slate-50" onMouseDown={e=>{e.preventDefault();onChange(x.ingredienteId);setBusqueda("");setAbierto(false)}}><span className="min-w-0"><span className="block truncate font-medium">{x.ingredienteDescripcion}</span><span className="block text-xs text-[var(--text-secondary)]">{x.unidadDeMedida??"Sin unidad"}</span></span>{valor===x.ingredienteId&&<Check className="h-4 w-4 shrink-0"/>}</button>):<div className="px-3 py-3 text-sm text-[var(--text-secondary)]">No se encontraron coincidencias.</div>}</div>}
+  {menu}
  </div>
 }
 const nueva=(orden:number):GuardarIngredienteEt=>({ingredienteId:0,valor:null,idTipoContenido:3,orden});
