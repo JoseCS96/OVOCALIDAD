@@ -1,11 +1,24 @@
 import {useEffect,useMemo,useState} from "react";
-import {Plus,Save,Trash2} from "lucide-react";
+import {Check,ChevronDown,Plus,Save,Trash2} from "lucide-react";
 import {Button} from "@/components/ui/button";
 import {Card,CardContent} from "@/components/ui/card";
 import {Input} from "@/components/ui/input";
 import type {CatalogosIngredientesEt,GuardarIngredienteEt,GuardarIngredientesEt,IngredienteEt} from "../../types";
 
 type Props={ingredientes:IngredienteEt[];catalogos?:CatalogosIngredientesEt;editable:boolean;guardando:boolean;onGuardar:(x:GuardarIngredientesEt)=>void};
+function ComboIngrediente({maestro,valor,disabled,onChange}:{maestro:CatalogosIngredientesEt["ingredientes"];valor:number;disabled:boolean;onChange:(id:number)=>void}){
+ const [abierto,setAbierto]=useState(false),[busqueda,setBusqueda]=useState("");
+ const seleccionado=maestro.find(x=>x.ingredienteId===valor);
+ const q=busqueda.trim().toLowerCase();
+ const opciones=maestro.filter(x=>!q||x.ingredienteDescripcion.toLowerCase().includes(q)||(x.unidadDeMedida??"").toLowerCase().includes(q));
+ return <div className="relative min-w-64">
+  <div className="flex h-9 items-center rounded-md border bg-white px-2 focus-within:ring-2 focus-within:ring-slate-200">
+   <input disabled={disabled} className="min-w-0 flex-1 bg-transparent text-sm outline-none disabled:cursor-not-allowed" value={abierto?busqueda:(seleccionado?.ingredienteDescripcion??"")} placeholder="Buscar ingrediente..." onFocus={()=>{setBusqueda("");setAbierto(true)}} onChange={e=>{setBusqueda(e.target.value);setAbierto(true)}} onBlur={()=>window.setTimeout(()=>setAbierto(false),150)} onKeyDown={e=>{if(e.key==="Escape")setAbierto(false)}} autoComplete="off"/>
+   <button type="button" tabIndex={-1} disabled={disabled} className="ml-1 text-slate-500" onMouseDown={e=>e.preventDefault()} onClick={()=>{setBusqueda("");setAbierto(v=>!v)}}><ChevronDown className="h-4 w-4"/></button>
+  </div>
+  {abierto&&!disabled&&<div className="absolute z-40 mt-1 max-h-64 w-full overflow-auto rounded-md border bg-white p-1 shadow-lg">{opciones.length?opciones.map(x=><button key={x.ingredienteId} type="button" tabIndex={-1} className="flex w-full items-center justify-between gap-3 rounded px-3 py-2 text-left text-sm hover:bg-slate-50" onMouseDown={e=>{e.preventDefault();onChange(x.ingredienteId);setBusqueda("");setAbierto(false)}}><span className="min-w-0"><span className="block truncate font-medium">{x.ingredienteDescripcion}</span><span className="block text-xs text-[var(--text-secondary)]">{x.unidadDeMedida??"Sin unidad"}</span></span>{valor===x.ingredienteId&&<Check className="h-4 w-4 shrink-0"/>}</button>):<div className="px-3 py-3 text-sm text-[var(--text-secondary)]">No se encontraron coincidencias.</div>}</div>}
+ </div>
+}
 const nueva=(orden:number):GuardarIngredienteEt=>({ingredienteId:0,valor:null,idTipoContenido:3,orden});
 export default function IngredientesEditor({ingredientes,catalogos,editable,guardando,onGuardar}:Props){
  const inicial=useMemo(()=>[...ingredientes].sort((a,b)=>(a.orden??0)-(b.orden??0)).map((x,i)=>({ingredienteId:x.ingredienteId,valor:x.versIngrValor,idTipoContenido:x.idTipoContenido,orden:x.orden??i+1})),[ingredientes]);
@@ -21,7 +34,7 @@ export default function IngredientesEditor({ingredientes,catalogos,editable,guar
   <div className="flex items-center justify-between border-b px-5 py-4"><div><h2 className="font-semibold">Ingredientes</h2><p className="text-xs text-[var(--text-secondary)]">Ingredientes y composición asociados a esta versión.</p></div><Button type="button" disabled={!editable} onClick={agregar}><Plus/>Agregar ingrediente</Button></div>
   <div className="overflow-x-auto"><table className="w-full min-w-[850px] text-sm"><thead className="bg-[var(--surface-muted)] text-left text-xs uppercase text-[var(--text-secondary)]"><tr><th className="px-5 py-3">Ingrediente</th><th>Unidad</th><th>Valor</th><th>Tipo contenido</th><th className="w-24">Orden</th><th className="px-5 text-right">Acciones</th></tr></thead>
    <tbody>{filas.length===0?<tr><td colSpan={6} className="px-5 py-10 text-center text-[var(--text-secondary)]">Sin ingredientes registrados.</td></tr>:filas.map((x,i)=>{const m=maestro.find(z=>z.ingredienteId===x.ingredienteId);return <tr key={i} className="border-t">
-    <td className="px-5 py-3"><select className="h-9 w-full min-w-64 rounded-md border bg-white px-2" disabled={!editable} value={x.ingredienteId} onChange={e=>actualizar(i,{ingredienteId:Number(e.target.value)})}><option value={0}>Seleccione...</option>{maestro.map(z=><option key={z.ingredienteId} value={z.ingredienteId}>{z.ingredienteDescripcion}</option>)}</select></td>
+    <td className="px-5 py-3"><ComboIngrediente maestro={maestro} valor={x.ingredienteId} disabled={!editable} onChange={id=>actualizar(i,{ingredienteId:id})}/></td>
     <td>{m?.unidadDeMedida??"—"}</td>
     <td><Input className="w-32" type="number" step="any" disabled={!editable} value={x.valor??""} placeholder="Sin valor" onChange={e=>actualizar(i,{valor:e.target.value===""?null:Number(e.target.value)})}/></td>
     <td><select className="h-9 min-w-32 rounded-md border bg-white px-2" disabled={!editable} value={x.idTipoContenido??""} onChange={e=>actualizar(i,{idTipoContenido:e.target.value?Number(e.target.value):null})}><option value="">Sin tipo</option>{tipos.map(t=><option key={t.idTipoContenido} value={t.idTipoContenido}>{t.nombre}</option>)}</select></td>
