@@ -1,4 +1,5 @@
-import {useState} from "react";
+import {useEffect,useRef,useState} from "react";
+import {createPortal} from "react-dom";
 import {CheckCircle2,ChevronDown,Eye,Send,Upload,X} from "lucide-react";
 import {Button} from "@/components/ui/button";
 import {useAuth} from "@/modules/auth/AuthContext";
@@ -11,6 +12,9 @@ export default function EtWorkflowActions({info,busy,onAccion}:Props){
  const [abierto,setAbierto]=useState(false);
  const [accion,setAccion]=useState<AccionWorkflowEt|null>(null);
  const [comentario,setComentario]=useState("");
+ const botonRef=useRef<HTMLButtonElement|null>(null);
+ const [posicion,setPosicion]=useState({top:0,left:0,width:256});
+ useEffect(()=>{if(!abierto||!botonRef.current)return;const actualizar=()=>{const r=botonRef.current!.getBoundingClientRect();setPosicion({top:r.bottom+8,left:Math.max(8,r.right-256),width:256})};actualizar();window.addEventListener("resize",actualizar);window.addEventListener("scroll",actualizar,true);return()=>{window.removeEventListener("resize",actualizar);window.removeEventListener("scroll",actualizar,true)}},[abierto]);
  const estado=info.estadoVersion?.toUpperCase();
  const habilitado=(a:AccionWorkflowEt)=>{
   if(a==="ENVIAR_REVISION")return tienePermiso("ET.ENVIAR_REVISION")&&estado==="BORRADOR";
@@ -27,13 +31,13 @@ export default function EtWorkflowActions({info,busy,onAccion}:Props){
  if(!tieneAcciones)return null;
  return <>
   <div className="relative">
-   <Button variant="outline" className="h-11 px-4 font-semibold" disabled={busy||estado==="PUBLICADO"} onClick={()=>setAbierto(v=>!v)}>Acciones<ChevronDown className="size-4"/></Button>
-   {abierto&&<div className="absolute right-0 z-30 mt-2 w-64 rounded-xl border bg-white p-2 shadow-xl">
+   <Button ref={botonRef} variant="outline" className="h-11 px-4 font-semibold" disabled={busy||estado==="PUBLICADO"} onClick={()=>setAbierto(v=>!v)}>Acciones<ChevronDown className="size-4"/></Button>
+   {abierto&&createPortal(<div className="fixed z-[100] rounded-xl border bg-white p-2 shadow-2xl" style={{top:posicion.top,left:posicion.left,width:posicion.width}}>
     <Opcion icon={<Send className="size-4"/>} texto="Enviar a revisión" disabled={!habilitado("ENVIAR_REVISION")} onClick={()=>seleccionar("ENVIAR_REVISION")}/>
     <Opcion icon={<Eye className="size-4"/>} texto="Observar" disabled={!habilitado("OBSERVAR")} onClick={()=>seleccionar("OBSERVAR")}/>
     <Opcion icon={<CheckCircle2 className="size-4"/>} texto="ET verificada" disabled={!habilitado("VERIFICAR")} onClick={()=>seleccionar("VERIFICAR")}/>
     <Opcion icon={<Upload className="size-4"/>} texto="Publicar ET" disabled={!habilitado("PUBLICAR")} onClick={()=>seleccionar("PUBLICAR")}/>
-   </div>}
+   </div>,document.body)}
   </div>
   {accion&&<div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/45 p-4">
    <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl">
