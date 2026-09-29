@@ -103,26 +103,22 @@ export default function GenerarLoteModal({ open, onClose, onCreated }: Props) {
             ) : (
               <>
                 <Field label="Producto / presentación Génesis" required>
-                  <div className="space-y-2">
-                    <Input
-                      value={busquedaGenesis}
-                      onChange={(e) => { setBusquedaGenesis(e.target.value); setForm((x) => ({ ...x, codigoGenesis: "" })); }}
-                      placeholder="Buscar por código de Calidad, ej. CL01"
-                    />
-                    {busquedaGenesis.trim().length > 0 && busquedaGenesis.trim().length < 2 && (
-                      <div className="text-xs text-[var(--text-secondary)]">Escribe al menos 2 caracteres.</div>
-                    )}
-                    {productosGenesis.isFetching && <div className="text-xs text-[var(--text-secondary)]">Buscando presentaciones en Génesis...</div>}
-                    {productosGenesis.isError && <div className="text-xs text-red-600">No se pudieron consultar las presentaciones de Génesis.</div>}
-                    {busquedaGenesis.trim().length >= 2 && !productosGenesis.isFetching && !productosGenesis.isError && (
-                      <SearchableSelect
-                        value={form.codigoGenesis}
-                        placeholder={productosGenesis.data?.length ? "Seleccionar presentación" : "Sin presentaciones encontradas"}
-                        options={(productosGenesis.data ?? []).map((x) => ({ value: x.codigoGenesis, label: `${x.codigoGenesis} — ${x.nombreGenesis} · Kardex ${x.kardex}` }))}
-                        onChange={(value) => setForm((x) => ({ ...x, codigoGenesis: value }))}
-                      />
-                    )}
-                  </div>
+                  <GenesisProductSelect
+                    query={busquedaGenesis}
+                    value={form.codigoGenesis}
+                    options={productosGenesis.data ?? []}
+                    loading={productosGenesis.isFetching}
+                    error={productosGenesis.isError}
+                    onQueryChange={(query) => {
+                      setBusquedaGenesis(query);
+                      setForm((x) => ({ ...x, codigoGenesis: "" }));
+                    }}
+                    onSelect={(codigoGenesis) => {
+                      const selected = productosGenesis.data?.find((x) => x.codigoGenesis === codigoGenesis);
+                      setForm((x) => ({ ...x, codigoGenesis }));
+                      if (selected) setBusquedaGenesis(`${selected.codigoGenesis} — ${selected.nombreGenesis}`);
+                    }}
+                  />
                 </Field>
                 <div className="grid gap-4 md:grid-cols-2">
                   <Field label="Naturaleza" required>
@@ -169,6 +165,57 @@ export default function GenerarLoteModal({ open, onClose, onCreated }: Props) {
           </div>
         </form>
       </div>
+    </div>
+  );
+}
+
+function GenesisProductSelect({ query, value, options, loading, error, onQueryChange, onSelect }: {
+  query: string;
+  value: string;
+  options: Array<{ codigoGenesis: string; nombreGenesis: string; kardex: number }>;
+  loading: boolean;
+  error: boolean;
+  onQueryChange: (query: string) => void;
+  onSelect: (codigoGenesis: string) => void;
+}) {
+  const searching = query.trim().length >= 2 && !value;
+
+  return (
+    <div className="relative">
+      <Input
+        value={query}
+        onChange={(e) => onQueryChange(e.target.value)}
+        onFocus={() => { if (value) onQueryChange(""); }}
+        placeholder="Escribe CL01, HL01, código Génesis..."
+        autoComplete="off"
+      />
+      {searching && (
+        <div className="absolute z-40 mt-1 max-h-64 w-full overflow-y-auto rounded-lg border border-[var(--border)] bg-white p-1 shadow-xl">
+          {loading ? (
+            <div className="px-3 py-4 text-sm text-[var(--text-secondary)]">Buscando en Génesis...</div>
+          ) : error ? (
+            <div className="px-3 py-4 text-sm text-red-600">No se pudieron consultar las presentaciones.</div>
+          ) : options.length === 0 ? (
+            <div className="px-3 py-4 text-sm text-[var(--text-secondary)]">Sin coincidencias</div>
+          ) : (
+            options.map((item) => (
+              <button
+                key={item.codigoGenesis}
+                type="button"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => onSelect(item.codigoGenesis)}
+                className="block w-full rounded-md px-3 py-2.5 text-left text-sm hover:bg-[var(--surface-muted)]"
+              >
+                <span className="font-medium text-[var(--text)]">{item.codigoGenesis}</span>
+                <span className="text-[var(--text-secondary)]"> — {item.nombreGenesis} · Kardex {item.kardex}</span>
+              </button>
+            ))
+          )}
+        </div>
+      )}
+      {query.trim().length === 1 && !value && (
+        <div className="mt-1 text-xs text-[var(--text-secondary)]">Escribe al menos 2 caracteres para buscar.</div>
+      )}
     </div>
   );
 }
