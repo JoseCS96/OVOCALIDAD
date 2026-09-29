@@ -21,23 +21,22 @@ export type LotesFiltros = {
   estadoEvaluacionId?: number; fechaDesde?: string; fechaHasta?: string;
 };
 
-export type ProductoCatalogo = { codigo: string; descripcion: string };
+export type ProductoGenesis = { genesisItemId: number; kardex: number; codigoGenesis: string; nombreGenesis: string; descripcionGenesis: string; estadoGenesis: number | null };
 export type CatalogoLote = { id: number; codigo: string; descripcion: string };
 export type CatalogosLote = {
-  productos: ProductoCatalogo[];
   naturalezas: CatalogoLote[];
   fases: CatalogoLote[];
   lineasOrigen: CatalogoLote[];
 };
 
 export type GenerarLoteRequest = {
-  productoCodigo: string; naturalezaId: number; faseId: number;
+  codigoGenesis: string; naturalezaId: number; faseId: number;
   lineaOrigenId: number; observacion?: string | null;
 };
 
 export type GenerarLoteResponse = {
   resultado: { codigoResultado: number; mensaje: string };
-  lote: { loteId: number; codigoLote: string; productoCodigo: string; productoDescripcion: string } | null;
+  lote: { loteId: number; codigoLote: string; productoCodigo: string; codigoGenesis: string; kardex: number | null; productoDescripcion: string } | null;
 };
 
 
