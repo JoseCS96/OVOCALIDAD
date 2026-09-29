@@ -3,9 +3,9 @@ import {Plus,Save,Trash2} from "lucide-react";
 import {Button} from "@/components/ui/button";
 import {Card,CardContent} from "@/components/ui/card";
 import type {DetalleEt,GuardarCambioEt,GuardarCambiosEt} from "../../types";
-type Props={cambios:DetalleEt["cambios"];editable:boolean;guardando:boolean;onGuardar:(x:GuardarCambiosEt)=>void};
+type Props={cambios:DetalleEt["cambiosVersion"];editable:boolean;guardando:boolean;onGuardar:(x:GuardarCambiosEt)=>void};
 export default function CambiosVersionEditor({cambios,editable,guardando,onGuardar}:Props){
- const inicial=useMemo<GuardarCambioEt[]>(()=>cambios.map(x=>({numeroRevision:x.numeroRevision,fechaActualizacion:(x.fechaActualizacion??"").slice(0,10),descripcion:x.descripcion})),[cambios]);
+ const inicial=useMemo<GuardarCambioEt[]>(()=>cambios.map(x=>({numeroRevision:x.cambVersNumeroDeRevision,fechaActualizacion:(x.cambVersFechaDeActualizacion??"").slice(0,10),descripcion:x.cambVersDescripcion})),[cambios]);
  const [filas,setFilas]=useState(inicial);useEffect(()=>setFilas(inicial),[inicial]);
  const set=<K extends keyof GuardarCambioEt>(i:number,k:K,v:GuardarCambioEt[K])=>setFilas(x=>x.map((a,j)=>j===i?{...a,[k]:v}:a));
  const invalid=filas.some(x=>x.numeroRevision<=0||!x.fechaActualizacion||!x.descripcion.trim()||x.descripcion.length>1000)||new Set(filas.map(x=>x.numeroRevision)).size!==filas.length;
