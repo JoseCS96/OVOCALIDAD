@@ -37,6 +37,9 @@ export type CaracteristicaCatalogoEt={caracteristicaId:number;caracteristicaDesc
 export type CriterioEt={tipoCriterioId:number;tipoCriterio:string};
 export type FaseEt={faseId:number;faseCodigo:string;faseDescripcion:string;estado:string};
 export type CatalogosEt={caracteristicas:CaracteristicaCatalogoEt[];tiposCriterio:CriterioEt[];fases:FaseEt[];tiposCaracteristica:unknown[];metodosEnsayo:unknown[]};
+export type TipoContenidoBaseEt="DESCRIPCION"|"ENVASE_EMBALAJE"|"ALMACENAMIENTO_DISTRIBUCION"|"VIDA_UTIL"|"DESCONGELAMIENTO";
+export type GuardarContenidoBaseEt={tipoContenido:TipoContenidoBaseEt;contenido:string|null};
+
 export type GuardarCaracteristicaEt={versCaractId:number|null;caracteristicaId:number;tipoCriterioId:number;valorCuantitativoInicial:number|null;valorCuantitativoFinal:number|null;valorCuantitativoIgual:number|null;valorCualitativo:string|null;faseId:number|null;esObligatorio:boolean;orden:number};
 export type OperacionEt={codigoResultado:number;mensaje:string;versCaractId?:number|null};
 
