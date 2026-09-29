@@ -21,9 +21,9 @@ export default function EspecificacionTecnicaPage(){
  const cat=useQuery({queryKey:["et-catalogos"],queryFn:obtenerCatalogosEt});
  const secCat=useQuery({queryKey:["et-secciones"],queryFn:obtenerSeccionesEt});
  const contenidos=useQuery({queryKey:["et-contenidos",id],queryFn:()=>obtenerContenidoSeccionesEt(id),enabled:id>0});
- const marcarGuardado=()=>{setUltimoGuardado(new Date());setMensajeGuardado("Cambios guardados correctamente.");window.setTimeout(()=>setMensajeGuardado(""),3000)};
+ const marcarGuardado=(mostrarMensaje=false)=>{setUltimoGuardado(new Date());if(!mostrarMensaje)return;setMensajeGuardado("Cambios guardados correctamente.");window.setTimeout(()=>setMensajeGuardado(""),3000)};
  const save=useMutation({mutationFn:(x:GuardarCaracteristicaEt)=>guardarCaracteristica(id,x),onSuccess:async()=>{setForm(null);setError("");await qc.invalidateQueries({queryKey:["et",id]});marcarGuardado()},onError:(e:Error)=>setError(e.message)});
- const saveInfo=useMutation({mutationFn:(x:import("./types").GuardarInformacionGeneralEt)=>guardarInformacionGeneralEt(id,x),onSuccess:async()=>{setError("");await qc.invalidateQueries({queryKey:["et",id]});marcarGuardado()},onError:(e:Error)=>setError(e.message)});
+ const saveInfo=useMutation({mutationFn:(x:import("./types").GuardarInformacionGeneralEt)=>guardarInformacionGeneralEt(id,x),onSuccess:async()=>{setError("");await qc.invalidateQueries({queryKey:["et",id]});marcarGuardado(true)},onError:(e:Error)=>setError(e.message)});
  const del=useMutation({mutationFn:(vc:number)=>eliminarCaracteristica(id,vc),onSuccess:async()=>{await qc.invalidateQueries({queryKey:["et",id]});marcarGuardado()},onError:(e:Error)=>setError(e.message)});
  const refrescar=async()=>{await Promise.all([qc.invalidateQueries({queryKey:["et",id]}),qc.invalidateQueries({queryKey:["et-contenidos",id]})])};
  const addSec=useMutation({mutationFn:(seccionId:number)=>agregarSeccionVersionEt(id,{seccionId,orden:null}),onSuccess:async()=>{setModalAgregar(false);await refrescar();marcarGuardado()},onError:(e:Error)=>setError(e.message)});
