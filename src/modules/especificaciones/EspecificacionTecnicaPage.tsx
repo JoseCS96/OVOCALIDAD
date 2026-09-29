@@ -16,12 +16,12 @@ const vacio:GuardarCaracteristicaEt={versCaractId:null,caracteristicaId:0,tipoCr
 const num=(v:string)=>v===""?null:Number(v);
 export default function EspecificacionTecnicaPage(){
  const nav=useNavigate(),qc=useQueryClient(),{versionId}=useParams(),id=Number(versionId);
- const [form,setForm]=useState<GuardarCaracteristicaEt|null>(null); const [error,setError]=useState(""); const [seccionActiva,setSeccionActiva]=useState<number|null>(null); const [modalAgregar,setModalAgregar]=useState(false); const [contenido,setContenido]=useState(""); const [ultimoGuardado,setUltimoGuardado]=useState<Date|null>(null); const [guardandoEstructura,setGuardandoEstructura]=useState(false); const [tipoFiltro,setTipoFiltro]=useState<number>(0); const [busquedaCaracteristica,setBusquedaCaracteristica]=useState(""); const [selectorAbierto,setSelectorAbierto]=useState(false);
+ const [form,setForm]=useState<GuardarCaracteristicaEt|null>(null); const [error,setError]=useState(""); const [mensajeGuardado,setMensajeGuardado]=useState(""); const [seccionActiva,setSeccionActiva]=useState<number|null>(null); const [modalAgregar,setModalAgregar]=useState(false); const [contenido,setContenido]=useState(""); const [ultimoGuardado,setUltimoGuardado]=useState<Date|null>(null); const [guardandoEstructura,setGuardandoEstructura]=useState(false); const [tipoFiltro,setTipoFiltro]=useState<number>(0); const [busquedaCaracteristica,setBusquedaCaracteristica]=useState(""); const [selectorAbierto,setSelectorAbierto]=useState(false);
  const et=useQuery({queryKey:["et",id],queryFn:()=>obtenerEt(id),enabled:id>0});
  const cat=useQuery({queryKey:["et-catalogos"],queryFn:obtenerCatalogosEt});
  const secCat=useQuery({queryKey:["et-secciones"],queryFn:obtenerSeccionesEt});
  const contenidos=useQuery({queryKey:["et-contenidos",id],queryFn:()=>obtenerContenidoSeccionesEt(id),enabled:id>0});
- const marcarGuardado=()=>setUltimoGuardado(new Date());
+ const marcarGuardado=()=>{setUltimoGuardado(new Date());setMensajeGuardado("Cambios guardados correctamente.");window.setTimeout(()=>setMensajeGuardado(""),3000)};
  const save=useMutation({mutationFn:(x:GuardarCaracteristicaEt)=>guardarCaracteristica(id,x),onSuccess:async()=>{setForm(null);setError("");await qc.invalidateQueries({queryKey:["et",id]});marcarGuardado()},onError:(e:Error)=>setError(e.message)});
  const saveInfo=useMutation({mutationFn:(x:import("./types").GuardarInformacionGeneralEt)=>guardarInformacionGeneralEt(id,x),onSuccess:async()=>{setError("");await qc.invalidateQueries({queryKey:["et",id]});marcarGuardado()},onError:(e:Error)=>setError(e.message)});
  const del=useMutation({mutationFn:(vc:number)=>eliminarCaracteristica(id,vc),onSuccess:async()=>{await qc.invalidateQueries({queryKey:["et",id]});marcarGuardado()},onError:(e:Error)=>setError(e.message)});
@@ -48,6 +48,7 @@ export default function EspecificacionTecnicaPage(){
  return <PageContainer className="space-y-4">
   <EtEditorHeader info={info} guardando={guardandoEstructura||addSec.isPending||removeSec.isPending||saveContenido.isPending||saveInfo.isPending||save.isPending||del.isPending} ultimoGuardado={ultimoGuardado} workflowBusy={workflow.isPending} onWorkflow={(accion,comentario)=>workflow.mutate({accion,comentario})} onVolver={()=>nav("/documentos/especificaciones")}/>
   {error&&<div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>}
+  {mensajeGuardado&&<div role="status" className="fixed right-6 top-6 z-[90] flex items-center gap-2 rounded-xl border border-emerald-200 bg-white px-4 py-3 text-sm font-medium text-emerald-700 shadow-lg"><CheckCircle2 className="size-5"/>{mensajeGuardado}</div>}
   <Card><CardContent className="p-5"><div className="grid gap-4 md:grid-cols-4"><Info l="Estado" v={info.estadoVersion}/><Info l="Producto / presentación" v={productoGenesis}/><Info l="Inicio vigencia" v={info.versionInicioVigencia?.slice(0,10)??"—"}/><Info l="Páginas" v={String(info.versionNroPaginas??"—")}/></div>{info.versionDescripcion&&<p className="mt-4 border-t pt-4 text-sm text-[var(--text-secondary)]">{info.versionDescripcion}</p>}</CardContent></Card>
   <div className="grid gap-4 lg:grid-cols-[300px_minmax(0,1fr)]">
    <EstructuraEtPanel estructura={estructura} activa={activa} editable={editable} busy={guardandoEstructura||addSec.isPending||removeSec.isPending} onSeleccionar={setSeccionActiva} onAgregar={()=>setModalAgregar(true)} onMover={moverSeccion} onQuitar={s=>confirm(`¿Retirar ${s.seccionDescripcion} de esta ET?`)&&removeSec.mutate(s.versSeccId)}/>
