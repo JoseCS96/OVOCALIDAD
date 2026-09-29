@@ -26,7 +26,7 @@ export default function EspecificacionTecnicaDetallePage(){
 }
 function Contenido({d,s}:{d:DetalleEt;s:SeccionEt}){const n=norm(s.seccionDescripcion),i=d.informacionGeneral;
  if(n.includes("INFORMACION GENERAL"))return <B t="Información general"><div className="grid gap-5 md:grid-cols-4"><Info l="Código" v={i.documentoCodigo}/><Info l="Producto" v={i.productoCodigo}/><Info l="Versión" v={fv(i.versionNumero)}/><Info l="Páginas" v={String(i.versionNroPaginas??"—")}/></div></B>;
- if(n.includes("RESPONSABLE"))return <B t="Responsables">{d.responsables.length?<T h={["Responsabilidad","Responsable","DNI"]} r={d.responsables.map(x=>[x.tipoResponsabilidad,x.usuarioNombresApellidos,x.usuarioDni])}/>:<Vacio/>}</B>;
+ if(n.includes("RESPONSABLE"))return <B t="Responsables">{d.responsables.length?<T h={["Responsabilidad","Responsable","Cargo","DNI"]} r={d.responsables.map(x=>[x.tipoResponsabilidad.replaceAll("_"," "),x.usuarioNombresApellidos,x.cargoDescripcion??"—",x.usuarioDni])}/>:<Vacio/>}</B>;
  if(n.includes("DESCRIPCION"))return <B t="Descripción"><Texto v={i.versionDescripcion}/></B>;
  if(n.includes("INGREDIENT"))return <B t="Ingredientes">{d.ingredientes.length?<T h={["Ingrediente","Cantidad","Unidad"]} r={[...d.ingredientes].sort(ord).map(x=>[x.ingredienteDescripcion,x.versIngrValor??"—",x.unidadDeMedida??"Sin medida"])}/>:<Vacio/>}</B>;
  if(n.includes("RECETA"))return <B t="Recetas"><Lista a={[...d.recetas].sort(ord).map(x=>x.recetaDescripcion)}/></B>;
