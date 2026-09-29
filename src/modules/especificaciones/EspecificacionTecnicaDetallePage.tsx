@@ -12,7 +12,7 @@ import EtDocumentPreview from "./components/EtDocumentPreview";
 import EtWorkflowActions from "./components/EtWorkflowActions";
 export default function EspecificacionTecnicaDetallePage(){
  const nav=useNavigate(),qc=useQueryClient(),{versionId}=useParams(),id=Number(versionId),q=useQuery({queryKey:["et",id],queryFn:()=>obtenerEt(id),enabled:id>0}),[sel,setSel]=useState<number|null>(null),[vista,setVista]=useState<"secciones"|"documento"|"pdf">("documento"),[mensaje,setMensaje]=useState(""),[error,setError]=useState("");
- const workflow=useMutation({mutationFn:({accion,comentario}:{accion:AccionWorkflowEt;comentario:string|null})=>cambiarEstadoEt(id,{accion,comentario,usuario:"USUARIO_WEB"}),onSuccess:async()=>{setError("");await qc.invalidateQueries({queryKey:["et",id]});setMensaje("Estado actualizado correctamente.");window.setTimeout(()=>setMensaje(""),3000)},onError:(e:Error)=>setError(e.message)});
+ const workflow=useMutation({mutationFn:({accion,comentario}:{accion:AccionWorkflowEt;comentario:string|null})=>cambiarEstadoEt(id,{accion,comentario}),onSuccess:async()=>{setError("");await qc.invalidateQueries({queryKey:["et",id]});setMensaje("Estado actualizado correctamente.");window.setTimeout(()=>setMensaje(""),3000)},onError:(e:Error)=>setError(e.message)});
  const secs=useMemo(()=>presentacionSecciones(q.data?.secciones??[]),[q.data]),act=secs.find(x=>x.seccionId===(sel??secs[0]?.seccionId));
  if(q.isLoading)return <PageContainer><div className="py-16 text-center">Cargando Especificación Técnica...</div></PageContainer>;
  if(q.isError||!q.data)return <PageContainer><div className="py-16 text-center text-red-600">No se pudo cargar la Especificación Técnica.</div></PageContainer>;
