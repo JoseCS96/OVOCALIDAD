@@ -1,5 +1,5 @@
 import {useEffect,useMemo,useState} from "react";
-import {ChevronDown,Plus,Save,X} from "lucide-react";
+import {Check,ChevronDown,Save,X} from "lucide-react";
 import {Button} from "@/components/ui/button";
 import {Card,CardContent} from "@/components/ui/card";
 import type {GuardarResponsablesEt,ResponsableCatalogoEt,ResponsableEt} from "../../types";
@@ -14,34 +14,42 @@ function tipo(r:ResponsableEt):Grupo|null{
  if(t.includes("APROBADO"))return "aprobadoPor";
  return null;
 }
-function texto(u:ResponsableCatalogoEt){return `${u.usuarioNombresApellidos} — ${u.cargoDescripcion}${u.cargoActual?" (Actual)":""}`}
+function texto(u:ResponsableCatalogoEt){return `${u.usuarioNombresApellidos} — ${u.cargoDescripcion}`}
 
-function ComboResponsable({grupo,catalogo,excluidos,valor,onChange}:{grupo:Grupo;catalogo:ResponsableCatalogoEt[];excluidos:number[];valor:string;onChange:(v:string)=>void}){
+function MultiComboResponsable({grupo,catalogo,valores,onChange}:{grupo:Grupo;catalogo:ResponsableCatalogoEt[];valores:number[];onChange:(ids:number[])=>void}){
  const [abierto,setAbierto]=useState(false);
  const [busqueda,setBusqueda]=useState("");
- const seleccionado=catalogo.find(u=>String(u.usuarioCargoHistorialId)===valor);
  const q=busqueda.trim().toLowerCase();
- const opciones=catalogo.filter(u=>!excluidos.includes(u.usuarioCargoHistorialId)&&(!q||texto(u).toLowerCase().includes(q)));
- return <div className="relative min-w-0 flex-1">
-  <div className="relative">
-   <input
-    className="h-10 w-full rounded-md border bg-white px-3 pr-9 text-sm outline-none focus:ring-2 focus:ring-slate-200"
-    value={abierto?busqueda:(seleccionado?texto(seleccionado):"")}
-    onFocus={()=>{setBusqueda("");setAbierto(true)}}
-    onChange={e=>{setBusqueda(e.target.value);setAbierto(true)}}
-    onKeyDown={e=>{if(e.key==="Escape"){setAbierto(false);setBusqueda("")}}}
-    onBlur={()=>window.setTimeout(()=>setAbierto(false),150)}
-    placeholder="Buscar persona o cargo..."
-    autoComplete="off"
-    aria-label={`Buscar responsable para ${grupo}`}
-   />
-   <button type="button" tabIndex={-1} className="absolute inset-y-0 right-0 flex w-9 items-center justify-center text-slate-500" onMouseDown={e=>e.preventDefault()} onClick={()=>{setBusqueda("");setAbierto(v=>!v)}} title="Mostrar opciones"><ChevronDown className="h-4 w-4"/></button>
+ const opciones=catalogo.filter(u=>!q||texto(u).toLowerCase().includes(q));
+ const toggle=(id:number)=>onChange(valores.includes(id)?valores.filter(x=>x!==id):[...valores,id]);
+
+ return <div className="relative">
+  <div className="min-h-10 rounded-md border bg-white px-2 py-1.5 focus-within:ring-2 focus-within:ring-slate-200">
+   <div className="flex flex-wrap items-center gap-1.5">
+    {valores.map(id=>{const u=catalogo.find(x=>x.usuarioCargoHistorialId===id);return <span key={id} className="inline-flex max-w-full items-center gap-1 rounded-md bg-slate-100 px-2 py-1 text-xs">
+     <span className="truncate">{u?texto(u):`Responsable #${id}`}</span>
+     {u?.cargoActual&&<span className="rounded-full border border-emerald-200 bg-emerald-50 px-1.5 py-0.5 text-[10px] font-medium text-emerald-700">Actual</span>}
+     <button type="button" className="rounded p-0.5 hover:bg-slate-200" onMouseDown={e=>e.preventDefault()} onClick={()=>toggle(id)} title="Quitar"><X className="h-3 w-3"/></button>
+    </span>})}
+    <input
+     className="min-w-[220px] flex-1 bg-transparent px-1 py-1 text-sm outline-none"
+     value={busqueda}
+     onFocus={()=>setAbierto(true)}
+     onChange={e=>{setBusqueda(e.target.value);setAbierto(true)}}
+     onKeyDown={e=>{if(e.key==="Escape")setAbierto(false)}}
+     onBlur={()=>window.setTimeout(()=>setAbierto(false),150)}
+     placeholder={valores.length?"Agregar otro responsable...":"Buscar persona o cargo..."}
+     autoComplete="off"
+     aria-label={`Buscar responsables para ${grupo}`}
+    />
+    <button type="button" tabIndex={-1} className="flex h-7 w-7 shrink-0 items-center justify-center text-slate-500" onMouseDown={e=>e.preventDefault()} onClick={()=>setAbierto(v=>!v)} title="Mostrar opciones"><ChevronDown className="h-4 w-4"/></button>
+   </div>
   </div>
-  {abierto&&<div className="absolute z-30 mt-1 max-h-64 w-full overflow-auto rounded-md border bg-white p-1 shadow-lg">
-   {opciones.length?opciones.map(u=><button key={u.usuarioCargoHistorialId} type="button" tabIndex={-1} className="flex w-full items-center justify-between gap-3 rounded px-3 py-2 text-left text-sm hover:bg-slate-50" onMouseDown={e=>{e.preventDefault();onChange(String(u.usuarioCargoHistorialId));setBusqueda("");setAbierto(false)}}>
-    <span className="min-w-0"><span className="block truncate font-medium">{u.usuarioNombresApellidos}</span><span className="block truncate text-xs text-[var(--text-secondary)]">{u.cargoDescripcion}</span></span>
+  {abierto&&<div className="absolute z-30 mt-1 max-h-72 w-full overflow-auto rounded-md border bg-white p-1 shadow-lg">
+   {opciones.length?opciones.map(u=>{const marcado=valores.includes(u.usuarioCargoHistorialId);return <button key={u.usuarioCargoHistorialId} type="button" tabIndex={-1} className="flex w-full items-center justify-between gap-3 rounded px-3 py-2 text-left text-sm hover:bg-slate-50" onMouseDown={e=>{e.preventDefault();toggle(u.usuarioCargoHistorialId);setBusqueda("");setAbierto(true)}}>
+    <span className="flex min-w-0 items-center gap-2"><span className="flex h-4 w-4 shrink-0 items-center justify-center rounded border">{marcado&&<Check className="h-3 w-3"/>}</span><span className="min-w-0"><span className="block truncate font-medium">{u.usuarioNombresApellidos}</span><span className="block truncate text-xs text-[var(--text-secondary)]">{u.cargoDescripcion}</span></span></span>
     {u.cargoActual&&<span className="shrink-0 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700">Actual</span>}
-   </button>):<div className="px-3 py-3 text-sm text-[var(--text-secondary)]">No se encontraron coincidencias.</div>}
+   </button>}):<div className="px-3 py-3 text-sm text-[var(--text-secondary)]">No se encontraron coincidencias.</div>}
   </div>}
  </div>
 }
@@ -53,44 +61,21 @@ export default function ResponsablesEditor({responsables,catalogo,editable,guard
   return x;
  },[responsables]);
  const [form,setForm]=useState(inicial);
- const [selects,setSelects]=useState<Record<Grupo,string>>({elaboradoPor:"",revisadoPor:"",aprobadoPor:""});
  useEffect(()=>setForm(inicial),[inicial]);
- const opcion=(id:number)=>catalogo.find(x=>x.usuarioCargoHistorialId===id);
- const seleccionado=(g:Grupo)=>{const raw=selects[g];const id=Number(raw);return catalogo.find(x=>x.usuarioCargoHistorialId===id)};
- const agregar=(g:Grupo)=>{const u=seleccionado(g);if(!u||form[g].includes(u.usuarioCargoHistorialId))return;setForm(x=>({...x,[g]:[...x[g],u.usuarioCargoHistorialId]}));setSelects(x=>({...x,[g]:""}))};
- const quitar=(g:Grupo,id:number)=>setForm(x=>({...x,[g]:x[g].filter(v=>v!==id)}));
 
  const GrupoEditor=({grupo,titulo}:{grupo:Grupo;titulo:string})=><div className="rounded-lg border p-4">
   <div className="mb-3 font-semibold">{titulo}</div>
-  <div className="space-y-2">
+  {editable?<MultiComboResponsable grupo={grupo} catalogo={catalogo} valores={form[grupo]} onChange={ids=>setForm(x=>({...x,[grupo]:ids}))}/>:<div className="space-y-2">
    {form[grupo].length===0&&<div className="text-sm text-[var(--text-secondary)]">Sin responsables asignados.</div>}
-   {form[grupo].map(id=>{const u=opcion(id);return <div key={id} className="flex items-center justify-between rounded-md bg-slate-50 px-3 py-2">
-    <div><div className="text-sm font-medium">{u?.usuarioNombresApellidos??`Responsable #${id}`}</div><div className="flex flex-wrap items-center gap-2 text-xs text-[var(--text-secondary)]"><span>{u?.cargoDescripcion??"Cargo histórico"}</span>{u?.cargoActual&&<span className="rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 font-medium text-emerald-700">Actual</span>}</div></div>
-    {editable&&<button type="button" className="rounded p-1 hover:bg-slate-200" onClick={()=>quitar(grupo,id)} title="Quitar responsable"><X className="h-4 w-4"/></button>}
-   </div>})}
-  </div>
-  {editable&&<div className="mt-3 flex gap-2">
-   <ComboResponsable grupo={grupo} catalogo={catalogo} excluidos={form[grupo]} valor={selects[grupo]} onChange={v=>setSelects(x=>({...x,[grupo]:v}))}/>
-   <Button type="button" variant="outline" disabled={!seleccionado(grupo)} onClick={()=>agregar(grupo)}><Plus/>Agregar</Button>
+   {form[grupo].map(id=>{const u=catalogo.find(x=>x.usuarioCargoHistorialId===id);return <div key={id} className="rounded-md bg-slate-50 px-3 py-2"><div className="text-sm font-medium">{u?.usuarioNombresApellidos??`Responsable #${id}`}</div><div className="text-xs text-[var(--text-secondary)]">{u?.cargoDescripcion??"Cargo histórico"}</div></div>})}
   </div>}
  </div>;
 
  return <Card><CardContent className="space-y-4 p-5">
-  <div><h2 className="font-semibold">Responsables</h2><p className="text-xs text-[var(--text-secondary)]">Selecciona la persona y el cargo que corresponde a esta versión. El cargo queda registrado como parte del historial de la ET.</p></div>
+  <div><h2 className="font-semibold">Responsables</h2><p className="text-xs text-[var(--text-secondary)]">Puedes seleccionar uno o más responsables por tipo. Cada selección conserva la persona y el cargo correspondiente a esta versión de la ET.</p></div>
   <GrupoEditor grupo="elaboradoPor" titulo="Elaborado por"/>
   <GrupoEditor grupo="revisadoPor" titulo="Revisado por"/>
   <GrupoEditor grupo="aprobadoPor" titulo="Aprobado por"/>
-  <div className="flex justify-end"><Button disabled={!editable||guardando} onClick={()=>{
-   const payload:GuardarResponsablesEt={
-    elaboradoPor:[...form.elaboradoPor],
-    revisadoPor:[...form.revisadoPor],
-    aprobadoPor:[...form.aprobadoPor]
-   };
-   (["elaboradoPor","revisadoPor","aprobadoPor"] as Grupo[]).forEach(g=>{
-    const u=seleccionado(g);
-    if(u&&!payload[g].includes(u.usuarioCargoHistorialId))payload[g].push(u.usuarioCargoHistorialId);
-   });
-   onGuardar(payload);
-  }}><Save/>{guardando?"Guardando...":"Guardar cambios"}</Button></div>
+  <div className="flex justify-end"><Button disabled={!editable||guardando} onClick={()=>onGuardar(form)}><Save/>{guardando?"Guardando...":"Guardar cambios"}</Button></div>
  </CardContent></Card>
 }
