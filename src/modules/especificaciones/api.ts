@@ -13,7 +13,7 @@ export async function obtenerEt(versionId:number){
 export async function buscarPresentacionesGenesisEt(busqueda:string){const {data}=await api.get<ProductoGenesis[]>("/api/lotes/productos-genesis",{params:{busqueda}});return data}
 export async function obtenerCatalogosEt(){const {data}=await api.get<CatalogosEt>("/api/especificaciones-tecnicas/catalogos");return data}
 export async function guardarCaracteristica(versionId:number,request:GuardarCaracteristicaEt){const {data}=await api.put<OperacionEt>(`/api/especificaciones-tecnicas/${versionId}/caracteristicas`,request);return validar(data)}
-export async function eliminarCaracteristica(versionId:number,versCaractId:number){const {data}=await api.delete<OperacionEt>(`/api/especificaciones-tecnicas/${versionId}/caracteristicas/${versCaractId}`,{data:{usuario:"USUARIO_WEB"}});return validar(data)}
+export async function eliminarCaracteristica(versionId:number,versCaractId:number){const {data}=await api.delete<OperacionEt>(`/api/especificaciones-tecnicas/${versionId}/caracteristicas/${versCaractId}`,{data:{}});return validar(data)}
 
 export async function listarEt(params?:{busqueda?:string;productoCodigo?:string;estVerId?:number}){const {data}=await api.get<EspecificacionTecnicaListado[]>("/api/especificaciones-tecnicas",{params});return data}
 
@@ -24,9 +24,9 @@ export async function crearSeccionEt(request:CrearSeccionEt){const {data}=await 
 
 export async function obtenerContenidoSeccionesEt(versionId:number){const {data}=await api.get<ContenidoSeccionEt[]>(`/api/especificaciones-tecnicas/${versionId}/secciones/contenido`);return data}
 export async function agregarSeccionVersionEt(versionId:number,request:AgregarSeccionVersionEt){const {data}=await api.post<OperacionEt>(`/api/especificaciones-tecnicas/${versionId}/secciones`,request);return validar(data)}
-export async function quitarSeccionVersionEt(versionId:number,versSeccId:number){const {data}=await api.delete<OperacionEt>(`/api/especificaciones-tecnicas/${versionId}/secciones/${versSeccId}`,{data:{usuario:"USUARIO_WEB"}});return validar(data)}
+export async function quitarSeccionVersionEt(versionId:number,versSeccId:number){const {data}=await api.delete<OperacionEt>(`/api/especificaciones-tecnicas/${versionId}/secciones/${versSeccId}`,{data:{}});return validar(data)}
 export async function reordenarSeccionesVersionEt(versionId:number,request:ReordenarSeccionesVersionEt){const {data}=await api.put<OperacionEt>(`/api/especificaciones-tecnicas/${versionId}/secciones/orden`,request);return validar(data)}
-export async function guardarContenidoSeccionEt(versionId:number,versSeccId:number,contenido:string){const {data}=await api.put<OperacionEt>(`/api/especificaciones-tecnicas/${versionId}/secciones/${versSeccId}/contenido`,{contenido,usuario:"USUARIO_WEB"});return validar(data)}
+export async function guardarContenidoSeccionEt(versionId:number,versSeccId:number,contenido:string){const {data}=await api.put<OperacionEt>(`/api/especificaciones-tecnicas/${versionId}/secciones/${versSeccId}/contenido`,{contenido});return validar(data)}
 
 export async function guardarInformacionGeneralEt(versionId:number,request:GuardarInformacionGeneralEt){const {data}=await api.put<OperacionEt>(`/api/especificaciones-tecnicas/${versionId}/informacion-general`,request);return validar(data)}
 
