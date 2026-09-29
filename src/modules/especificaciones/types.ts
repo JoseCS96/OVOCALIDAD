@@ -55,6 +55,14 @@ export type GuardarRecetasEt={recetas:GuardarRecetaEt[]};
 export type GuardarProcedimientoEt={descripcion:string;idTipoContenido:number|null;orden:number};
 export type GuardarProcedimientosEt={procedimientos:GuardarProcedimientoEt[]};
 
+export type TratamientoCatalogoEt={tratConservId:number;tratConservDescripcion:string};
+export type ParametroTratamientoCatalogoEt={paramTratId:number;paramTratDescripcion:string;paramTratUnidadDeMedida:string|null};
+export type TipoCriterioTratamientoCatalogoEt={tipoCriterioId:number;tipCritDescripcion:string};
+export type CatalogosTratamientosEt={tratamientos:TratamientoCatalogoEt[];parametros:ParametroTratamientoCatalogoEt[];tiposCriterio:TipoCriterioTratamientoCatalogoEt[]};
+export type GuardarParametroTratamientoEt={parametroTratId:number;tipoCriterioId:number;valorCuantitativoInicial:number|null;valorCuantitativoFinal:number|null;valorCuantitativoIgual:number|null;valorCualitativo:string|null;orden:number};
+export type GuardarTratamientoEt={tratConservId:number;parametros:GuardarParametroTratamientoEt[]};
+export type GuardarTratamientosEt={tratamientos:GuardarTratamientoEt[]};
+
 export type GuardarCaracteristicaEt={versCaractId:number|null;caracteristicaId:number;tipoCriterioId:number;valorCuantitativoInicial:number|null;valorCuantitativoFinal:number|null;valorCuantitativoIgual:number|null;valorCualitativo:string|null;faseId:number|null;esObligatorio:boolean;orden:number};
 export type OperacionEt={codigoResultado:number;mensaje:string;versCaractId?:number|null};
 
