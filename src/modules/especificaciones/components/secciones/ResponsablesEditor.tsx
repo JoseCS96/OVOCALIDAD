@@ -32,14 +32,15 @@ function ComboResponsable({grupo,catalogo,excluidos,valor,onChange}:{grupo:Grupo
     value={valor}
     onFocus={()=>setAbierto(true)}
     onChange={e=>{onChange(e.target.value);setAbierto(true)}}
+    onKeyDown={e=>{if(e.key==="Escape")setAbierto(false)}}
     placeholder="Buscar persona o cargo..."
     autoComplete="off"
     aria-label={`Buscar responsable para ${grupo}`}
    />
    <button type="button" className="absolute inset-y-0 right-0 flex w-9 items-center justify-center text-slate-500" onClick={()=>setAbierto(v=>!v)} title="Mostrar opciones"><ChevronDown className="h-4 w-4"/></button>
   </div>
-  {abierto&&<div className="absolute z-30 mt-1 max-h-64 w-full overflow-auto rounded-md border bg-white p-1 shadow-lg">
-   {opciones.length?opciones.map(u=><button key={u.usuarioCargoHistorialId} type="button" className="flex w-full items-center justify-between gap-3 rounded px-3 py-2 text-left text-sm hover:bg-slate-50" onMouseDown={e=>e.preventDefault()} onClick={()=>{onChange(String(u.usuarioCargoHistorialId));setAbierto(false)}}>
+  {abierto&&<div className="absolute z-30 mt-1 max-h-64 w-full overflow-auto rounded-md border bg-white p-1 shadow-lg" onMouseDown={e=>e.preventDefault()}>
+   {opciones.length?opciones.map(u=><button key={u.usuarioCargoHistorialId} type="button" className="flex w-full items-center justify-between gap-3 rounded px-3 py-2 text-left text-sm hover:bg-slate-50" onClick={()=>{onChange(String(u.usuarioCargoHistorialId));setAbierto(false)}}>
     <span className="min-w-0"><span className="block truncate font-medium">{u.usuarioNombresApellidos}</span><span className="block truncate text-xs text-[var(--text-secondary)]">{u.cargoDescripcion}</span></span>
     {u.cargoActual&&<span className="shrink-0 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700">Actual</span>}
    </button>):<div className="px-3 py-3 text-sm text-[var(--text-secondary)]">No se encontraron coincidencias.</div>}
