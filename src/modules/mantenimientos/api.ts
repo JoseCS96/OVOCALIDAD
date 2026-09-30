@@ -27,3 +27,26 @@ export async function obtenerCatalogosCaracteristica(){const {data}=await api.ge
 export async function crearCaracteristica(request:{caracteristicaDescripcion:string;caracteristicaUnidadDeMedida:string|null;tipoCaractId:number;metEnsayoId:number|null}){const {data}=await api.post<OperacionCaracteristica>("/api/mantenimientos/caracteristicas",request);return validarCaracteristica(data)}
 export async function editarCaracteristica(id:number,request:{caracteristicaDescripcion:string;caracteristicaUnidadDeMedida:string|null;tipoCaractId:number;metEnsayoId:number|null}){const {data}=await api.put<OperacionCaracteristica>(`/api/mantenimientos/caracteristicas/${id}`,request);return validarCaracteristica(data)}
 export async function cambiarEstadoCaracteristica(id:number,estado:boolean){const {data}=await api.patch<OperacionCaracteristica>(`/api/mantenimientos/caracteristicas/${id}/estado`,{estado});return validarCaracteristica(data)}
+
+
+export type TipoCaracteristicaMaestro={
+ tipoCaractId:number;tipoCaractDescripcion:string;estado:boolean;
+ audUsuarioCreacion:string;audFechaCreacion:string;audUsuarioModificacion:string|null;audFechaActualizacion:string|null;tieneUso:boolean
+};
+export type OperacionTipoCaracteristica={codigoResultado:number;mensaje:string;tipoCaractId?:number;estado?:boolean};
+function validarTipoCaracteristica(x:OperacionTipoCaracteristica){if(x.codigoResultado!==0)throw new Error(x.mensaje);return x}
+export async function listarTiposCaracteristica(params?:{busqueda?:string;estado?:boolean}){const {data}=await api.get<TipoCaracteristicaMaestro[]>("/api/mantenimientos/tipos-caracteristica",{params});return data}
+export async function crearTipoCaracteristica(request:{tipoCaractDescripcion:string}){const {data}=await api.post<OperacionTipoCaracteristica>("/api/mantenimientos/tipos-caracteristica",request);return validarTipoCaracteristica(data)}
+export async function editarTipoCaracteristica(id:number,request:{tipoCaractDescripcion:string}){const {data}=await api.put<OperacionTipoCaracteristica>(`/api/mantenimientos/tipos-caracteristica/${id}`,request);return validarTipoCaracteristica(data)}
+export async function cambiarEstadoTipoCaracteristica(id:number,estado:boolean){const {data}=await api.patch<OperacionTipoCaracteristica>(`/api/mantenimientos/tipos-caracteristica/${id}/estado`,{estado});return validarTipoCaracteristica(data)}
+
+export type MetodoEnsayoMaestro={
+ metEnsayoId:number;metEnsayoDescripcion:string;estado:boolean;
+ audUsuarioCreacion:string;audFechaCreacion:string;audUsuarioModificacion:string|null;audFechaActualizacion:string|null;tieneUso:boolean
+};
+export type OperacionMetodoEnsayo={codigoResultado:number;mensaje:string;metEnsayoId?:number;estado?:boolean};
+function validarMetodoEnsayo(x:OperacionMetodoEnsayo){if(x.codigoResultado!==0)throw new Error(x.mensaje);return x}
+export async function listarMetodosEnsayo(params?:{busqueda?:string;estado?:boolean}){const {data}=await api.get<MetodoEnsayoMaestro[]>("/api/mantenimientos/metodos-ensayo",{params});return data}
+export async function crearMetodoEnsayo(request:{metEnsayoDescripcion:string}){const {data}=await api.post<OperacionMetodoEnsayo>("/api/mantenimientos/metodos-ensayo",request);return validarMetodoEnsayo(data)}
+export async function editarMetodoEnsayo(id:number,request:{metEnsayoDescripcion:string}){const {data}=await api.put<OperacionMetodoEnsayo>(`/api/mantenimientos/metodos-ensayo/${id}`,request);return validarMetodoEnsayo(data)}
+export async function cambiarEstadoMetodoEnsayo(id:number,estado:boolean){const {data}=await api.patch<OperacionMetodoEnsayo>(`/api/mantenimientos/metodos-ensayo/${id}/estado`,{estado});return validarMetodoEnsayo(data)}
