@@ -52,13 +52,15 @@ export default function AppRouter() {
           <Route path="/documentos/especificaciones/:versionId" element={<EspecificacionTecnicaDetallePage />} />
           <Route path="/documentos/especificaciones/:versionId/editar" element={<EspecificacionTecnicaPage />} />
           <Route path="/documentos/especificaciones" element={<EspecificacionesTecnicasPage />} />
-          <Route path="/mantenimientos/ingredientes" element={<IngredientesMantenimientoPage />} />
-          <Route path="/mantenimientos/caracteristicas" element={<CaracteristicasMantenimientoPage />} />
-          <Route path="/mantenimientos/tipos-caracteristica" element={<TiposCaracteristicaMantenimientoPage />} />
-          <Route path="/mantenimientos/metodos-ensayo" element={<MetodosEnsayoMantenimientoPage />} />
-          <Route path="/mantenimientos/contenidos-rotulado" element={<ContenidosRotuladoMantenimientoPage />} />
-          <Route path="/mantenimientos/cargos" element={<CargosMantenimientoPage />} />
-          <Route path="/mantenimientos/responsables" element={<ResponsablesMantenimientoPage />} />
+          <Route element={<ProtectedRoute perfilesPermitidos={["JEFE_CALIDAD"]} />}>
+            <Route path="/mantenimientos/ingredientes" element={<IngredientesMantenimientoPage />} />
+            <Route path="/mantenimientos/caracteristicas" element={<CaracteristicasMantenimientoPage />} />
+            <Route path="/mantenimientos/tipos-caracteristica" element={<TiposCaracteristicaMantenimientoPage />} />
+            <Route path="/mantenimientos/metodos-ensayo" element={<MetodosEnsayoMantenimientoPage />} />
+            <Route path="/mantenimientos/contenidos-rotulado" element={<ContenidosRotuladoMantenimientoPage />} />
+            <Route path="/mantenimientos/cargos" element={<CargosMantenimientoPage />} />
+            <Route path="/mantenimientos/responsables" element={<ResponsablesMantenimientoPage />} />
+          </Route>
           {pages.map((page) => <Route key={page.path} path={page.path} element={<ModulePlaceholder {...page} />} />)}
         </Route>
       </Route>
