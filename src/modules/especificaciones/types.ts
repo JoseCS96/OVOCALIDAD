@@ -99,3 +99,5 @@ export type GuardarInformacionGeneralEt={documentoDescripcionDocumento:string;ve
 export type AccionWorkflowEt="ENVIAR_REVISION"|"OBSERVAR"|"VERIFICAR"|"PUBLICAR";
 export type CambiarEstadoEt={accion:AccionWorkflowEt;comentario:string|null};
 export type CambiarEstadoEtResponse=OperacionEt&{versionId?:number|null;estVerOrigenId?:number|null;estadoOrigen?:string|null;estVerDestinoId?:number|null;estadoDestino?:string|null;accion?:string|null;comentario?:string|null};
+
+export type VersionReemplazableEt={versionId:number;documentoCodigo:string;versionNumero:number;versionInicioVigencia:string|null;versionFinVigencia:string|null;estadoVersion:string};
