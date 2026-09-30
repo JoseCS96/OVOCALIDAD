@@ -18,7 +18,7 @@ export default function InformacionGeneralEditor({info,presentacion,versionesRee
   <div className="border-b px-5 py-4"><h2 className="font-semibold">Información general</h2><p className="text-xs text-[var(--text-secondary)]">Edita los datos principales de la Especificación Técnica.</p></div>
   <div className="grid gap-5 p-5 md:grid-cols-2">
    <Field label="Código ET"><Input value={info.documentoCodigo} disabled/><Hint>El código identifica al documento y no se modifica desde esta sección.</Hint></Field>
-   <Field label="Producto / presentación Génesis"><Input value={presentacion?`${presentacion.codigoGenesis} — ${presentacion.nombreGenesis??presentacion.descripcionGenesis??""}`:info.productoCodigo||"—"} disabled/><Hint>{presentacion?`Kardex ${presentacion.kardex}`:"Sin presentación Génesis asociada."}</Hint></Field>
+   <Field label="Producto Génesis"><Input value={info.productoCodigo&&info.productoDescripcion?`${info.productoCodigo} — ${info.productoDescripcion.replace(new RegExp(`^${info.productoCodigo}\\s*-\\s*`,"i"),"")}`:info.productoCodigo||"—"} disabled/><Hint>Producto asociado a la Especificación Técnica.</Hint></Field>
    <Field label="Nombre / descripción del documento"><Input value={form.documentoDescripcionDocumento} onChange={e=>set("documentoDescripcionDocumento",e.target.value)}/></Field>
    <Field label="Versión"><Input type="number" min="0" step="0.0001" value={form.versionNumero??""} onChange={e=>set("versionNumero",e.target.value===""?null:Number(e.target.value))}/></Field>
    <Field label="Inicio de vigencia"><Input type="date" value={form.versionInicioVigencia??""} onChange={e=>set("versionInicioVigencia",e.target.value||null)}/></Field>
