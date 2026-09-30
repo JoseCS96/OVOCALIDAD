@@ -62,3 +62,25 @@ export async function listarContenidosRotulado(params?:{busqueda?:string;estado?
 export async function crearContenidoRotulado(request:{contRotuladoDescripcion:string}){const {data}=await api.post<OperacionContenidoRotulado>("/api/mantenimientos/contenidos-rotulado",request);return validarContenidoRotulado(data)}
 export async function editarContenidoRotulado(id:number,request:{contRotuladoDescripcion:string}){const {data}=await api.put<OperacionContenidoRotulado>(`/api/mantenimientos/contenidos-rotulado/${id}`,request);return validarContenidoRotulado(data)}
 export async function cambiarEstadoContenidoRotulado(id:number,estado:boolean){const {data}=await api.patch<OperacionContenidoRotulado>(`/api/mantenimientos/contenidos-rotulado/${id}/estado`,{estado});return validarContenidoRotulado(data)}
+
+
+export type CargoMaestro={cargoId:number;cargoDescripcion:string;estado:boolean;tieneUso:boolean;cantidadResponsables:number;audUsuarioCreacion:string|null;audFechaCreacion:string;audUsuarioModificacion:string|null;audFechaActualizacion:string|null};
+export type CargoActivo={cargoId:number;cargoDescripcion:string};
+export type OperacionCargo={codigoResultado:number;mensaje:string;cargoId?:number;estado?:boolean};
+function validarCargo(x:OperacionCargo){if(x.codigoResultado!==0)throw new Error(x.mensaje);return x}
+export async function listarCargos(params?:{busqueda?:string;estado?:boolean}){const {data}=await api.get<CargoMaestro[]>("/api/mantenimientos/cargos",{params});return data}
+export async function listarCargosActivos(){const {data}=await api.get<CargoActivo[]>("/api/mantenimientos/cargos/activos");return data}
+export async function crearCargo(request:{cargoDescripcion:string}){const {data}=await api.post<OperacionCargo>("/api/mantenimientos/cargos",request);return validarCargo(data)}
+export async function editarCargo(id:number,request:{cargoDescripcion:string}){const {data}=await api.put<OperacionCargo>(`/api/mantenimientos/cargos/${id}`,request);return validarCargo(data)}
+export async function cambiarEstadoCargo(id:number,estado:boolean){const {data}=await api.patch<OperacionCargo>(`/api/mantenimientos/cargos/${id}/estado`,{estado});return validarCargo(data)}
+
+export type ResponsableMaestro={usuarioDni:string;usuarioNombresApellidos:string;estado:boolean;usuarioInicioVigencia:string|null;usuarioFinVigencia:string|null;tipoUsuarioId:number;usuarioCargoHistorialId:number|null;cargoId:number|null;cargoDescripcion:string|null;cargoFechaInicio:string|null;tieneCargoActual:boolean;tieneUso:boolean;audUsuarioCreacion:string|null;audFechaCreacion:string;audUsuarioModificacion:string|null;audFechaActualizacion:string|null};
+export type HistorialCargoResponsable={usuarioCargoHistorialId:number;usuarioDni:string;usuarioNombresApellidos:string;cargoId:number;cargoDescripcion:string;fechaInicio:string|null;fechaFin:string|null;cargoActual:boolean;estado:boolean;audUsuarioCreacion:string|null;audFechaCreacion:string;audUsuarioModificacion:string|null;audFechaActualizacion:string|null};
+export type OperacionResponsable={codigoResultado:number;mensaje:string;usuarioDni?:string;usuarioCargoHistorialId?:number;cargoId?:number;estado?:boolean};
+function validarResponsable(x:OperacionResponsable){if(x.codigoResultado!==0)throw new Error(x.mensaje);return x}
+export async function listarResponsables(params?:{busqueda?:string;estado?:boolean}){const {data}=await api.get<ResponsableMaestro[]>("/api/mantenimientos/responsables",{params});return data}
+export async function crearResponsable(request:{usuarioDni:string;usuarioNombresApellidos:string;cargoId:number;fechaInicioCargo?:string|null}){const {data}=await api.post<OperacionResponsable>("/api/mantenimientos/responsables",request);return validarResponsable(data)}
+export async function editarResponsable(usuarioDni:string,request:{usuarioNombresApellidos:string}){const {data}=await api.put<OperacionResponsable>(`/api/mantenimientos/responsables/${encodeURIComponent(usuarioDni)}`,request);return validarResponsable(data)}
+export async function cambiarCargoResponsable(usuarioDni:string,request:{cargoId:number;fechaInicioCargo?:string|null}){const {data}=await api.put<OperacionResponsable>(`/api/mantenimientos/responsables/${encodeURIComponent(usuarioDni)}/cargo`,request);return validarResponsable(data)}
+export async function obtenerHistorialCargosResponsable(usuarioDni:string){const {data}=await api.get<HistorialCargoResponsable[]>(`/api/mantenimientos/responsables/${encodeURIComponent(usuarioDni)}/historial-cargos`);return data}
+export async function cambiarEstadoResponsable(usuarioDni:string,estado:boolean){const {data}=await api.patch<OperacionResponsable>(`/api/mantenimientos/responsables/${encodeURIComponent(usuarioDni)}/estado`,{estado});return validarResponsable(data)}
