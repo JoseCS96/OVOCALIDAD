@@ -18,7 +18,7 @@ export default function EtWorkflowActions({info,busy,onAccion}:Props){
  const estado=info.estadoVersion?.toUpperCase();
  const habilitado=(a:AccionWorkflowEt)=>{
   if(a==="ENVIAR_REVISION")return tienePermiso("ET.ENVIAR_REVISION")&&estado==="BORRADOR";
-  if(a==="OBSERVAR")return tienePermiso("ET.OBSERVAR")&&(estado==="PENDIENTE_REVISION"||estado==="VERIFICADO");
+  if(a==="OBSERVAR")return tienePermiso("ET.OBSERVAR")&&estado==="PENDIENTE_REVISION";
   if(a==="VERIFICAR")return tienePermiso("ET.VERIFICAR")&&estado==="PENDIENTE_REVISION";
   if(a==="PUBLICAR")return tienePermiso("ET.PUBLICAR")&&estado==="VERIFICADO";
   if(a==="VIGENTAR")return tienePermiso("ET.PUBLICAR")&&estado==="PUBLICADO";
