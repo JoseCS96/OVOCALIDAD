@@ -8,9 +8,10 @@ import SidebarItem from "./SidebarItem";
 type SidebarProps = { collapsed: boolean; onToggle: () => void };
 
 function Sidebar({ collapsed, onToggle }: SidebarProps) {
-  const { tieneModulo, tienePermiso } = useAuth();
+  const { tieneModulo, tienePermiso, tienePerfil } = useAuth();
 
   const groups = navigationGroups
+    .filter((group) => !group.perfilesPermitidos || group.perfilesPermitidos.some(tienePerfil))
     .map((group) => ({
       ...group,
       items: group.items.filter((item) =>
