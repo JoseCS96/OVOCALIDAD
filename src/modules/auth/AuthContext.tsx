@@ -11,6 +11,7 @@ type AuthContextValue = {
   logout: () => void;
   tienePermiso: (permiso: string) => boolean;
   tieneModulo: (moduloCodigo: string) => boolean;
+  tienePerfil: (perfilCodigo: string) => boolean;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -76,6 +77,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     logout,
     tienePermiso: (permiso) => acceso?.permisos.includes(permiso) ?? false,
     tieneModulo: (moduloCodigo) => acceso?.modulos.some((modulo) => modulo.moduloCodigo === moduloCodigo) ?? false,
+    tienePerfil: (perfilCodigo) => acceso?.perfiles.some((perfil) => perfil.perfilCodigo === perfilCodigo) ?? false,
   }), [acceso, cargando, login, logout]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
