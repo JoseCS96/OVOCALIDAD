@@ -21,22 +21,24 @@ export default function EtWorkflowActions({info,busy,onAccion}:Props){
   if(a==="OBSERVAR")return tienePermiso("ET.OBSERVAR")&&(estado==="PENDIENTE_REVISION"||estado==="VERIFICADO");
   if(a==="VERIFICAR")return tienePermiso("ET.VERIFICAR")&&estado==="PENDIENTE_REVISION";
   if(a==="PUBLICAR")return tienePermiso("ET.PUBLICAR")&&estado==="VERIFICADO";
+  if(a==="VIGENTAR")return tienePermiso("ET.PUBLICAR")&&estado==="PUBLICADO";
   return false;
  };
  const seleccionar=(a:AccionWorkflowEt)=>{if(!habilitado(a)||busy)return;setAbierto(false);setComentario("");setAccion(a)};
  const confirmar=()=>{if(!accion)return;if(accion==="OBSERVAR"&&!comentario.trim())return;onAccion(accion,accion==="OBSERVAR"?comentario.trim():null);setAccion(null);setComentario("")};
- const titulo=accion==="ENVIAR_REVISION"?"Enviar a revisión":accion==="OBSERVAR"?"Observar ET":accion==="VERIFICAR"?"Confirmar ET verificada":"Publicar ET";
- const detalle=accion==="ENVIAR_REVISION"?"La ET pasará a PENDIENTE_REVISION y quedará bloqueada para edición.":accion==="OBSERVAR"?(estado==="VERIFICADO"?"La ET volverá a PENDIENTE_REVISION.":"La ET volverá a BORRADOR para su corrección."):accion==="VERIFICAR"?"Confirma que la revisión terminó. La ET pasará a VERIFICADO.":accion==="PUBLICAR"?"La ET debe estar verificada. Al publicar quedará en estado final.":"";
+ const titulo=accion==="ENVIAR_REVISION"?"Enviar a revisión":accion==="OBSERVAR"?"Observar ET":accion==="VERIFICAR"?"Confirmar ET verificada":accion==="PUBLICAR"?"Publicar ET":"Pasar a vigente";
+ const detalle=accion==="ENVIAR_REVISION"?"La ET pasará a PENDIENTE_REVISION y quedará bloqueada para edición.":accion==="OBSERVAR"?(estado==="VERIFICADO"?"La ET volverá a PENDIENTE_REVISION.":"La ET volverá a BORRADOR para su corrección."):accion==="VERIFICAR"?"Confirma que la revisión terminó. La ET pasará a VERIFICADO.":accion==="PUBLICAR"?"La ET debe estar verificada. Al publicar pasará a PUBLICADO; todavía no será la versión vigente para evaluaciones.":accion==="VIGENTAR"?"La ET pasará a VIGENTE y podrá ser utilizada como especificación vigente en las evaluaciones.":"";
  const tieneAcciones=["ET.ENVIAR_REVISION","ET.OBSERVAR","ET.VERIFICAR","ET.PUBLICAR"].some(tienePermiso);
  if(!tieneAcciones)return null;
  return <>
   <div className="relative">
-   <Button ref={botonRef} variant="outline" className="h-11 px-4 font-semibold" disabled={busy||estado==="PUBLICADO"} onClick={()=>setAbierto(v=>!v)}>Acciones<ChevronDown className="size-4"/></Button>
+   <Button ref={botonRef} variant="outline" className="h-11 px-4 font-semibold" disabled={busy||estado==="VIGENTE"} onClick={()=>setAbierto(v=>!v)}>Acciones<ChevronDown className="size-4"/></Button>
    {abierto&&createPortal(<div className="fixed z-[100] rounded-xl border bg-white p-2 shadow-2xl" style={{top:posicion.top,left:posicion.left,width:posicion.width}}>
     <Opcion icon={<Send className="size-4"/>} texto="Enviar a revisión" disabled={!habilitado("ENVIAR_REVISION")} onClick={()=>seleccionar("ENVIAR_REVISION")}/>
     <Opcion icon={<Eye className="size-4"/>} texto="Observar" disabled={!habilitado("OBSERVAR")} onClick={()=>seleccionar("OBSERVAR")}/>
     <Opcion icon={<CheckCircle2 className="size-4"/>} texto="ET verificada" disabled={!habilitado("VERIFICAR")} onClick={()=>seleccionar("VERIFICAR")}/>
     <Opcion icon={<Upload className="size-4"/>} texto="Publicar ET" disabled={!habilitado("PUBLICAR")} onClick={()=>seleccionar("PUBLICAR")}/>
+    <Opcion icon={<CheckCircle2 className="size-4"/>} texto="Pasar a vigente" disabled={!habilitado("VIGENTAR")} onClick={()=>seleccionar("VIGENTAR")}/>
    </div>,document.body)}
   </div>
   {accion&&<div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/45 p-4">
