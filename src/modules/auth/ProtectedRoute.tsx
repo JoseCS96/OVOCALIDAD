@@ -1,8 +1,12 @@
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "./AuthContext";
 
-export default function ProtectedRoute() {
-  const { autenticado, cargando } = useAuth();
+type ProtectedRouteProps = {
+  perfilesPermitidos?: string[];
+};
+
+export default function ProtectedRoute({ perfilesPermitidos }: ProtectedRouteProps) {
+  const { autenticado, cargando, tienePerfil } = useAuth();
   const location = useLocation();
 
   if (cargando) {
@@ -18,6 +22,10 @@ export default function ProtectedRoute() {
 
   if (!autenticado) {
     return <Navigate to="/login" replace state={{ from: location.pathname }} />;
+  }
+
+  if (perfilesPermitidos && !perfilesPermitidos.some(tienePerfil)) {
+    return <Navigate to="/" replace />;
   }
 
   return <Outlet />;
