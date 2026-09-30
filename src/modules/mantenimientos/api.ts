@@ -50,3 +50,15 @@ export async function listarMetodosEnsayo(params?:{busqueda?:string;estado?:bool
 export async function crearMetodoEnsayo(request:{metEnsayoDescripcion:string}){const {data}=await api.post<OperacionMetodoEnsayo>("/api/mantenimientos/metodos-ensayo",request);return validarMetodoEnsayo(data)}
 export async function editarMetodoEnsayo(id:number,request:{metEnsayoDescripcion:string}){const {data}=await api.put<OperacionMetodoEnsayo>(`/api/mantenimientos/metodos-ensayo/${id}`,request);return validarMetodoEnsayo(data)}
 export async function cambiarEstadoMetodoEnsayo(id:number,estado:boolean){const {data}=await api.patch<OperacionMetodoEnsayo>(`/api/mantenimientos/metodos-ensayo/${id}/estado`,{estado});return validarMetodoEnsayo(data)}
+
+
+export type ContenidoRotuladoMaestro={
+ contRotuladoId:number;contRotuladoDescripcion:string|null;estado:boolean;
+ audUsuarioCreacion:string;audFechaCreacion:string;audUsuarioModificacion:string|null;audFechaActualizacion:string|null;tieneUso:boolean
+};
+export type OperacionContenidoRotulado={codigoResultado:number;mensaje:string;contRotuladoId?:number;estado?:boolean};
+function validarContenidoRotulado(x:OperacionContenidoRotulado){if(x.codigoResultado!==0)throw new Error(x.mensaje);return x}
+export async function listarContenidosRotulado(params?:{busqueda?:string;estado?:boolean}){const {data}=await api.get<ContenidoRotuladoMaestro[]>("/api/mantenimientos/contenidos-rotulado",{params});return data}
+export async function crearContenidoRotulado(request:{contRotuladoDescripcion:string}){const {data}=await api.post<OperacionContenidoRotulado>("/api/mantenimientos/contenidos-rotulado",request);return validarContenidoRotulado(data)}
+export async function editarContenidoRotulado(id:number,request:{contRotuladoDescripcion:string}){const {data}=await api.put<OperacionContenidoRotulado>(`/api/mantenimientos/contenidos-rotulado/${id}`,request);return validarContenidoRotulado(data)}
+export async function cambiarEstadoContenidoRotulado(id:number,estado:boolean){const {data}=await api.patch<OperacionContenidoRotulado>(`/api/mantenimientos/contenidos-rotulado/${id}/estado`,{estado});return validarContenidoRotulado(data)}
