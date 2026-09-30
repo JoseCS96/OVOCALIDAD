@@ -12,7 +12,7 @@ export default function ContenidosRotuladoMantenimientoPage(){
  const cargar=useCallback(async()=>{setCargando(true);try{setItems(await listarContenidosRotulado({busqueda:busqueda.trim()||undefined,estado:filtro==="todos"?undefined:filtro==="activos"}))}finally{setCargando(false)}},[busqueda,filtro]);
  useEffect(()=>{const t=window.setTimeout(cargar,250);return()=>window.clearTimeout(t)},[cargar]);
  const abrirNuevo=()=>{setEditando(null);setDescripcion("");setError("")};
- const abrirEditar=(x:ContenidoRotuladoMaestro)=>{setEditando(x);setDescripcion(x.contRotuladoDescripcion);setError("")};
+ const abrirEditar=(x:ContenidoRotuladoMaestro)=>{setEditando(x);setDescripcion(x.contRotuladoDescripcion??"");setError("")};
  const cerrar=()=>setEditando(undefined);
  const guardar=async()=>{if(!descripcion.trim()){setError("La descripción es obligatoria.");return}setGuardando(true);setError("");try{const req={contRotuladoDescripcion:descripcion.trim()};if(editando)await editarContenidoRotulado(editando.contRotuladoId,req);else await crearContenidoRotulado(req);cerrar();await cargar()}catch(e){setError(e instanceof Error?e.message:"No se pudo guardar el registro.")}finally{setGuardando(false)}};
  const cambiarEstado=async(x:ContenidoRotuladoMaestro)=>{if(!window.confirm(`¿Deseas ${x.estado?"inactivar":"activar"} “${x.contRotuladoDescripcion}”?`))return;await cambiarEstadoContenidoRotulado(x.contRotuladoId,!x.estado);await cargar()};
