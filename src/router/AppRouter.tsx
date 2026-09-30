@@ -20,6 +20,8 @@ import CaracteristicasMantenimientoPage from "@/modules/mantenimientos/Caracteri
 import TiposCaracteristicaMantenimientoPage from "@/modules/mantenimientos/TiposCaracteristicaMantenimientoPage";
 import MetodosEnsayoMantenimientoPage from "@/modules/mantenimientos/MetodosEnsayoMantenimientoPage";
 import ContenidosRotuladoMantenimientoPage from "@/modules/mantenimientos/ContenidosRotuladoMantenimientoPage";
+import CargosMantenimientoPage from "@/modules/mantenimientos/CargosMantenimientoPage";
+import ResponsablesMantenimientoPage from "@/modules/mantenimientos/ResponsablesMantenimientoPage";
 
 const pages = [
   { path: "/productos", title: "Productos", eyebrow: "Gestión documental", description: "Maestro de productos y códigos asociados al proceso de calidad.", icon: Package },
@@ -55,6 +57,8 @@ export default function AppRouter() {
           <Route path="/mantenimientos/tipos-caracteristica" element={<TiposCaracteristicaMantenimientoPage />} />
           <Route path="/mantenimientos/metodos-ensayo" element={<MetodosEnsayoMantenimientoPage />} />
           <Route path="/mantenimientos/contenidos-rotulado" element={<ContenidosRotuladoMantenimientoPage />} />
+          <Route path="/mantenimientos/cargos" element={<CargosMantenimientoPage />} />
+          <Route path="/mantenimientos/responsables" element={<ResponsablesMantenimientoPage />} />
           {pages.map((page) => <Route key={page.path} path={page.path} element={<ModulePlaceholder {...page} />} />)}
         </Route>
       </Route>
