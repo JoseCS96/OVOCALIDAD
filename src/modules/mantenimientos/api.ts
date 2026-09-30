@@ -24,8 +24,8 @@ export type OperacionCaracteristica={codigoResultado:number;mensaje:string;carac
 function validarCaracteristica(x:OperacionCaracteristica){if(x.codigoResultado!==0)throw new Error(x.mensaje);return x}
 export async function listarCaracteristicas(params?:{busqueda?:string;tipoCaractId?:number;estado?:boolean}){const {data}=await api.get<CaracteristicaMantenimiento[]>("/api/mantenimientos/caracteristicas",{params});return data}
 export async function obtenerCatalogosCaracteristica(){const {data}=await api.get<CatalogosCaracteristicaMantenimiento>("/api/mantenimientos/caracteristicas/catalogos");return data}
-export async function crearCaracteristica(request:{caracteristicaDescripcion:string;caracteristicaUnidadDeMedida:string|null;tipoCaractId:number;metEnsayoId:number|null}){const {data}=await api.post<OperacionCaracteristica>("/api/mantenimientos/caracteristicas",request);return validarCaracteristica(data)}
-export async function editarCaracteristica(id:number,request:{caracteristicaDescripcion:string;caracteristicaUnidadDeMedida:string|null;tipoCaractId:number;metEnsayoId:number|null}){const {data}=await api.put<OperacionCaracteristica>(`/api/mantenimientos/caracteristicas/${id}`,request);return validarCaracteristica(data)}
+export async function crearCaracteristica(request:{caracteristicaDescripcion:string;caracteristicaUnidadDeMedida:string|null;tipoCaractId:number;metEnsayoId:number}){const {data}=await api.post<OperacionCaracteristica>("/api/mantenimientos/caracteristicas",request);return validarCaracteristica(data)}
+export async function editarCaracteristica(id:number,request:{caracteristicaDescripcion:string;caracteristicaUnidadDeMedida:string|null;tipoCaractId:number;metEnsayoId:number}){const {data}=await api.put<OperacionCaracteristica>(`/api/mantenimientos/caracteristicas/${id}`,request);return validarCaracteristica(data)}
 export async function cambiarEstadoCaracteristica(id:number,estado:boolean){const {data}=await api.patch<OperacionCaracteristica>(`/api/mantenimientos/caracteristicas/${id}/estado`,{estado});return validarCaracteristica(data)}
 
 
