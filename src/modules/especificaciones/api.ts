@@ -1,6 +1,6 @@
 import { api } from "@/lib/api";
 import type { ProductoGenesis } from "../lotes/types";
-import type { CatalogosEt, DetalleEt, GuardarCaracteristicaEt, OperacionEt, EspecificacionTecnicaListado, CrearEspecificacionTecnica, CrearEspecificacionTecnicaResponse, SeccionesEtCatalogo, CrearSeccionEt, CrearSeccionEtResponse, ContenidoSeccionEt, AgregarSeccionVersionEt, ReordenarSeccionesVersionEt, GuardarInformacionGeneralEt, GuardarContenidoBaseEt, ResponsableCatalogoEt, GuardarResponsablesEt, CatalogosIngredientesEt, GuardarIngredientesEt, GuardarRecetasEt, GuardarProcedimientosEt, CatalogosTratamientosEt, GuardarTratamientosEt, GuardarInstruccionesEt, GuardarContenidoRotuladoEt, ContenidoRotuladoCatalogo, GuardarCambiosEt, GuardarAnexosEt, CambiarEstadoEt, CambiarEstadoEtResponse } from "./types";
+import type { CatalogosEt, DetalleEt, GuardarCaracteristicaEt, OperacionEt, EspecificacionTecnicaListado, CrearEspecificacionTecnica, CrearEspecificacionTecnicaResponse, SeccionesEtCatalogo, CrearSeccionEt, CrearSeccionEtResponse, ContenidoSeccionEt, AgregarSeccionVersionEt, ReordenarSeccionesVersionEt, GuardarInformacionGeneralEt, GuardarContenidoBaseEt, ResponsableCatalogoEt, GuardarResponsablesEt, CatalogosIngredientesEt, GuardarIngredientesEt, GuardarRecetasEt, GuardarProcedimientosEt, CatalogosTratamientosEt, GuardarTratamientosEt, GuardarInstruccionesEt, GuardarContenidoRotuladoEt, ContenidoRotuladoCatalogo, GuardarCambiosEt, GuardarAnexosEt, CambiarEstadoEt, CambiarEstadoEtResponse, VersionReemplazableEt } from "./types";
 function validar(data:OperacionEt){if(data.codigoResultado!==0)throw new Error(data.mensaje);return data}
 export async function obtenerEt(versionId:number){
  const {data}=await api.get<DetalleEt>(`/api/especificaciones-tecnicas/${versionId}`);
@@ -28,6 +28,7 @@ export async function quitarSeccionVersionEt(versionId:number,versSeccId:number)
 export async function reordenarSeccionesVersionEt(versionId:number,request:ReordenarSeccionesVersionEt){const {data}=await api.put<OperacionEt>(`/api/especificaciones-tecnicas/${versionId}/secciones/orden`,request);return validar(data)}
 export async function guardarContenidoSeccionEt(versionId:number,versSeccId:number,contenido:string){const {data}=await api.put<OperacionEt>(`/api/especificaciones-tecnicas/${versionId}/secciones/${versSeccId}/contenido`,{contenido});return validar(data)}
 
+export async function obtenerVersionesReemplazablesEt(versionId:number){const {data}=await api.get<VersionReemplazableEt[]>(`/api/especificaciones-tecnicas/${versionId}/versiones-reemplazables`);return data}
 export async function guardarInformacionGeneralEt(versionId:number,request:GuardarInformacionGeneralEt){const {data}=await api.put<OperacionEt>(`/api/especificaciones-tecnicas/${versionId}/informacion-general`,request);return validar(data)}
 export async function guardarContenidoBaseEt(versionId:number,request:GuardarContenidoBaseEt){const {data}=await api.put<OperacionEt>(`/api/especificaciones-tecnicas/${versionId}/contenido-base`,request);return validar(data)}
 
