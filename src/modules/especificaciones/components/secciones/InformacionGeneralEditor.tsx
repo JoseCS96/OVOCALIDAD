@@ -3,10 +3,10 @@ import {createPortal} from "react-dom";
 import {Check,ChevronDown,Search,Save,X} from "lucide-react";
 import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
-import type {GuardarInformacionGeneralEt,InformacionGeneralEt,PresentacionGenesisDetalleEt,VersionReemplazableEt} from "../../types";
+import type {GuardarInformacionGeneralEt,InformacionGeneralEt,VersionReemplazableEt} from "../../types";
 
-type Props={info:InformacionGeneralEt;presentacion:PresentacionGenesisDetalleEt|null;versionesReemplazables:VersionReemplazableEt[];guardando:boolean;onGuardar:(request:GuardarInformacionGeneralEt)=>void};
-export default function InformacionGeneralEditor({info,presentacion,versionesReemplazables,guardando,onGuardar}:Props){
+type Props={info:InformacionGeneralEt;versionesReemplazables:VersionReemplazableEt[];guardando:boolean;onGuardar:(request:GuardarInformacionGeneralEt)=>void};
+export default function InformacionGeneralEditor({info,versionesReemplazables,guardando,onGuardar}:Props){
  const [form,setForm]=useState<GuardarInformacionGeneralEt>(()=>toForm(info));
  useEffect(()=>setForm(toForm(info)),[info]);
  const set=<K extends keyof GuardarInformacionGeneralEt>(k:K,v:GuardarInformacionGeneralEt[K])=>setForm(x=>({...x,[k]:v}));
