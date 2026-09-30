@@ -96,8 +96,8 @@ export type ReordenarSeccionesVersionEt={secciones:Array<{versSeccId:number;orde
 
 export type GuardarInformacionGeneralEt={documentoDescripcionDocumento:string;versionNumero:number|null;versionInicioVigencia:string|null;versionReemplazaAId:number|null;versionNroPaginas:number|null;versionDescripcion:string|null};
 
-export type AccionWorkflowEt="ENVIAR_REVISION"|"OBSERVAR"|"VERIFICAR"|"PUBLICAR";
+export type AccionWorkflowEt="ENVIAR_REVISION"|"OBSERVAR"|"VERIFICAR"|"PUBLICAR"|"VIGENTAR";
 export type CambiarEstadoEt={accion:AccionWorkflowEt;comentario:string|null};
-export type CambiarEstadoEtResponse=OperacionEt&{versionId?:number|null;estVerOrigenId?:number|null;estadoOrigen?:string|null;estVerDestinoId?:number|null;estadoDestino?:string|null;accion?:string|null;comentario?:string|null};
+export type CambiarEstadoEtResponse=OperacionEt&{versionId?:number|null;estVerOrigenId?:number|null;estadoOrigen?:string|null;estVerDestinoId?:number|null;estadoDestino?:string|null;accion?:string|null;comentario?:string|null;versionVigenteAnteriorId?:number|null;fechaVigencia?:string|null};
 
 export type VersionReemplazableEt={versionId:number;documentoCodigo:string;versionNumero:number;versionInicioVigencia:string|null;versionFinVigencia:string|null;estadoVersion:string};
