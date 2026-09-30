@@ -81,7 +81,7 @@ export type EspecificacionTecnicaListado={versionId:number;documentoId:number;do
 
 export type CrearEtSeccion={seccionId:number;orden:number};
 export type PresentacionGenesisEt={kardex:number;codigoGenesis:string};
-export type CrearEspecificacionTecnica={documentoCodigo:string;documentoDescripcionDocumento:string;presentacionesGenesis:PresentacionGenesisEt[];versionNumero:number;versionInicioVigencia:string|null;versionReemplazaAId:number|null;versionNroPaginas:number|null;secciones:CrearEtSeccion[]};
+export type CrearEspecificacionTecnica={documentoCodigo:string;documentoDescripcionDocumento:string;productoCodigo:string;presentacionesGenesis:PresentacionGenesisEt[];versionNumero:number;versionInicioVigencia:string|null;versionReemplazaAId:number|null;versionNroPaginas:number|null;secciones:CrearEtSeccion[]};
 export type CrearEspecificacionTecnicaResponse=OperacionEt&{documentoId?:number|null;versionId?:number|null;documentoCodigo?:string|null;productoCodigo?:string|null;versionNumero?:number|null;estadoVersion?:string|null};
 
 export type SeccionDisponibleEt={seccionId:number;seccionDescripcion:string;idTipoSeccion:number|null;tipoSeccion:string|null;ordenDefault:number;esBase:boolean;puedeEliminarse:boolean;permiteReordenar:boolean;icono:string|null};
