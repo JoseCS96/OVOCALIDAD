@@ -8,7 +8,7 @@ export type NavigationItem = {
   permiso?: string;
 };
 
-export type NavigationGroup = { title: string; items: NavigationItem[] };
+export type NavigationGroup = { title: string; items: NavigationItem[]; perfilesPermitidos?: string[] };
 
 export const navigationGroups: NavigationGroup[] = [
   { title: "Inicio", items: [{ label: "Dashboard", path: "/", icon: Home }] },
@@ -28,7 +28,7 @@ export const navigationGroups: NavigationGroup[] = [
     { label: "Certificados", path: "/certificacion/certificados", icon: ShieldCheck, permiso: "CERTIFICADO.VER" },
     { label: "Liberaciones", path: "/certificacion/liberaciones", icon: FileCheck2, permiso: "LIBERACION.VER" },
   ]},
-  { title: "Mantenimientos", items: [
+  { title: "Mantenimientos", perfilesPermitidos: ["JEFE_CALIDAD"], items: [
     { label: "Ingredientes", path: "/mantenimientos/ingredientes", icon: Wrench },
     { label: "Características", path: "/mantenimientos/caracteristicas", icon: Wrench },
     { label: "Tipos de característica", path: "/mantenimientos/tipos-caracteristica", icon: Wrench },
