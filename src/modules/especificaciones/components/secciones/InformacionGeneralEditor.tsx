@@ -1,14 +1,19 @@
-import {useEffect,useState} from "react";
-import {Save} from "lucide-react";
+import {useEffect,useMemo,useRef,useState} from "react";
+import {createPortal} from "react-dom";
+import {Check,ChevronDown,Search,Save,X} from "lucide-react";
 import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
-import type {GuardarInformacionGeneralEt,InformacionGeneralEt,PresentacionGenesisDetalleEt} from "../../types";
+import type {GuardarInformacionGeneralEt,InformacionGeneralEt,PresentacionGenesisDetalleEt,VersionReemplazableEt} from "../../types";
 
-type Props={info:InformacionGeneralEt;presentacion:PresentacionGenesisDetalleEt|null;guardando:boolean;onGuardar:(request:GuardarInformacionGeneralEt)=>void};
-export default function InformacionGeneralEditor({info,presentacion,guardando,onGuardar}:Props){
+type Props={info:InformacionGeneralEt;presentacion:PresentacionGenesisDetalleEt|null;versionesReemplazables:VersionReemplazableEt[];guardando:boolean;onGuardar:(request:GuardarInformacionGeneralEt)=>void};
+export default function InformacionGeneralEditor({info,presentacion,versionesReemplazables,guardando,onGuardar}:Props){
  const [form,setForm]=useState<GuardarInformacionGeneralEt>(()=>toForm(info));
  useEffect(()=>setForm(toForm(info)),[info]);
  const set=<K extends keyof GuardarInformacionGeneralEt>(k:K,v:GuardarInformacionGeneralEt[K])=>setForm(x=>({...x,[k]:v}));
+ const [reemplazaAbierto,setReemplazaAbierto]=useState(false),[busqueda,setBusqueda]=useState(""),[rect,setRect]=useState<DOMRect|null>(null);const anchor=useRef<HTMLDivElement|null>(null);
+ const seleccion=versionesReemplazables.find(x=>x.versionId===form.versionReemplazaAId);
+ const filtradas=useMemo(()=>{const q=busqueda.trim().toLowerCase();return versionesReemplazables.filter(x=>!q||`${x.documentoCodigo} ${x.versionNumero} ${x.estadoVersion} ${x.versionInicioVigencia??""}`.toLowerCase().includes(q))},[versionesReemplazables,busqueda]);
+ useEffect(()=>{if(!reemplazaAbierto)return;const pos=()=>anchor.current&&setRect(anchor.current.getBoundingClientRect());pos();window.addEventListener("resize",pos);window.addEventListener("scroll",pos,true);return()=>{window.removeEventListener("resize",pos);window.removeEventListener("scroll",pos,true)}},[reemplazaAbierto]);
  return <div className="rounded-xl border bg-white">
   <div className="border-b px-5 py-4"><h2 className="font-semibold">Información general</h2><p className="text-xs text-[var(--text-secondary)]">Edita los datos principales de la Especificación Técnica.</p></div>
   <div className="grid gap-5 p-5 md:grid-cols-2">
@@ -17,6 +22,7 @@ export default function InformacionGeneralEditor({info,presentacion,guardando,on
    <Field label="Nombre / descripción del documento"><Input value={form.documentoDescripcionDocumento} onChange={e=>set("documentoDescripcionDocumento",e.target.value)}/></Field>
    <Field label="Versión"><Input type="number" min="0" step="0.0001" value={form.versionNumero??""} onChange={e=>set("versionNumero",e.target.value===""?null:Number(e.target.value))}/></Field>
    <Field label="Inicio de vigencia"><Input type="date" value={form.versionInicioVigencia??""} onChange={e=>set("versionInicioVigencia",e.target.value||null)}/></Field>
+   <Field label="Reemplaza a (opcional)"><div ref={anchor} className="relative"><button type="button" className="flex h-10 w-full items-center justify-between rounded-md border bg-white px-3 text-left text-sm" onClick={()=>setReemplazaAbierto(v=>!v)}><span className={seleccion?"truncate":"truncate text-[var(--text-secondary)]"}>{seleccion?`${seleccion.documentoCodigo} · V.${fmtVersion(seleccion.versionNumero)} · ${fecha(seleccion.versionInicioVigencia)}`:"Sin versión reemplazada"}</span><ChevronDown className="h-4 w-4 shrink-0 text-slate-500"/></button>{reemplazaAbierto&&rect&&createPortal(<div style={{position:"fixed",left:rect.left,top:rect.bottom+4,width:rect.width,zIndex:9999}} className="overflow-hidden rounded-md border bg-white shadow-2xl"><div className="relative border-b p-2"><Search className="absolute left-4 top-4 h-4 w-4 text-slate-400"/><input autoFocus className="h-9 w-full rounded-md border bg-white pl-9 pr-8 text-sm outline-none focus:ring-2 focus:ring-ring" placeholder="Escriba para buscar versión..." value={busqueda} onChange={e=>setBusqueda(e.target.value)}/>{busqueda&&<button type="button" className="absolute right-4 top-4" onClick={()=>setBusqueda("")}><X className="h-4 w-4"/></button>}</div><div className="max-h-56 overflow-y-auto p-1"><button type="button" className="flex w-full items-center justify-between rounded px-3 py-2 text-left text-sm hover:bg-slate-100" onClick={()=>{set("versionReemplazaAId",null);setReemplazaAbierto(false);setBusqueda("")}}><span>Sin versión reemplazada</span>{form.versionReemplazaAId===null&&<Check className="h-4 w-4"/>}</button>{filtradas.map(x=><button type="button" key={x.versionId} className="flex w-full items-center justify-between rounded px-3 py-2 text-left text-sm hover:bg-slate-100" onClick={()=>{set("versionReemplazaAId",x.versionId);setReemplazaAbierto(false);setBusqueda("")}}><span><b>{x.documentoCodigo} · V.{fmtVersion(x.versionNumero)}</b><span className="ml-2 text-xs text-[var(--text-secondary)]">{fecha(x.versionInicioVigencia)} · {x.estadoVersion}</span></span>{form.versionReemplazaAId===x.versionId&&<Check className="h-4 w-4 shrink-0"/>}</button>)}{filtradas.length===0&&<div className="px-3 py-4 text-center text-sm text-[var(--text-secondary)]">No hay versiones anteriores disponibles.</div>}</div></div>,document.body)}</div><Hint>Solo muestra versiones anteriores del mismo documento. Puede dejarse vacío y completarse después.</Hint></Field>
    <Field label="N.º páginas"><Input type="number" min="1" value={form.versionNroPaginas??""} onChange={e=>set("versionNroPaginas",e.target.value===""?null:Number(e.target.value))}/></Field>
    <div className="md:col-span-2"><Field label="Descripción general"><textarea className="min-h-28 w-full resize-y rounded-lg border bg-white p-3 text-sm outline-none focus:ring-2 focus:ring-slate-200" value={form.versionDescripcion??""} onChange={e=>set("versionDescripcion",e.target.value||null)} placeholder="Descripción general de la versión..."/></Field></div>
   </div>
@@ -26,3 +32,6 @@ export default function InformacionGeneralEditor({info,presentacion,guardando,on
 function toForm(info:InformacionGeneralEt):GuardarInformacionGeneralEt{return {documentoDescripcionDocumento:info.documentoDescripcionDocumento,versionNumero:info.versionNumero,versionInicioVigencia:info.versionInicioVigencia?.slice(0,10)??null,versionReemplazaAId:info.versionReemplazaAId,versionNroPaginas:info.versionNroPaginas,versionDescripcion:info.versionDescripcion}}
 function Field({label,children}:{label:string;children:React.ReactNode}){return <label className="block space-y-1.5"><span className="text-xs font-medium text-[var(--text-secondary)]">{label}</span>{children}</label>}
 function Hint({children}:{children:React.ReactNode}){return <span className="block text-[11px] text-[var(--text-secondary)]">{children}</span>}
+
+function fmtVersion(v:number){return Number.isInteger(v)?String(v):String(v).replace(/0+$/,"").replace(/\.$/,"")}
+function fecha(v:string|null){return v?new Date(v+"T00:00:00").toLocaleDateString("es-PE"):"Sin fecha"}
