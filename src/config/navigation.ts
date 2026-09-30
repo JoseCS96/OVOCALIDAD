@@ -34,6 +34,8 @@ export const navigationGroups: NavigationGroup[] = [
     { label: "Tipos de característica", path: "/mantenimientos/tipos-caracteristica", icon: Wrench },
     { label: "Métodos de ensayo", path: "/mantenimientos/metodos-ensayo", icon: Wrench },
     { label: "Contenido del Rotulado", path: "/mantenimientos/contenidos-rotulado", icon: Wrench },
+    { label: "Cargos", path: "/mantenimientos/cargos", icon: Wrench },
+    { label: "Responsables", path: "/mantenimientos/responsables", icon: Wrench },
   ]},
   { title: "Sistema", items: [
     { label: "Trazabilidad", path: "/trazabilidad", icon: Boxes, permiso: "TRAZABILIDAD.VER" },
