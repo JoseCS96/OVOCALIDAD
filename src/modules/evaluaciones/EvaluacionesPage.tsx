@@ -71,7 +71,7 @@ export default function EvaluacionesPage() {
         <Button variant="outline" onClick={() => { void refetch(); if (puedeConsolidar) void refrescarDecision(); }} disabled={isFetching}><RefreshCw size={15} className={isFetching ? "animate-spin" : ""}/>Actualizar</Button>
       </div>}
     />
-    <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+    <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-5">
       {[
         ["Total visibles", data.length],
         ["Pendientes", data.filter(x => x.estadoEvaluacionCodigo === "PENDIENTE").length],
@@ -94,18 +94,18 @@ export default function EvaluacionesPage() {
         : isLoading ? <p className="p-10 text-center text-sm">Cargando evaluaciones...</p>
         : isError ? <p className="p-10 text-center text-sm text-red-600">No se pudo cargar el listado. Verifica que el nuevo procedimiento SQL esté instalado.</p>
         : visibles.length === 0 ? <p className="p-10 text-center text-sm text-[var(--text-secondary)]">No hay evaluaciones para estos filtros.</p>
-        : <div className="overflow-x-auto"><table className="w-full min-w-[1000px] text-left text-sm">
+        : <div className="overflow-x-auto"><table className="w-full min-w-[1100px] table-fixed text-left text-sm">
           <thead className="bg-[var(--surface-muted)] text-xs uppercase text-[var(--text-secondary)]"><tr>
-            <th className="px-4 py-3">Lote / producto</th><th className="px-4 py-3">Tipo</th><th className="px-4 py-3">Estado</th><th className="px-4 py-3">Decisión de Calidad</th><th className="px-4 py-3">Evaluador</th><th className="px-4 py-3">Inicio / fin</th><th className="px-4 py-3 text-right">Acción</th>
+            <th className="w-[23%] px-3 py-3">Lote / producto</th><th className="w-[14%] px-3 py-3">Tipo</th><th className="w-[11%] px-3 py-3 text-center">Estado</th><th className="w-[16%] px-3 py-3 text-center">Decisión de Calidad</th><th className="w-[11%] px-3 py-3 text-center">Evaluador</th><th className="w-[14%] px-3 py-3 text-center">Inicio / fin</th><th className="w-[11%] px-3 py-3 text-center">Acción</th>
           </tr></thead><tbody>{visibles.map(item => {
             const disponible = item.estadoEvaluacionCodigo === "PENDIENTE" && !item.usuarioEvaluador;
             return <tr key={item.evaluacionId} className="border-t border-[var(--border)]">
-              <td className="px-4 py-4"><p className="font-semibold">{item.codigoLote}</p><p className="text-xs text-[var(--text-secondary)]">{item.productoCodigo} · {item.productoDescripcion}</p></td>
+              <td className="px-3 py-4 align-middle"><p className="font-semibold">{item.codigoLote}</p><p className="text-xs text-[var(--text-secondary)]">{item.productoCodigo} · {item.productoDescripcion}</p></td>
               <td className="px-4 py-4">{item.tipoEvaluacionDescripcion}<p className="text-xs text-[var(--text-secondary)]">Intento {item.intento}</p></td>
               <td className="px-4 py-4"><Badge variant="outline" className={estadoClase(item.estadoEvaluacionCodigo)}>{item.estadoEvaluacionCodigo.replaceAll("_", " ")}</Badge></td>
               <td className="px-4 py-4">
                 {puedeConsolidar && pendientesIds.has(item.evaluacionId)
-                  ? <div className="flex flex-col items-start gap-1">
+                  ? <div className="flex flex-col items-center justify-center gap-1">
                       <Badge variant="outline" className="border-amber-300 bg-amber-50 text-amber-800">Pendiente de decisión</Badge>
                       <button type="button" className="text-xs font-medium text-blue-700 underline underline-offset-2" onClick={() => navigate("/operacion/evaluaciones/consolidacion")}>Revisar decisión</button>
                     </div>
@@ -116,8 +116,8 @@ export default function EvaluacionesPage() {
                       : <span className="text-xs text-[var(--text-secondary)]">{puedeConsolidar ? "No figura pendiente" : "Consultar con Jefatura"}</span>}
               </td>
               <td className="px-4 py-4">{item.usuarioEvaluador || "Sin asignar"}</td>
-              <td className="px-4 py-4 text-xs">{fecha(item.fechaInicio)}<p className="text-[var(--text-secondary)]">{fecha(item.fechaFin)}</p></td>
-              <td className="px-4 py-4 text-right">{disponible && puedeIniciar
+              <td className="px-3 py-4 text-center align-middle text-xs">{fecha(item.fechaInicio)}<p className="text-[var(--text-secondary)]">{fecha(item.fechaFin)}</p></td>
+              <td className="px-3 py-4 text-center align-middle">{disponible && puedeIniciar
                 ? <Button size="sm" disabled={iniciar.isPending} onClick={() => iniciar.mutate(item.evaluacionId)}><PlayCircle size={14}/>Iniciar</Button>
                 : <Button size="sm" variant="outline" disabled={!puedeVer} onClick={() => navigate(`/operacion/evaluaciones/${item.evaluacionId}`)}>Ver detalle <ArrowRight size={14}/></Button>}</td>
             </tr>;
