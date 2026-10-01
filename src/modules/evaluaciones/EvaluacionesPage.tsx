@@ -113,7 +113,7 @@ export default function EvaluacionesPage() {
                     ? <span className="text-xs text-[var(--text-secondary)]">Aún no corresponde</span>
                     : puedeConsolidar && errorDecision
                       ? <span className="text-xs text-amber-700">No disponible</span>
-                      : <span className="text-xs text-[var(--text-secondary)]">{puedeConsolidar ? "Sin decisión pendiente" : "Consultar con Jefatura"}</span>}
+                      : <span className="text-xs text-[var(--text-secondary)]">{puedeConsolidar ? "No figura pendiente" : "Consultar con Jefatura"}</span>}
               </td>
               <td className="px-4 py-4">{item.usuarioEvaluador || "Sin asignar"}</td>
               <td className="px-4 py-4 text-xs">{fecha(item.fechaInicio)}<p className="text-[var(--text-secondary)]">{fecha(item.fechaFin)}</p></td>
