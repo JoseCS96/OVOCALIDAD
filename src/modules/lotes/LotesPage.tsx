@@ -69,14 +69,22 @@ export default function LotesPage() {
   const puedeIniciarEvaluacion = tienePermiso("EVALUACION.INICIAR");
   const puedeVerEvaluacion = tienePermiso("EVALUACION.VER");
   const [actionError, setActionError] = useState<string | null>(null);
+  const [startingId, setStartingId] = useState<number | null>(null);
   const iniciarMutation = useMutation({
     mutationFn: (evaluacionId: number) => iniciarEvaluacion(evaluacionId),
+    onMutate: (evaluacionId) => { setActionError(null); setStartingId(evaluacionId); },
     onSuccess: async (_, evaluacionId) => {
       setActionError(null);
       await queryClient.invalidateQueries({ queryKey: ["lotes"] });
+      await queryClient.refetchQueries({ queryKey: ["lotes"], type: "active" });
       navigate(`/operacion/evaluaciones/${evaluacionId}`);
     },
-    onError: (error) => setActionError(error instanceof Error ? error.message : "No se pudo iniciar la evaluación."),
+    onError: async (error) => {
+      await queryClient.invalidateQueries({ queryKey: ["lotes"] });
+      await queryClient.refetchQueries({ queryKey: ["lotes"], type: "active" });
+      setActionError(error instanceof Error ? error.message : "No se pudo iniciar la evaluación.");
+    },
+    onSettled: () => setStartingId(null),
   });
   const [draft, setDraft] = useState<LotesFiltros>({});
   const [filtros, setFiltros] = useState<LotesFiltros>({});
@@ -241,7 +249,6 @@ export default function LotesPage() {
                   <th className="px-5 py-3"><button type="button" onClick={() => sortBy("estadoLoteDescripcion")} className="group inline-flex items-center gap-1.5 whitespace-nowrap font-semibold uppercase tracking-[0.08em] hover:text-[var(--primary)]">Estado lote<ArrowDownUp size={13} className={sortKey === "estadoLoteDescripcion" ? "text-[var(--primary)]" : "opacity-45 group-hover:opacity-100"} /></button></th>
                   <th className="px-5 py-3"><button type="button" onClick={() => sortBy("estadoEvaluacionDescripcion")} className="group inline-flex items-center gap-1.5 whitespace-nowrap font-semibold uppercase tracking-[0.08em] hover:text-[var(--primary)]">Evaluación<ArrowDownUp size={13} className={sortKey === "estadoEvaluacionDescripcion" ? "text-[var(--primary)]" : "opacity-45 group-hover:opacity-100"} /></button></th>
                   <th className="px-5 py-3">Avance evaluación</th>
-                  <th className="px-5 py-3">Avance evaluación</th>
                   <th className="px-5 py-3 text-right">Acciones</th>
                 </tr>
               </thead>
@@ -322,7 +329,7 @@ export default function LotesPage() {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-52">
                           {puedeIniciarEvaluacion && lote.evaluacionId !== null && lote.estadoEvaluacionCodigo === "PENDIENTE" && (
-                            <DropdownMenuItem onClick={() => iniciarMutation.mutate(lote.evaluacionId!)}>
+                            <DropdownMenuItem disabled={startingId !== null} onClick={() => iniciarMutation.mutate(lote.evaluacionId!)}>
                               <Play size={15} />
                               Iniciar evaluación
                             </DropdownMenuItem>
@@ -359,7 +366,12 @@ export default function LotesPage() {
           )}
         </CardContent>
       </Card>
-      {actionError && <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{actionError}</div>}
+      {actionError && (
+        <div role="alert" className="fixed bottom-6 right-6 z-[110] flex max-w-sm items-start gap-3 rounded-xl border border-red-200 bg-white p-4 text-sm text-red-700 shadow-xl">
+          <span className="flex-1">{actionError}</span>
+          <button type="button" aria-label="Cerrar notificación" className="font-bold text-red-600 hover:text-red-800" onClick={() => setActionError(null)}>×</button>
+        </div>
+      )}
       {puedeCrearLote && <GenerarLoteModal open={generarOpen} onClose={() => setGenerarOpen(false)} onCreated={() => refetch()} />}
     </PageContainer>
   );
