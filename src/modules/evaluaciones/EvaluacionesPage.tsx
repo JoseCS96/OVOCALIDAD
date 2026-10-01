@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/modules/auth/AuthContext";
-import { iniciarEvaluacion, listarEvaluacionesCalidad } from "./api";
+import { iniciarEvaluacion, listarEvaluacionesCalidad, listarEvaluacionesPendientesCalculo } from "./api";
 
 const fecha = (value: string | null) => value
   ? new Intl.DateTimeFormat("es-PE", { dateStyle: "short", timeStyle: "short" }).format(new Date(value))
@@ -35,6 +35,15 @@ export default function EvaluacionesPage() {
     queryFn: listarEvaluacionesCalidad,
     enabled: puedeVer,
   });
+  const { data: pendientesDecision = [], isError: errorDecision, refetch: refrescarDecision } = useQuery({
+    queryKey: ["evaluaciones", "pendientes-calculo"],
+    queryFn: listarEvaluacionesPendientesCalculo,
+    enabled: puedeConsolidar,
+  });
+  const pendientesIds = useMemo(
+    () => new Set(pendientesDecision.map(item => item.evaluacionId)),
+    [pendientesDecision],
+  );
   const iniciar = useMutation({
     mutationFn: iniciarEvaluacion,
     onSuccess: async (response) => {
@@ -59,17 +68,19 @@ export default function EvaluacionesPage() {
       description={esAuxiliar ? "Pendientes disponibles y tu historial de evaluaciones." : "Seguimiento general de evaluaciones de Calidad en todos sus estados."}
       actions={<div className="flex gap-2">
         {puedeConsolidar && <Button variant="outline" onClick={() => navigate("/operacion/evaluaciones/consolidacion")}>Pendientes de decisión <ArrowRight size={14}/></Button>}
-        <Button variant="outline" onClick={() => refetch()} disabled={isFetching}><RefreshCw size={15} className={isFetching ? "animate-spin" : ""}/>Actualizar</Button>
+        <Button variant="outline" onClick={() => { void refetch(); if (puedeConsolidar) void refrescarDecision(); }} disabled={isFetching}><RefreshCw size={15} className={isFetching ? "animate-spin" : ""}/>Actualizar</Button>
       </div>}
     />
-    <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+    <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
       {[
         ["Total visibles", data.length],
         ["Pendientes", data.filter(x => x.estadoEvaluacionCodigo === "PENDIENTE").length],
         ["En proceso", data.filter(x => x.estadoEvaluacionCodigo === "EN_PROCESO").length],
         ["Terminadas", data.filter(x => x.estadoEvaluacionCodigo === "TERMINADA").length],
+        ...(puedeConsolidar ? [["Pendientes de decisión", pendientesDecision.length] as [string, number]] : []),
       ].map(([label, count]) => <Card key={label} className="border-[var(--border)]"><CardContent className="p-5"><p className="text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)]">{label}</p><p className="mt-2 text-3xl font-semibold">{count}</p></CardContent></Card>)}
     </section>
+    {puedeConsolidar && errorDecision && <p className="text-sm text-amber-700">No se pudo consultar las decisiones pendientes; su estado no está disponible temporalmente.</p>}
     <Card className="overflow-hidden border-[var(--border)]">
       <CardContent className="p-0">
         <div className="flex flex-wrap gap-3 border-b border-[var(--border)] p-4">
@@ -85,13 +96,25 @@ export default function EvaluacionesPage() {
         : visibles.length === 0 ? <p className="p-10 text-center text-sm text-[var(--text-secondary)]">No hay evaluaciones para estos filtros.</p>
         : <div className="overflow-x-auto"><table className="w-full min-w-[1000px] text-left text-sm">
           <thead className="bg-[var(--surface-muted)] text-xs uppercase text-[var(--text-secondary)]"><tr>
-            <th className="px-4 py-3">Lote / producto</th><th className="px-4 py-3">Tipo</th><th className="px-4 py-3">Estado</th><th className="px-4 py-3">Evaluador</th><th className="px-4 py-3">Inicio / fin</th><th className="px-4 py-3 text-right">Acción</th>
+            <th className="px-4 py-3">Lote / producto</th><th className="px-4 py-3">Tipo</th><th className="px-4 py-3">Estado</th><th className="px-4 py-3">Decisión de Calidad</th><th className="px-4 py-3">Evaluador</th><th className="px-4 py-3">Inicio / fin</th><th className="px-4 py-3 text-right">Acción</th>
           </tr></thead><tbody>{visibles.map(item => {
             const disponible = item.estadoEvaluacionCodigo === "PENDIENTE" && !item.usuarioEvaluador;
             return <tr key={item.evaluacionId} className="border-t border-[var(--border)]">
               <td className="px-4 py-4"><p className="font-semibold">{item.codigoLote}</p><p className="text-xs text-[var(--text-secondary)]">{item.productoCodigo} · {item.productoDescripcion}</p></td>
               <td className="px-4 py-4">{item.tipoEvaluacionDescripcion}<p className="text-xs text-[var(--text-secondary)]">Intento {item.intento}</p></td>
               <td className="px-4 py-4"><Badge variant="outline" className={estadoClase(item.estadoEvaluacionCodigo)}>{item.estadoEvaluacionCodigo.replaceAll("_", " ")}</Badge></td>
+              <td className="px-4 py-4">
+                {puedeConsolidar && pendientesIds.has(item.evaluacionId)
+                  ? <div className="flex flex-col items-start gap-1">
+                      <Badge variant="outline" className="border-amber-300 bg-amber-50 text-amber-800">Pendiente de decisión</Badge>
+                      <button type="button" className="text-xs font-medium text-blue-700 underline underline-offset-2" onClick={() => navigate("/operacion/evaluaciones/consolidacion")}>Revisar decisión</button>
+                    </div>
+                  : item.estadoEvaluacionCodigo === "PENDIENTE" || item.estadoEvaluacionCodigo === "EN_PROCESO"
+                    ? <span className="text-xs text-[var(--text-secondary)]">Aún no corresponde</span>
+                    : puedeConsolidar && errorDecision
+                      ? <span className="text-xs text-amber-700">No disponible</span>
+                      : <span className="text-xs text-[var(--text-secondary)]">{puedeConsolidar ? "Sin decisión pendiente" : "Consultar con Jefatura"}</span>}
+              </td>
               <td className="px-4 py-4">{item.usuarioEvaluador || "Sin asignar"}</td>
               <td className="px-4 py-4 text-xs">{fecha(item.fechaInicio)}<p className="text-[var(--text-secondary)]">{fecha(item.fechaFin)}</p></td>
               <td className="px-4 py-4 text-right">{disponible && puedeIniciar
