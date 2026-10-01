@@ -46,7 +46,7 @@ export type GuardarResponsablesEt={elaboradoPor:number[];revisadoPor:number[];ap
 export type IngredienteCatalogoEt={ingredienteId:number;ingredienteDescripcion:string;unidadDeMedida:string|null};
 export type TipoContenidoCatalogoEt={idTipoContenido:number;codigo:string;nombre:string;descripcion:string|null};
 export type CatalogosIngredientesEt={ingredientes:IngredienteCatalogoEt[];tiposContenido:TipoContenidoCatalogoEt[]};
-export type GuardarIngredienteEt={ingredienteId:number;valor:number|null;idTipoContenido:number|null;orden:number};
+export type GuardarIngredienteEt={ingredienteId:number;unidadDeMedida:string|null;valor:number|null;idTipoContenido:number|null;orden:number};
 export type GuardarIngredientesEt={ingredientes:GuardarIngredienteEt[]};
 
 export type GuardarRecetaEt={descripcion:string;idTipoContenido:number|null;orden:number};
