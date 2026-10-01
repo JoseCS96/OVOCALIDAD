@@ -114,8 +114,16 @@ export default function LotesPage() {
   const pagedData = useMemo(() => sortedData.slice((page - 1) * pageSize, page * pageSize), [sortedData, page]);
   useEffect(() => { if (page > totalPages) setPage(totalPages); }, [page, totalPages]);
 
-  const totalConEvaluacion = useMemo(
-    () => data.filter((item) => item.evaluacionId !== null).length,
+  const totalEvaluacionesTerminadas = useMemo(
+    () => data.filter((item) => item.evaluacionId !== null && item.estadoEvaluacionCodigo === "TERMINADA").length,
+    [data]
+  );
+  const totalEvaluacionesPendientes = useMemo(
+    () => data.filter((item) => item.evaluacionId !== null && ["PENDIENTE", "EN_PROCESO"].includes(item.estadoEvaluacionCodigo ?? "")).length,
+    [data]
+  );
+  const totalSinEvaluacion = useMemo(
+    () => data.filter((item) => item.evaluacionId === null).length,
     [data]
   );
 
@@ -161,7 +169,7 @@ export default function LotesPage() {
         }
       />
 
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <Card className="border-[var(--border)] shadow-[var(--shadow-card)]">
           <CardContent className="p-5">
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--text-secondary)]">Lotes visibles</p>
@@ -170,14 +178,20 @@ export default function LotesPage() {
         </Card>
         <Card className="border-[var(--border)] shadow-[var(--shadow-card)]">
           <CardContent className="p-5">
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--text-secondary)]">Con evaluación</p>
-            <p className="mt-2 text-3xl font-semibold">{totalConEvaluacion}</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--text-secondary)]">Evaluación terminada</p>
+            <p className="mt-2 text-3xl font-semibold">{totalEvaluacionesTerminadas}</p>
+          </CardContent>
+        </Card>
+        <Card className="border-[var(--border)] shadow-[var(--shadow-card)]">
+          <CardContent className="p-5">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--text-secondary)]">Pendiente / en proceso</p>
+            <p className="mt-2 text-3xl font-semibold">{totalEvaluacionesPendientes}</p>
           </CardContent>
         </Card>
         <Card className="border-[var(--border)] shadow-[var(--shadow-card)]">
           <CardContent className="p-5">
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--text-secondary)]">Sin evaluación</p>
-            <p className="mt-2 text-3xl font-semibold">{data.length - totalConEvaluacion}</p>
+            <p className="mt-2 text-3xl font-semibold">{totalSinEvaluacion}</p>
           </CardContent>
         </Card>
       </div>
