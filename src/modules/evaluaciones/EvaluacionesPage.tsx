@@ -105,10 +105,7 @@ export default function EvaluacionesPage() {
               <td className="px-4 py-4"><Badge variant="outline" className={estadoClase(item.estadoEvaluacionCodigo)}>{item.estadoEvaluacionCodigo.replaceAll("_", " ")}</Badge></td>
               <td className="px-4 py-4">
                 {puedeConsolidar && pendientesIds.has(item.evaluacionId)
-                  ? <div className="flex flex-col items-center justify-center gap-1">
-                      <Badge variant="outline" className="border-amber-300 bg-amber-50 text-amber-800">Pendiente de decisión</Badge>
-                      <button type="button" className="text-xs font-medium text-blue-700 underline underline-offset-2" onClick={() => navigate("/operacion/evaluaciones/consolidacion")}>Revisar decisión</button>
-                    </div>
+                  ? <button type="button" className="inline-flex items-center justify-center rounded-full border border-amber-300 bg-amber-50 px-3 py-1 text-xs font-medium text-amber-800 transition-colors hover:bg-amber-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500" onClick={() => navigate("/operacion/evaluaciones/consolidacion")} title="Ir a revisar decisión">Pendiente - Revisar decisión</button>
                   : item.estadoEvaluacionCodigo === "PENDIENTE" || item.estadoEvaluacionCodigo === "EN_PROCESO"
                     ? <span className="text-xs text-[var(--text-secondary)]">Aún no corresponde</span>
                     : puedeConsolidar && errorDecision
