@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowRight, PlayCircle, RefreshCw } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import PageContainer from "@/components/common/PageContainer";
 import PageHeader from "@/components/common/PageHeader";
 import { Badge } from "@/components/ui/badge";
@@ -58,7 +58,7 @@ export default function EvaluacionesPage() {
     <PageHeader eyebrow="Operación · Calidad" title="Evaluaciones"
       description={esAuxiliar ? "Pendientes disponibles y tu historial de evaluaciones." : "Seguimiento general de evaluaciones de Calidad en todos sus estados."}
       actions={<div className="flex gap-2">
-        {puedeConsolidar && <Button variant="outline" asChild><Link to="/operacion/evaluaciones/consolidacion">Pendientes de decisión <ArrowRight size={14}/></Link></Button>}
+        {puedeConsolidar && <Button variant="outline" onClick={() => navigate("/operacion/evaluaciones/consolidacion")}>Pendientes de decisión <ArrowRight size={14}/></Button>}
         <Button variant="outline" onClick={() => refetch()} disabled={isFetching}><RefreshCw size={15} className={isFetching ? "animate-spin" : ""}/>Actualizar</Button>
       </div>}
     />
