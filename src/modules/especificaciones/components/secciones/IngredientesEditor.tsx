@@ -24,9 +24,9 @@ function ComboIngrediente({maestro,valor,disabled,onChange}:{maestro:CatalogosIn
   {menu}
  </div>
 }
-const nueva=(orden:number):GuardarIngredienteEt=>({ingredienteId:0,valor:null,idTipoContenido:3,orden});
+const nueva=(orden:number):GuardarIngredienteEt=>({ingredienteId:0,unidadDeMedida:null,valor:null,idTipoContenido:3,orden});
 export default function IngredientesEditor({ingredientes,catalogos,editable,guardando,onGuardar}:Props){
- const inicial=useMemo(()=>[...ingredientes].sort((a,b)=>(a.orden??0)-(b.orden??0)).map((x,i)=>({ingredienteId:x.ingredienteId,valor:x.versIngrValor,idTipoContenido:x.idTipoContenido,orden:x.orden??i+1})),[ingredientes]);
+ const inicial=useMemo(()=>[...ingredientes].sort((a,b)=>(a.orden??0)-(b.orden??0)).map((x,i)=>({ingredienteId:x.ingredienteId,unidadDeMedida:x.unidadDeMedida,valor:x.versIngrValor,idTipoContenido:x.idTipoContenido,orden:x.orden??i+1})),[ingredientes]);
  const [filas,setFilas]=useState<GuardarIngredienteEt[]>(inicial);
  useEffect(()=>setFilas(inicial),[inicial]);
  const maestro=catalogos?.ingredientes??[],tipos=catalogos?.tiposContenido??[];
@@ -38,9 +38,9 @@ export default function IngredientesEditor({ingredientes,catalogos,editable,guar
  return <Card><CardContent className="p-0">
   <div className="flex items-center justify-between border-b px-5 py-4"><div><h2 className="font-semibold">Ingredientes</h2><p className="text-xs text-[var(--text-secondary)]">Ingredientes y composición asociados a esta versión.</p></div><Button type="button" disabled={!editable} onClick={agregar}><Plus/>Agregar ingrediente</Button></div>
   <div className="overflow-x-auto overflow-y-visible"><table className="w-full min-w-[850px] text-sm"><thead className="bg-[var(--surface-muted)] text-left text-xs uppercase text-[var(--text-secondary)]"><tr><th className="px-5 py-3">Ingrediente</th><th>Unidad</th><th>Valor</th><th>Tipo contenido</th><th className="w-24">Orden</th><th className="px-5 text-right">Acciones</th></tr></thead>
-   <tbody>{filas.length===0?<tr><td colSpan={6} className="px-5 py-10 text-center text-[var(--text-secondary)]">Sin ingredientes registrados.</td></tr>:filas.map((x,i)=>{const m=maestro.find(z=>z.ingredienteId===x.ingredienteId);return <tr key={i} className="border-t">
+   <tbody>{filas.length===0?<tr><td colSpan={6} className="px-5 py-10 text-center text-[var(--text-secondary)]">Sin ingredientes registrados.</td></tr>:filas.map((x,i)=>{return <tr key={i} className="border-t">
     <td className="relative overflow-visible px-5 py-3"><ComboIngrediente maestro={maestro} valor={x.ingredienteId} disabled={!editable} onChange={id=>actualizar(i,{ingredienteId:id})}/></td>
-    <td>{m?.unidadDeMedida??"—"}</td>
+    <td><Input className="w-28" maxLength={30} disabled={!editable} value={x.unidadDeMedida??""} placeholder="Opcional" onChange={e=>actualizar(i,{unidadDeMedida:e.target.value||null})}/></td>
     <td><Input className="w-32" type="number" step="any" disabled={!editable} value={x.valor??""} placeholder="Sin valor" onChange={e=>actualizar(i,{valor:e.target.value===""?null:Number(e.target.value)})}/></td>
     <td><select className="h-9 min-w-32 rounded-md border bg-white px-2" disabled={!editable} value={x.idTipoContenido??""} onChange={e=>actualizar(i,{idTipoContenido:e.target.value?Number(e.target.value):null})}><option value="">Sin tipo</option>{tipos.map(t=><option key={t.idTipoContenido} value={t.idTipoContenido}>{t.nombre}</option>)}</select></td>
     <td><Input className="w-20" type="number" min={1} disabled={!editable} value={x.orden} onChange={e=>actualizar(i,{orden:Number(e.target.value)})}/></td>
