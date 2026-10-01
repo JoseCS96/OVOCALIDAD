@@ -4,6 +4,7 @@ import type {
   GuardarResultadoRequest,
   OperacionResponse,
   PanelEvaluador,
+  PanelEvaluacionItem,
   SolicitarReaperturaResponse,
   TerminarEvaluacionResponse,
   SolicitudReaperturaDetalle,
@@ -96,5 +97,10 @@ export async function consolidarEvaluaciones(evaluacionIds: number[], observacio
     "/api/evaluaciones/consolidar",
     { evaluacionIds, observacion: observacion?.trim() || null },
   );
+  return data;
+}
+
+export async function listarEvaluacionesCalidad() {
+  const { data } = await api.get<PanelEvaluacionItem[]>("/api/evaluaciones/listado");
   return data;
 }
