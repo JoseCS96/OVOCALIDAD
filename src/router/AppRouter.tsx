@@ -9,6 +9,7 @@ import LotesPage from "@/modules/lotes/LotesPage";
 import LoteDetallePage from "@/modules/lotes/LoteDetallePage";
 import EvaluacionEnLineaPage from "@/modules/evaluaciones/EvaluacionEnLineaPage";
 import EvaluacionesPage from "@/modules/evaluaciones/EvaluacionesPage";
+import ConsolidacionCalidadPage from "@/modules/evaluaciones/ConsolidacionCalidadPage";
 import DisposicionPreviewPage from "@/modules/evaluaciones/DisposicionPreviewPage";
 import SolicitudesReaperturaPage from "@/modules/evaluaciones/SolicitudesReaperturaPage";
 import EspecificacionTecnicaPage from "@/modules/especificaciones/EspecificacionTecnicaPage";
@@ -45,6 +46,7 @@ export default function AppRouter() {
           <Route path="/operacion/lotes" element={<LotesPage />} />
           <Route path="/operacion/lotes/:loteId" element={<LoteDetallePage />} />
           <Route path="/operacion/evaluaciones" element={<EvaluacionesPage />} />
+          <Route path="/operacion/evaluaciones/consolidacion" element={<ConsolidacionCalidadPage />} />
           <Route path="/operacion/evaluaciones/disposicion" element={<DisposicionPreviewPage />} />
           <Route path="/operacion/evaluaciones/:evaluacionId" element={<EvaluacionEnLineaPage />} />
           <Route path="/operacion/evaluaciones/reaperturas" element={<SolicitudesReaperturaPage />} />
