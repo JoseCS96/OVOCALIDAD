@@ -87,3 +87,20 @@ export async function cambiarEstadoResponsable(usuarioDni:string,estado:boolean)
 
 export async function agregarCargoHistoricoResponsable(usuarioDni:string,request:{cargoId:number;fechaInicio?:string|null;fechaFin?:string|null}){const {data}=await api.post<OperacionResponsable>(`/api/mantenimientos/responsables/${encodeURIComponent(usuarioDni)}/historial-cargos`,request);return validarResponsable(data)}
 export async function editarCargoHistoricoResponsable(usuarioCargoHistorialId:number,request:{cargoId:number;fechaInicio?:string|null;fechaFin?:string|null}){const {data}=await api.put<OperacionResponsable>(`/api/mantenimientos/responsables/historial-cargos/${usuarioCargoHistorialId}`,request);return validarResponsable(data)}
+
+export type FaseMantenimiento={
+ faseId:number;codigo:string;descripcion:string;estado:"ACTIVO"|"INACTIVO";
+ fechaCreacion:string|null;usuarioCreacion:number|null;fechaModificacion:string|null;usuarioModificacion:number|null
+};
+export async function listarFases(params?:{buscar?:string;incluirInactivos?:boolean}){
+ const {data}=await api.get<FaseMantenimiento[]>("/api/mantenimientos/fases",{params});return data;
+}
+export async function guardarFase(request:{codigo:string;descripcion:string},id?:number){
+ const {data}=id==null
+  ?await api.post<FaseMantenimiento>("/api/mantenimientos/fases",request)
+  :await api.put<FaseMantenimiento>(`/api/mantenimientos/fases/${id}`,request);
+ return data;
+}
+export async function cambiarEstadoFase(id:number,estado:"ACTIVO"|"INACTIVO"){
+ const {data}=await api.patch<FaseMantenimiento>(`/api/mantenimientos/fases/${id}/estado`,{estado});return data;
+}
