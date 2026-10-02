@@ -29,6 +29,7 @@ export const navigationGroups: NavigationGroup[] = [
     { label: "Liberaciones", path: "/certificacion/liberaciones", icon: FileCheck2, permiso: "LIBERACION.VER" },
   ]},
   { title: "Mantenimientos", perfilesPermitidos: ["JEFE_CALIDAD"], items: [
+    { label: "Fases", path: "/mantenimientos/fases", icon: Wrench },
     { label: "Ingredientes", path: "/mantenimientos/ingredientes", icon: Wrench },
     { label: "Características", path: "/mantenimientos/caracteristicas", icon: Wrench },
     { label: "Tipos de característica", path: "/mantenimientos/tipos-caracteristica", icon: Wrench },
