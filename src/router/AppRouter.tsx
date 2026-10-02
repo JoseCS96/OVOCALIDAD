@@ -16,6 +16,7 @@ import EspecificacionTecnicaPage from "@/modules/especificaciones/Especificacion
 import EspecificacionTecnicaDetallePage from "@/modules/especificaciones/EspecificacionTecnicaDetallePage";
 import EspecificacionesTecnicasPage from "@/modules/especificaciones/EspecificacionesTecnicasPage";
 import NuevaEspecificacionTecnicaPage from "@/modules/especificaciones/NuevaEspecificacionTecnicaPage";
+import FasesMantenimientoPage from "@/modules/mantenimientos/FasesMantenimientoPage";
 import IngredientesMantenimientoPage from "@/modules/mantenimientos/IngredientesMantenimientoPage";
 import CaracteristicasMantenimientoPage from "@/modules/mantenimientos/CaracteristicasMantenimientoPage";
 import TiposCaracteristicaMantenimientoPage from "@/modules/mantenimientos/TiposCaracteristicaMantenimientoPage";
@@ -55,6 +56,7 @@ export default function AppRouter() {
           <Route path="/documentos/especificaciones/:versionId/editar" element={<EspecificacionTecnicaPage />} />
           <Route path="/documentos/especificaciones" element={<EspecificacionesTecnicasPage />} />
           <Route element={<ProtectedRoute perfilesPermitidos={["JEFE_CALIDAD"]} />}>
+            <Route path="/mantenimientos/fases" element={<FasesMantenimientoPage />} />
             <Route path="/mantenimientos/ingredientes" element={<IngredientesMantenimientoPage />} />
             <Route path="/mantenimientos/caracteristicas" element={<CaracteristicasMantenimientoPage />} />
             <Route path="/mantenimientos/tipos-caracteristica" element={<TiposCaracteristicaMantenimientoPage />} />
