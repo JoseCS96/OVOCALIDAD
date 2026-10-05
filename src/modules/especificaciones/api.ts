@@ -65,3 +65,11 @@ export async function retornarEtBorrador(versionId:number,password:string,coment
  if(data.codigoResultado!==0)throw new Error(data.mensaje);
  return data;
 }
+
+
+export async function vincularPdfEt(versionId:number,archivo:File){
+ const form=new FormData();
+ form.append("archivo",archivo);
+ const {data}=await api.post<OperacionEt>(`/api/especificaciones-tecnicas/${versionId}/pdf`,form);
+ return validar(data);
+}
