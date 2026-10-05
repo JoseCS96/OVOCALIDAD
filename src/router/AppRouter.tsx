@@ -16,6 +16,7 @@ import EspecificacionTecnicaPage from "@/modules/especificaciones/Especificacion
 import EspecificacionTecnicaDetallePage from "@/modules/especificaciones/EspecificacionTecnicaDetallePage";
 import EspecificacionesTecnicasPage from "@/modules/especificaciones/EspecificacionesTecnicasPage";
 import NuevaEspecificacionTecnicaPage from "@/modules/especificaciones/NuevaEspecificacionTecnicaPage";
+import NuevaFichaTecnicaPage from "@/modules/fichasTecnicas/NuevaFichaTecnicaPage";
 import FasesMantenimientoPage from "@/modules/mantenimientos/FasesMantenimientoPage";
 import IngredientesMantenimientoPage from "@/modules/mantenimientos/IngredientesMantenimientoPage";
 import CaracteristicasMantenimientoPage from "@/modules/mantenimientos/CaracteristicasMantenimientoPage";
@@ -52,6 +53,7 @@ export default function AppRouter() {
           <Route path="/operacion/evaluaciones/:evaluacionId" element={<EvaluacionEnLineaPage />} />
           <Route path="/operacion/evaluaciones/reaperturas" element={<SolicitudesReaperturaPage />} />
           <Route path="/documentos/especificaciones/nueva" element={<NuevaEspecificacionTecnicaPage />} />
+          <Route path="/documentos/fichas-tecnicas/nueva" element={<NuevaFichaTecnicaPage />} />
           <Route path="/documentos/especificaciones/:versionId" element={<EspecificacionTecnicaDetallePage />} />
           <Route path="/documentos/especificaciones/:versionId/editar" element={<EspecificacionTecnicaPage />} />
           <Route path="/documentos/especificaciones" element={<EspecificacionesTecnicasPage />} />
