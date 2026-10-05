@@ -73,3 +73,9 @@ export async function vincularPdfEt(versionId:number,archivo:File){
  const {data}=await api.post<OperacionEt>(`/api/especificaciones-tecnicas/${versionId}/pdf`,form);
  return validar(data);
 }
+
+
+export async function obtenerPdfEt(versionId:number){
+ const {data}=await api.get<Blob>(`/api/especificaciones-tecnicas/${versionId}/pdf`,{responseType:"blob"});
+ return data;
+}
