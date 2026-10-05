@@ -29,12 +29,12 @@ function Topbar({ sidebarCollapsed, onSidebarToggle }: TopbarProps) {
   const [campanaAbierta,setCampanaAbierta]=useState(false);
   const [modalAbierto,setModalAbierto]=useState(false);
   const pendientes=useMemo(()=>notificaciones.filter(n=>n.mostrarEnCampana&&!n.leida),[notificaciones]);
-  const pendientesModal=useMemo(()=>notificaciones.filter(n=>n.mostrarEnModal),[notificaciones]);
+  const pendientesModal=useMemo(()=>notificaciones.filter(n=>n.mostrarEnModal&&!n.leida),[notificaciones]);
 
-  useEffect(()=>{if(!acceso)return;obtenerNotificaciones().then(data=>{setNotificaciones(data);setModalAbierto(data.some((n: Notificacion)=>n.mostrarEnModal));}).catch(()=>{});},[acceso?.usuario.nombreUsuario]);
+  useEffect(()=>{if(!acceso)return;obtenerNotificaciones().then(data=>{setNotificaciones(data);setModalAbierto(data.some((n: Notificacion)=>n.mostrarEnModal&&!n.leida));}).catch(()=>{});},[acceso?.usuario.nombreUsuario]);
 
   async function cerrarModal(){setModalAbierto(false);try{await marcarModalMostrado();setNotificaciones(ns=>ns.map(n=>n.mostrarEnModal?{...n,mostradaModal:true,cantidadVecesModal:n.cantidadVecesModal+1}:n));}catch{}}
-  async function abrirNotificacion(n:Notificacion){try{if(!n.leida){await marcarNotificacionLeida(n.notificacionId);setNotificaciones(ns=>ns.map(x=>x.notificacionId===n.notificacionId?{...x,leida:true}:x));}}finally{setCampanaAbierta(false);if(n.urlDestino)navigate(n.urlDestino);}}
+  async function abrirNotificacion(n:Notificacion){try{if(!n.leida){await marcarNotificacionLeida(n.notificacionId);setNotificaciones(ns=>ns.map(x=>x.notificacionId===n.notificacionId?{...x,leida:true,mostrarEnModal:false}:x));}}finally{setCampanaAbierta(false);if(n.urlDestino)navigate(n.urlDestino);}}
   async function verSolicitudes(){await cerrarModal();navigate("/documentos/especificaciones");}
   const navigate = useNavigate();
   const groups = navigationGroups
