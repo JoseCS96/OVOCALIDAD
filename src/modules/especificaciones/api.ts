@@ -58,3 +58,10 @@ export async function cambiarEstadoEt(versionId:number,request:CambiarEstadoEt){
 
 export async function resetearEt(versionId:number){const {data}=await api.post<OperacionEt>(`/api/especificaciones-tecnicas/${versionId}/resetear`);return validar(data)}
 export async function eliminarEtBorrador(versionId:number){const {data}=await api.delete<OperacionEt>(`/api/especificaciones-tecnicas/${versionId}`);return validar(data)}
+
+
+export async function retornarEtBorrador(versionId:number,password:string,comentario:string|null){
+ const {data}=await api.post<CambiarEstadoEtResponse>(`/api/especificaciones-tecnicas/${versionId}/retornar-borrador`,{password,comentario});
+ if(data.codigoResultado!==0)throw new Error(data.mensaje);
+ return data;
+}
