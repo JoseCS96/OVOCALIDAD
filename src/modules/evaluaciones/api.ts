@@ -15,6 +15,7 @@ import type {
   ConsolidacionEvaluacionResultado,
   CrearEvaluacionRequest,
   CrearEvaluacionResponse,
+  RutaEvaluacionLote,
 } from "./types";
 
 
@@ -26,6 +27,11 @@ export async function crearEvaluacion(request: CrearEvaluacionRequest) {
 
 export async function obtenerPanelEvaluador() {
   const { data } = await api.get<PanelEvaluador>("/api/evaluaciones/mi-panel");
+  return data;
+}
+
+export async function obtenerRutaEvaluacionLote(loteId: number) {
+  const { data } = await api.get<RutaEvaluacionLote>(`/api/evaluaciones/lote/${loteId}/ruta`);
   return data;
 }
 
