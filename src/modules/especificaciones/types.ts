@@ -11,7 +11,7 @@ export type CaracteristicaEt = {
   versCaractId:number; caracteristicaId:number; tipoCaractId:number; tipoCaracteristica:string; caracteristica:string;
   unidad:string|null; metEnsayoId:number|null; metodoEnsayo:string|null; tipoCriterioId:number|null; tipoCriterio:string|null;
   valorCuantitativoInicial:number|null; valorCuantitativoFinal:number|null; valorCuantitativoIgual:number|null;
-  valorCualitativo:string|null; faseId:number|null; faseCodigo:string|null; fase:string|null; esObligatorio:boolean; orden:number|null;
+  valorCualitativo:string|null; versionFaseId:number|null; faseCodigoReferencia:string|null; versionFaseDescripcion:string|null; versionFaseOrden:number|null; versionFaseEsFinal:boolean|null; versionFaseEsObligatoria:boolean|null; faseId:number|null; faseCodigo:string|null; fase:string|null; esObligatorio:boolean; orden:number|null;
 };
 export type SeccionEt={versSeccId:number;versionId:number;seccionId:number;seccionDescripcion:string;orden:number|null;idTipoSeccion:number|null;tipoSeccionDescripcion:string|null;esBase:boolean;puedeEliminarse:boolean;permiteReordenar:boolean;icono:string|null};
 export type ResponsableEt={tipoResponsabilidad:string;idRelacion:number;usuarioDni:string;usuarioNombresApellidos:string;cargoId:number|null;usuarioCargoHistorialId:number|null;cargoDescripcion?:string|null;cargoActual?:boolean|null};
@@ -31,11 +31,14 @@ export type DetalleEt = {
  anexos:Array<{versionAnexoId:number;anexoId:number;anexoDescripcion:string}>;
  historial:Array<{versionHistorialEstadoId:number;estadoOrigen:string|null;estadoDestino:string;accion:string;comentario:string|null;fecha:string}>;
  presentacionesGenesis:PresentacionGenesisDetalleEt[];
+ fasesEvaluacion:VersionFaseEt[];
 };
 export type ProductoEt={productoCodigo:string;productoDescripcion:string};
 export type CaracteristicaCatalogoEt={caracteristicaId:number;caracteristicaDescripcion:string;unidad:string|null;tipoCaractId:number;tipoCaracteristica:string;metEnsayoId:number|null;metodoEnsayo:string|null};
 export type CriterioEt={tipoCriterioId:number;tipoCriterio:string};
 export type FaseEt={faseId:number;faseCodigo:string;faseDescripcion:string;estado:string};
+export type VersionFaseEt={versionFaseId:number;versionId:number;orden:number;codigoReferencia:string;descripcion:string|null;faseId:number;faseCodigo:string;faseDescripcion:string;esFinal:boolean;esObligatoria:boolean;cantidadCaracteristicas:number};
+export type GuardarFaseEt={versionFaseId:number|null;faseId:number;codigoReferencia:string;descripcion:string|null;orden:number;esFinal:boolean;esObligatoria:boolean};
 export type CatalogosEt={caracteristicas:CaracteristicaCatalogoEt[];tiposCriterio:CriterioEt[];fases:FaseEt[];tiposCaracteristica:unknown[];metodosEnsayo:unknown[]};
 export type TipoContenidoBaseEt="DESCRIPCION"|"ENVASE_EMBALAJE"|"ALMACENAMIENTO_DISTRIBUCION"|"VIDA_UTIL"|"DESCONGELAMIENTO";
 export type GuardarContenidoBaseEt={tipoContenido:TipoContenidoBaseEt;contenido:string|null};
@@ -74,7 +77,7 @@ export type GuardarAnexosEt={anexos:{descripcion:string}[]};
 export type GuardarCambioEt={numeroRevision:number;fechaActualizacion:string;descripcion:string};
 export type GuardarCambiosEt={cambios:GuardarCambioEt[]};
 
-export type GuardarCaracteristicaEt={versCaractId:number|null;caracteristicaId:number;tipoCriterioId:number;valorCuantitativoInicial:number|null;valorCuantitativoFinal:number|null;valorCuantitativoIgual:number|null;valorCualitativo:string|null;faseId:number|null;unidadDeMedida:string|null;esObligatorio:boolean;orden:number};
+export type GuardarCaracteristicaEt={versCaractId:number|null;caracteristicaId:number;tipoCriterioId:number;valorCuantitativoInicial:number|null;valorCuantitativoFinal:number|null;valorCuantitativoIgual:number|null;valorCualitativo:string|null;versionFaseId:number|null;faseId:number|null;unidadDeMedida:string|null;esObligatorio:boolean;orden:number};
 export type OperacionEt={codigoResultado:number;mensaje:string;versCaractId?:number|null};
 
 export type EspecificacionTecnicaListado={versionId:number;documentoId:number;documentoCodigo:string;documentoDescripcionDocumento:string;productoCodigo:string;productoDescripcion:string|null;versionNumero:number|null;versionInicioVigencia:string|null;versionNroPaginas:number|null;estVerId:number;estadoVersion:string;audUsuarioCreacion:string|null;audFechaCreacion:string;audUsuarioModificacion:string|null;audFechaActualizacion:string|null;permiteEditar:boolean};
