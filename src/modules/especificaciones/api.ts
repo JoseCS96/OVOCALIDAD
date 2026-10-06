@@ -1,6 +1,6 @@
 import { api } from "@/lib/api";
 import type { ProductoGenesis } from "../lotes/types";
-import type { CatalogosEt, DetalleEt, GuardarCaracteristicaEt, OperacionEt, EspecificacionTecnicaListado, CrearEspecificacionTecnica, CrearEspecificacionTecnicaResponse, SeccionesEtCatalogo, CrearSeccionEt, CrearSeccionEtResponse, ContenidoSeccionEt, AgregarSeccionVersionEt, ReordenarSeccionesVersionEt, GuardarInformacionGeneralEt, GuardarContenidoBaseEt, ResponsableCatalogoEt, GuardarResponsablesEt, CatalogosIngredientesEt, GuardarIngredientesEt, GuardarRecetasEt, GuardarProcedimientosEt, CatalogosTratamientosEt, GuardarTratamientosEt, GuardarInstruccionesEt, GuardarContenidoRotuladoEt, ContenidoRotuladoCatalogo, GuardarCambiosEt, GuardarAnexosEt, CambiarEstadoEt, CambiarEstadoEtResponse, VersionReemplazableEt } from "./types";
+import type { CatalogosEt, DetalleEt, GuardarCaracteristicaEt, OperacionEt, EspecificacionTecnicaListado, CrearEspecificacionTecnica, CrearEspecificacionTecnicaResponse, SeccionesEtCatalogo, CrearSeccionEt, CrearSeccionEtResponse, ContenidoSeccionEt, AgregarSeccionVersionEt, ReordenarSeccionesVersionEt, GuardarInformacionGeneralEt, GuardarContenidoBaseEt, ResponsableCatalogoEt, GuardarResponsablesEt, CatalogosIngredientesEt, GuardarIngredientesEt, GuardarRecetasEt, GuardarProcedimientosEt, CatalogosTratamientosEt, GuardarTratamientosEt, GuardarInstruccionesEt, GuardarContenidoRotuladoEt, ContenidoRotuladoCatalogo, GuardarCambiosEt, GuardarAnexosEt, CambiarEstadoEt, CambiarEstadoEtResponse, VersionReemplazableEt, VersionFaseEt, GuardarFaseEt } from "./types";
 function validar(data:OperacionEt){if(data.codigoResultado!==0)throw new Error(data.mensaje);return data}
 export async function obtenerEt(versionId:number){
  const {data}=await api.get<DetalleEt>(`/api/especificaciones-tecnicas/${versionId}`);
@@ -12,6 +12,9 @@ export async function obtenerEt(versionId:number){
 }
 export async function buscarPresentacionesGenesisEt(busqueda:string){const {data}=await api.get<ProductoGenesis[]>("/api/lotes/productos-genesis",{params:{busqueda}});return data}
 export async function obtenerCatalogosEt(){const {data}=await api.get<CatalogosEt>("/api/especificaciones-tecnicas/catalogos");return data}
+export async function listarFasesEt(versionId:number){const {data}=await api.get<VersionFaseEt[]>(`/api/especificaciones-tecnicas/${versionId}/fases`);return data}
+export async function guardarFaseEt(versionId:number,request:GuardarFaseEt){const {data}=await api.put<OperacionEt>(`/api/especificaciones-tecnicas/${versionId}/fases`,request);return validar(data)}
+export async function eliminarFaseEt(versionId:number,versionFaseId:number){const {data}=await api.delete<OperacionEt>(`/api/especificaciones-tecnicas/${versionId}/fases/${versionFaseId}`,{data:{}});return validar(data)}
 export async function guardarCaracteristica(versionId:number,request:GuardarCaracteristicaEt){const {data}=await api.put<OperacionEt>(`/api/especificaciones-tecnicas/${versionId}/caracteristicas`,request);return validar(data)}
 export async function eliminarCaracteristica(versionId:number,versCaractId:number){const {data}=await api.delete<OperacionEt>(`/api/especificaciones-tecnicas/${versionId}/caracteristicas/${versCaractId}`,{data:{}});return validar(data)}
 
