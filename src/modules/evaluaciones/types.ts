@@ -341,3 +341,21 @@ export type CrearEvaluacionResponse = OperacionResponse & {
   intento?: number | null;
   usuarioEvaluador?: string | null;
 };
+
+export type RutaEvaluacionEtapa = {
+  versionFaseId: number; orden: number; codigoReferencia: string;
+  versionFaseDescripcion?: string | null; faseId: number; faseCodigo: string;
+  faseDescripcion: string; esFinal: boolean; esObligatoria: boolean;
+  cantidadCaracteristicas: number; cantidadIntentos: number;
+  ultimaEvaluacionId?: number | null; estadoEtapa: "PENDIENTE" | "EN_PROCESO" | "CONFORME" | "NO_CONFORME";
+};
+export type RutaEvaluacionIntento = {
+  evaluacionId: number; versionFaseId?: number | null; versionFaseOrden?: number | null;
+  codigoReferencia?: string | null; evaluacionPadreId?: number | null; intento: number;
+  tipoEvaluacionId: number; tipoEvaluacion: string; estadoEvaluacionId: number;
+  estadoEvaluacion: string; resultadoGeneral?: boolean | null; usuarioEvaluador?: string | null;
+  fechaInicio?: string | null; fechaFin?: string | null; motivoReevaluacion?: string | null;
+  observacion?: string | null; esReevaluacion: boolean; resultadosRegistrados: number;
+  resultadosConformes: number; resultadosNoConformes: number;
+};
+export type RutaEvaluacionLote = { etapas: RutaEvaluacionEtapa[]; intentos: RutaEvaluacionIntento[] };
