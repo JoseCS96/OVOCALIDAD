@@ -46,7 +46,7 @@ function valorSugerido(item: EvaluacionDetalle): Pick<Draft, "numero" | "texto">
 
   const numeros = especificacion.match(/-?\d+(?:[.,]\d+)?/g)?.map((v) => Number(v.replace(",", "."))) ?? [];
   if (criterio === "RANGO" && numeros.length >= 2) return { numero: String((numeros[0] + numeros[1]) / 2), texto: "" };
-  if ((criterio === "MINIMO" || criterio === "MAXIMO" || criterio === "IGUAL") && numeros[0] !== undefined) return { numero: String(numeros[0]), texto: "" };
+  if (["MINIMO", "MAXIMO", "MAYOR_QUE", "MENOR_QUE", "IGUAL"].includes(criterio) && numeros[0] !== undefined) return { numero: String(numeros[0]), texto: "" };
   return { numero: "", texto: "" };
 }
 
@@ -68,6 +68,8 @@ function calcularCumpleLocal(item: EvaluacionDetalle, draft: Draft): boolean | n
   if (criterio === "MINIMO") return numeros[0] !== undefined ? valor >= numeros[0] : null;
   if (criterio === "MAXIMO") return numeros[0] !== undefined ? valor <= numeros[0] : null;
   if (criterio === "RANGO") return numeros.length >= 2 ? valor >= numeros[0] && valor <= numeros[1] : null;
+  if (criterio === "MAYOR_QUE") return numeros[0] !== undefined ? valor > numeros[0] : null;
+  if (criterio === "MENOR_QUE") return numeros[0] !== undefined ? valor < numeros[0] : null;
   if (criterio === "IGUAL") return numeros[0] !== undefined ? valor === numeros[0] : null;
 
   return null;
@@ -274,7 +276,7 @@ export default function EvaluacionEnLineaPage() {
       if (!draft) continue;
       if (!resultadoCambio(item, draft)) continue;
       const criterio = (item.tipoCriterio ?? "").toUpperCase();
-      if (["MINIMO", "MAXIMO", "RANGO"].includes(criterio) && draft.numero === "") {
+      if (["MINIMO", "MAXIMO", "RANGO", "MAYOR_QUE", "MENOR_QUE", "IGUAL"].includes(criterio) && draft.numero === "") {
         setSaveError(`Ingresa un resultado para ${item.caracteristica}.`);
         return;
       }
@@ -285,7 +287,7 @@ export default function EvaluacionEnLineaPage() {
       requests.push({
         versCaractId: item.versCaractId,
         resultadoTexto: ["AUSENCIA", "CUALITATIVO"].includes(criterio) ? draft.texto.trim() : null,
-        resultadoNumerico: ["MINIMO", "MAXIMO", "RANGO"].includes(criterio) ? Number(draft.numero) : null,
+        resultadoNumerico: ["MINIMO", "MAXIMO", "RANGO", "MAYOR_QUE", "MENOR_QUE", "IGUAL"].includes(criterio) ? Number(draft.numero) : null,
         cumple: ["CUALITATIVO", "AUSENCIA"].includes(criterio) ? calcularCumpleLocal(item, draft) : null,
         observacion: null,
       });
@@ -353,6 +355,16 @@ export default function EvaluacionEnLineaPage() {
         <Badge variant="outline" className="ml-auto w-fit border-blue-200 bg-blue-50 px-2 py-0.5 text-[11px] text-blue-700">{cabecera.estadoEvaluacion.replaceAll("_", " ")}</Badge>
       </div>
 
+      {cabecera.versionFaseId && (
+        <div className="flex flex-wrap items-center gap-2 rounded-lg border border-blue-200 bg-blue-50/70 px-4 py-2 text-sm">
+          <span className="font-semibold text-blue-900">Etapa {cabecera.versionFaseOrden ?? "—"}</span>
+          <span className="font-semibold text-blue-800">{cabecera.codigoReferencia ?? cabecera.faseCodigo ?? "—"}</span>
+          {cabecera.faseDescripcion && <span className="text-blue-700">· {cabecera.faseDescripcion}</span>}
+          {cabecera.esFinal && <Badge className="border-emerald-200 bg-emerald-50 text-emerald-700" variant="outline">Etapa final</Badge>}
+          {cabecera.esReevaluacion && <Badge className="border-amber-300 bg-amber-50 text-amber-800" variant="outline">Reevaluación · origen #{cabecera.evaluacionPadreId}</Badge>}
+        </div>
+      )}
+
       <Card className="border-[var(--border)] shadow-[var(--shadow-card)]">
         <CardContent className="grid gap-x-5 gap-y-1 px-4 py-2 xl:grid-cols-[1fr_1.15fr_1.2fr_.8fr_.8fr]">
           <div className="min-w-0"><span className="text-[10px] font-semibold uppercase text-[var(--text-secondary)]">Lote</span><p className="truncate text-sm font-semibold">{cabecera.codigoLote}</p></div>
@@ -366,8 +378,8 @@ export default function EvaluacionEnLineaPage() {
       {estaEnProceso ? (
         <div className="flex items-center gap-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-1 text-[11px] leading-none text-amber-900">
           <FlaskConical className="h-4 w-4 shrink-0" />
-          <span className="font-semibold">Registro parcial habilitado.</span>
-          <span className="text-amber-800">Puedes guardar avances sin cerrar la evaluación.</span>
+          <span className="font-semibold">{cabecera.esReevaluacion ? "Reevaluación selectiva habilitada." : "Registro parcial habilitado."}</span>
+          <span className="text-amber-800">{cabecera.esReevaluacion ? "Solo se muestran los parámetros que no cumplieron en el intento anterior." : "Puedes guardar avances sin cerrar la evaluación."}</span>
         </div>
       ) : (
         <div className="flex items-center gap-2 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-1 text-[11px] leading-none text-emerald-900">
@@ -380,8 +392,8 @@ export default function EvaluacionEnLineaPage() {
       <Card className="overflow-hidden border-[var(--border)] shadow-[var(--shadow-card)]">
         <CardContent className="p-0">
           <div className="flex flex-col gap-3 border-b border-[var(--border)] px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
-            <div><h2 className="text-lg font-semibold">Registro de resultados</h2><p className="text-sm text-[var(--text-secondary)]">{avance.resultadosRegistrados} resultados registrados · {avance.obligatoriasCompletas}/{avance.totalObligatorias} obligatorios completos</p></div>
-            <div className="text-sm font-medium text-[var(--text-secondary)]">{avance.totalCaracteristicas} características</div>
+            <div><h2 className="text-lg font-semibold">{cabecera.esReevaluacion ? "Parámetros a reevaluar" : "Registro de resultados"}</h2><p className="text-sm text-[var(--text-secondary)]">{avance.resultadosRegistrados} resultados registrados · {avance.obligatoriasCompletas}/{avance.totalObligatorias} obligatorios completos{avance.parametrosPendientes !== undefined ? ` · ${avance.parametrosPendientes} pendientes` : ""}</p></div>
+            <div className="text-right text-sm font-medium text-[var(--text-secondary)]"><div>{avance.totalCaracteristicas} características</div>{avance.porcentajeAvance !== undefined && <div className="text-xs">{avance.porcentajeAvance.toFixed(0)}% avance</div>}</div>
           </div>
 
           <div className="max-h-[calc(100vh-245px)] min-h-[440px] overflow-auto">
@@ -399,7 +411,18 @@ export default function EvaluacionEnLineaPage() {
                       return (
                         <tr key={item.versCaractId} className="border-t border-[var(--border)] align-top hover:bg-[var(--surface-muted)]/40">
                           <td className="px-5 py-4 text-xs font-medium text-[var(--text-secondary)]">{labelGrupo(grupo)}</td>
-                          <td className="px-5 py-4"><p className="font-semibold">{item.caracteristica}</p>{item.metodoEnsayo && <p className="mt-1 text-xs text-[var(--text-secondary)]">{item.metodoEnsayo}</p>}</td>
+                          <td className="px-5 py-4">
+                            <p className="font-semibold">{item.caracteristica}</p>
+                            {item.metodoEnsayo && <p className="mt-1 text-xs text-[var(--text-secondary)]">{item.metodoEnsayo}</p>}
+                            {cabecera.esReevaluacion && item.evaluacionResultadoPadreId && (
+                              <div className="mt-2 rounded-md border border-amber-200 bg-amber-50 px-2.5 py-2 text-xs text-amber-900">
+                                <span className="font-semibold">Resultado anterior:</span>{" "}
+                                {item.resultadoNumericoAnterior ?? item.resultadoTextoAnterior ?? "—"}
+                                {item.unidad ? ` ${item.unidad}` : ""}
+                                {item.observacionAnterior && <p className="mt-1 text-amber-800">{item.observacionAnterior}</p>}
+                              </div>
+                            )}
+                          </td>
                           <td className="px-5 py-4">{item.esObligatorio ? <Badge variant="outline">Sí</Badge> : "No"}</td>
                           <td className="px-5 py-4 font-medium">{item.especificacion || "—"}</td>
                           <td className="px-5 py-4"><ResultadoControl item={item} draft={draft} puedeRegistrar={puedeRegistrarResultados} onChange={(next) => updateDraft(item.versCaractId, next)} /></td>
