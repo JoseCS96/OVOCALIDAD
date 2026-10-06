@@ -1,7 +1,7 @@
 import { Fragment, useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, FlaskConical, RotateCcw, Save, ShieldCheck, X } from "lucide-react";
-import { Link, useLocation, useParams } from "react-router-dom";
+import { ArrowLeft, FlaskConical, PlayCircle, RotateCcw, Save, ShieldCheck, X } from "lucide-react";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import PageContainer from "@/components/common/PageContainer";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -156,6 +156,7 @@ function ResultadoControl({ item, draft, onChange, puedeRegistrar }: { item: Eva
 }
 
 export default function EvaluacionEnLineaPage() {
+  const navigate = useNavigate();
   const { evaluacionId } = useParams();
   const location = useLocation();
   const id = Number(evaluacionId);
