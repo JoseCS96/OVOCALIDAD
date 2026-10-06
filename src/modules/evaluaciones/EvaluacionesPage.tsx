@@ -57,12 +57,27 @@ export default function EvaluacionesPage() {
       void client.invalidateQueries({ queryKey: ["evaluaciones"] });
     },
   });
-  const visibles = useMemo(() => data.filter(x =>
-    (estado === "TODOS" || x.estadoEvaluacionCodigo === estado) &&
-    (!busqueda.trim() || [x.codigoLote, x.productoCodigo, x.productoDescripcion, x.usuarioEvaluador ?? ""]
+  const lotes = useMemo(() => {
+    const grupos = new Map<number, typeof data>();
+    data.forEach(item => {
+      const grupo = grupos.get(item.loteId) ?? [];
+      grupo.push(item);
+      grupos.set(item.loteId, grupo);
+    });
+    return Array.from(grupos.values()).map(intentos => {
+      const ordenados = [...intentos].sort((a, b) =>
+        b.intento - a.intento || b.evaluacionId - a.evaluacionId
+      );
+      return { actual: ordenados[0], intentos: ordenados };
+    });
+  }, [data]);
+  const visibles = useMemo(() => lotes.filter(({ actual, intentos }) =>
+    (estado === "TODOS" || actual.estadoEvaluacionCodigo === estado) &&
+    (!busqueda.trim() || [actual.codigoLote, actual.productoCodigo, actual.productoDescripcion,
+      actual.usuarioEvaluador ?? "", ...intentos.map(x => x.usuarioEvaluador ?? "")]
       .some(v => v.toLocaleLowerCase().includes(busqueda.trim().toLocaleLowerCase())))
-  ), [data, estado, busqueda]);
-  const estados = Array.from(new Set(data.map(x => x.estadoEvaluacionCodigo)));
+  ), [lotes, estado, busqueda]);
+  const estados = Array.from(new Set(lotes.map(x => x.actual.estadoEvaluacionCodigo)));
   return <PageContainer className="space-y-5">
     <PageHeader eyebrow="Operación · Calidad" title="Evaluaciones"
       description={esAuxiliar ? "Pendientes disponibles y tu historial de evaluaciones." : "Seguimiento general de evaluaciones de Calidad en todos sus estados."}
@@ -73,10 +88,10 @@ export default function EvaluacionesPage() {
     />
     <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-5">
       {[
-        ["Total visibles", data.length],
-        ["Pendientes", data.filter(x => x.estadoEvaluacionCodigo === "PENDIENTE").length],
-        ["En proceso", data.filter(x => x.estadoEvaluacionCodigo === "EN_PROCESO").length],
-        ["Terminadas", data.filter(x => x.estadoEvaluacionCodigo === "TERMINADA").length],
+        ["Total visibles", lotes.length],
+        ["Pendientes", lotes.filter(x => x.actual.estadoEvaluacionCodigo === "PENDIENTE").length],
+        ["En proceso", lotes.filter(x => x.actual.estadoEvaluacionCodigo === "EN_PROCESO").length],
+        ["Terminadas", lotes.filter(x => x.actual.estadoEvaluacionCodigo === "TERMINADA").length],
         ...(puedeConsolidar ? [["Pendientes de decisión", pendientesDecision.length] as [string, number]] : []),
       ].map(([label, count]) => <Card key={label} className="border-[var(--border)]"><CardContent className="p-5"><p className="text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)]">{label}</p><p className="mt-2 text-3xl font-semibold">{count}</p></CardContent></Card>)}
     </section>
@@ -97,11 +112,11 @@ export default function EvaluacionesPage() {
         : <div className="overflow-x-auto"><table className="w-full min-w-[1100px] table-fixed text-left text-sm">
           <thead className="bg-[var(--surface-muted)] text-xs uppercase text-[var(--text-secondary)]"><tr>
             <th className="w-[23%] px-3 py-3">Lote / producto</th><th className="w-[14%] px-3 py-3">Tipo</th><th className="w-[11%] px-3 py-3 text-center">Estado</th><th className="w-[16%] px-3 py-3 text-center">Decisión de Calidad</th><th className="w-[11%] px-3 py-3 text-center">Evaluador</th><th className="w-[14%] px-3 py-3 text-center">Inicio / fin</th><th className="w-[11%] px-3 py-3 text-center">Acción</th>
-          </tr></thead><tbody>{visibles.map(item => {
+          </tr></thead><tbody>{visibles.map(({ actual: item, intentos }) => {
             const disponible = item.estadoEvaluacionCodigo === "PENDIENTE" && !item.usuarioEvaluador;
             return <tr key={item.evaluacionId} className="border-t border-[var(--border)]">
               <td className="px-3 py-4 align-middle"><p className="font-semibold">{item.codigoLote}</p><p className="text-xs text-[var(--text-secondary)]">{item.productoCodigo} · {item.productoDescripcion}</p></td>
-              <td className="px-4 py-4">{item.tipoEvaluacionDescripcion}<p className="text-xs text-[var(--text-secondary)]">Intento {item.intento}</p></td>
+              <td className="px-4 py-4">{item.tipoEvaluacionDescripcion}<p className="text-xs text-[var(--text-secondary)]">{intentos.length} {intentos.length === 1 ? "intento" : "intentos"} · actual I{item.intento}</p></td>
               <td className="px-4 py-4"><Badge variant="outline" className={estadoClase(item.estadoEvaluacionCodigo)}>{item.estadoEvaluacionCodigo.replaceAll("_", " ")}</Badge></td>
               <td className="px-4 py-4">
                 {puedeConsolidar && pendientesIds.has(item.evaluacionId)
