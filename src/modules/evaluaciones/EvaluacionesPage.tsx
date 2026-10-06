@@ -111,25 +111,34 @@ export default function EvaluacionesPage() {
         : visibles.length === 0 ? <p className="p-10 text-center text-sm text-[var(--text-secondary)]">No hay evaluaciones para estos filtros.</p>
         : <div className="overflow-x-auto"><table className="w-full min-w-[1100px] table-fixed text-left text-sm">
           <thead className="bg-[var(--surface-muted)] text-xs uppercase text-[var(--text-secondary)]"><tr>
-            <th className="w-[23%] px-3 py-3">Lote / producto</th><th className="w-[14%] px-3 py-3">Tipo</th><th className="w-[11%] px-3 py-3 text-center">Estado</th><th className="w-[16%] px-3 py-3 text-center">Decisión de Calidad</th><th className="w-[11%] px-3 py-3 text-center">Evaluador</th><th className="w-[14%] px-3 py-3 text-center">Inicio / fin</th><th className="w-[11%] px-3 py-3 text-center">Acción</th>
+            <th className="w-[27%] px-4 py-3">Lote / producto</th>
+            <th className="w-[18%] px-4 py-3">Evaluación</th>
+            <th className="w-[19%] px-4 py-3">Situación</th>
+            <th className="w-[14%] px-4 py-3">Responsable</th>
+            <th className="w-[13%] px-4 py-3">Última actividad</th>
+            <th className="w-[9%] px-4 py-3 text-right">Acción</th>
           </tr></thead><tbody>{visibles.map(({ actual: item, intentos }) => {
             const disponible = item.estadoEvaluacionCodigo === "PENDIENTE" && !item.usuarioEvaluador;
-            return <tr key={item.evaluacionId} className="border-t border-[var(--border)]">
-              <td className="px-3 py-4 align-middle"><p className="font-semibold">{item.codigoLote}</p><p className="text-xs text-[var(--text-secondary)]">{item.productoCodigo} · {item.productoDescripcion}</p></td>
-              <td className="px-4 py-4">{item.tipoEvaluacionDescripcion}<p className="text-xs text-[var(--text-secondary)]">{intentos.length} {intentos.length === 1 ? "intento" : "intentos"} · actual I{item.intento}</p></td>
-              <td className="px-4 py-4"><Badge variant="outline" className={estadoClase(item.estadoEvaluacionCodigo)}>{item.estadoEvaluacionCodigo.replaceAll("_", " ")}</Badge></td>
+            const pendienteDecision = puedeConsolidar && pendientesIds.has(item.evaluacionId);
+            const actividad = item.fechaFin || item.fechaInicio;
+            return <tr key={item.evaluacionId} className="border-t border-[var(--border)] align-middle">
+              <td className="px-4 py-4"><p className="font-semibold">{item.codigoLote}</p><p className="mt-0.5 line-clamp-2 text-xs text-[var(--text-secondary)]">{item.productoCodigo} · {item.productoDescripcion}</p></td>
+              <td className="px-4 py-4"><p className="font-medium">{item.tipoEvaluacionDescripcion}</p><p className="mt-0.5 text-xs text-[var(--text-secondary)]">{intentos.length} {intentos.length === 1 ? "intento" : "intentos"} · actual I{item.intento}</p></td>
               <td className="px-4 py-4">
-                {puedeConsolidar && pendientesIds.has(item.evaluacionId)
-                  ? <button type="button" className="inline-flex items-center justify-center rounded-full border border-amber-300 bg-amber-50 px-3 py-1 text-xs font-medium text-amber-800 transition-colors hover:bg-amber-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500" onClick={() => navigate("/operacion/evaluaciones/consolidacion")} title="Ir a revisar decisión">RevisarDecision</button>
-                  : item.estadoEvaluacionCodigo === "PENDIENTE" || item.estadoEvaluacionCodigo === "EN_PROCESO"
-                    ? <span className="text-xs text-[var(--text-secondary)]">Aún no corresponde</span>
-                    : puedeConsolidar && errorDecision
-                      ? <span className="text-xs text-amber-700">No disponible</span>
-                      : <span className="text-xs text-[var(--text-secondary)]">{puedeConsolidar ? "No figura pendiente" : "Consultar con Jefatura"}</span>}
+                <Badge variant="outline" className={estadoClase(item.estadoEvaluacionCodigo)}>{item.estadoEvaluacionCodigo.replaceAll("_", " ")}</Badge>
+                <div className="mt-1.5">
+                  {pendienteDecision
+                    ? <button type="button" className="text-xs font-medium text-amber-700 hover:underline" onClick={() => navigate("/operacion/evaluaciones/consolidacion")}>Decisión pendiente</button>
+                    : item.estadoEvaluacionCodigo === "PENDIENTE" || item.estadoEvaluacionCodigo === "EN_PROCESO"
+                      ? <span className="text-xs text-[var(--text-secondary)]">Decisión aún no corresponde</span>
+                      : puedeConsolidar && errorDecision
+                        ? <span className="text-xs text-amber-700">Decisión no disponible</span>
+                        : <span className="text-xs text-[var(--text-secondary)]">{puedeConsolidar ? "Sin decisión pendiente" : "Seguimiento de Calidad"}</span>}
+                </div>
               </td>
-              <td className="px-4 py-4">{item.usuarioEvaluador || "Sin asignar"}</td>
-              <td className="px-3 py-4 text-center align-middle text-xs">{fecha(item.fechaInicio)}<p className="text-[var(--text-secondary)]">{fecha(item.fechaFin)}</p></td>
-              <td className="px-3 py-4 text-center align-middle">{disponible && puedeIniciar
+              <td className="px-4 py-4"><p className="font-medium">{item.usuarioEvaluador || "Sin asignar"}</p></td>
+              <td className="px-4 py-4 text-xs"><p className="font-medium">{fecha(actividad)}</p>{item.fechaInicio && item.fechaFin && <p className="mt-0.5 text-[var(--text-secondary)]">Finalizada</p>}</td>
+              <td className="px-4 py-4 text-right">{disponible && puedeIniciar
                 ? <Button size="sm" disabled={iniciar.isPending} onClick={() => iniciar.mutate(item.evaluacionId)}><PlayCircle size={14}/>Iniciar</Button>
                 : <Button size="sm" variant="outline" disabled={!puedeVer} onClick={() => navigate(`/operacion/evaluaciones/${item.evaluacionId}`)}>Ver detalle <ArrowRight size={14}/></Button>}</td>
             </tr>;
