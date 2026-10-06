@@ -371,7 +371,21 @@ export default function EvaluacionEnLineaPage() {
   const estadoLoteCodigo = detalleLote?.lote.estadoLoteCodigo?.toUpperCase() ?? "";
   const loteEnEtapaPosterior = ["LIBERADO", "NO_CONFORME", "CERTIFICADO", "ANULADO"].includes(estadoLoteCodigo);
   const esEvaluacionPorEtapa = Boolean(cabecera.versionFaseId);
-  const puedeContinuarEtapa = esEvaluacionPorEtapa && estaTerminada && cabecera.resultadoGeneral === true && cabecera.esFinal === false && !loteEnEtapaPosterior;
+  const existeEvaluacionEtapaPosterior = Boolean(
+    cabecera.versionFaseOrden &&
+    rutaLote?.etapas?.some(
+      (etapa) =>
+        etapa.orden > cabecera.versionFaseOrden! &&
+        (etapa.cantidadIntentos > 0 || Boolean(etapa.ultimaEvaluacionId)),
+    ),
+  );
+  const puedeContinuarEtapa =
+    esEvaluacionPorEtapa &&
+    estaTerminada &&
+    cabecera.resultadoGeneral === true &&
+    cabecera.esFinal === false &&
+    !loteEnEtapaPosterior &&
+    !existeEvaluacionEtapaPosterior;
   const tieneIntentoPosteriorMismaEtapa = Boolean(
     cabecera.versionFaseId &&
     rutaLote?.intentos?.some(
