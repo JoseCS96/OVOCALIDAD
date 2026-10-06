@@ -13,7 +13,16 @@ import type {
   EvaluacionPendienteCalculo,
   PrecalculoEvaluacionesResponse,
   ConsolidacionEvaluacionResultado,
+  CrearEvaluacionRequest,
+  CrearEvaluacionResponse,
 } from "./types";
+
+
+export async function crearEvaluacion(request: CrearEvaluacionRequest) {
+  const { data } = await api.post<CrearEvaluacionResponse>("/api/evaluaciones/crear", request);
+  if (data.codigoResultado !== 0) throw new Error(data.mensaje);
+  return data;
+}
 
 export async function obtenerPanelEvaluador() {
   const { data } = await api.get<PanelEvaluador>("/api/evaluaciones/mi-panel");
