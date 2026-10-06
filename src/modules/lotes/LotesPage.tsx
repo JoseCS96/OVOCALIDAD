@@ -318,21 +318,7 @@ export default function LotesPage() {
                         </div>
                       </div>
                     </td>
-                    <td className="px-5 py-4">
-                      <div className="min-w-[180px]">
-                        <div className="mb-1.5 flex items-center justify-between gap-3 text-xs">
-                          <span className="font-semibold text-[var(--text)]">{Number(lote.porcentajeAvance ?? 0).toFixed(0)}%</span>
-                          <span className="text-[var(--text-secondary)]">{lote.resultadosRegistrados}/{lote.totalParametrosEvaluacion} evaluados</span>
-                        </div>
-                        <div className="h-2 overflow-hidden rounded-full bg-slate-200">
-                          <div className="h-full rounded-full bg-emerald-500 transition-all" style={{ width: `${Math.min(100, Math.max(0, Number(lote.porcentajeAvance ?? 0)))}%` }} />
-                        </div>
-                        <div className="mt-1 flex justify-between text-[10px] text-[var(--text-secondary)]">
-                          <span>{lote.totalEvaluaciones === 0 ? "Sin iniciar" : `${lote.totalEvaluaciones} eval.`}</span>
-                          <span>{Number(lote.porcentajeFaltante ?? 100).toFixed(0)}% faltante</span>
-                        </div>
-                      </div>
-                    </td>
+
                     <td className="px-5 py-4 text-right">
                       <DropdownMenu>
                         <DropdownMenuTrigger
