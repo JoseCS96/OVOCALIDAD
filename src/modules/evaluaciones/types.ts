@@ -3,32 +3,59 @@ export type EvaluacionCabecera = {
   loteId: number;
   codigoLote: string;
   productoCodigo: string;
+  codigoGenesis?: string | null;
   productoDescripcion: string;
+  kardex?: number | null;
   documentoId: number;
   documentoCodigo: string;
   documentoDescripcionDocumento: string;
   versionId: number;
   versionNumero: number;
+  versionFaseId?: number | null;
+  versionFaseOrden?: number | null;
+  codigoReferencia?: string | null;
+  versionFaseDescripcion?: string | null;
+  faseId?: number | null;
+  faseCodigo?: string | null;
+  faseDescripcion?: string | null;
+  esFinal?: boolean | null;
+  versionFaseEsObligatoria?: boolean | null;
   tipoEvaluacionId: number;
   tipoEvaluacion: string;
   estadoEvaluacionId: number;
   estadoEvaluacion: string;
   intento: number;
+  evaluacionPadreId?: number | null;
   usuarioEvaluador: string;
-  fechaInicio: string;
+  fechaInicio: string | null;
   fechaFin: string | null;
+  motivoReevaluacion?: string | null;
   observacion: string | null;
   resultadoGeneral: boolean | null;
+  esReevaluacion?: boolean;
 };
 
 export type EvaluacionDetalle = {
   evaluacionResultadoId: number | null;
   versCaractId: number;
+  versionFaseId?: number | null;
+  versionFaseOrden?: number | null;
+  codigoReferencia?: string | null;
+  esFinal?: boolean | null;
+  ordenGeneral?: number;
+  tipoCaractId?: number;
   tipoCaracteristica: string;
+  item?: number;
+  esInicioGrupo?: boolean;
+  fase?: string | null;
   caracteristica: string;
   tipoCriterioId: number | null;
   tipoCriterio: string | null;
   especificacion: string | null;
+  valorCuantitativoInicial?: number | null;
+  valorCuantitativoFinal?: number | null;
+  valorCuantitativoIgual?: number | null;
+  valorCualitativo?: string | null;
   unidad: string | null;
   metodoEnsayo: string | null;
   orden: number;
@@ -36,8 +63,19 @@ export type EvaluacionDetalle = {
   tipoResultado: "NUMERICO" | "TEXTO";
   resultadoNumerico: number | null;
   resultadoTexto: string | null;
+  resultado?: string | null;
+  observacion?: string | null;
   cumple: boolean | null;
+  cumpleDescripcion?: string | null;
+  tieneResultado?: boolean;
+  tieneObservacion?: boolean;
   permiteEditar: boolean;
+  evaluacionPadreId?: number | null;
+  evaluacionResultadoPadreId?: number | null;
+  resultadoTextoAnterior?: string | null;
+  resultadoNumericoAnterior?: number | null;
+  cumpleAnterior?: boolean | null;
+  observacionAnterior?: string | null;
 };
 
 export type EvaluacionAvance = {
@@ -45,6 +83,8 @@ export type EvaluacionAvance = {
   totalObligatorias: number;
   resultadosRegistrados: number;
   obligatoriasCompletas: number;
+  parametrosPendientes?: number;
+  porcentajeAvance?: number;
 };
 
 export type Evaluacion = {
@@ -121,6 +161,18 @@ export type OperacionResponse = {
   cumple?: boolean | null;
   resultadoGeneral?: boolean | null;
   resultadoDescripcion?: string | null;
+  versionFaseId?: number | null;
+  versionFaseOrden?: number | null;
+  codigoReferencia?: string | null;
+  faseCodigo?: string | null;
+  esFinal?: boolean | null;
+  evaluacionPadreId?: number | null;
+  esReevaluacion?: boolean;
+  requiereReevaluacion?: boolean;
+  siguienteVersionFaseId?: number | null;
+  siguienteVersionFaseOrden?: number | null;
+  siguienteCodigoReferencia?: string | null;
+  tieneSiguienteEtapa?: boolean;
   totalParametros?: number | null;
   totalObligatorios?: number | null;
   obligatoriosEvaluados?: number | null;
