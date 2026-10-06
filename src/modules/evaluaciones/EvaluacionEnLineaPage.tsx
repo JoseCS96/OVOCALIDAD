@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { crearEvaluacion, guardarResultado, iniciarEvaluacion, obtenerEvaluacion, solicitarReapertura, terminarEvaluacion } from "./api";
+import { crearEvaluacion, guardarResultado, iniciarEvaluacion, obtenerEvaluacion, obtenerRutaEvaluacionLote, solicitarReapertura, terminarEvaluacion } from "./api";
 import { useAuth } from "@/modules/auth/AuthContext";
 import type { EvaluacionDetalle, GuardarResultadoRequest } from "./types";
 import { obtenerDetalleLote } from "@/modules/lotes/api";
@@ -183,6 +183,11 @@ export default function EvaluacionEnLineaPage() {
     queryFn: () => obtenerDetalleLote(loteId),
     enabled: loteId > 0,
   });
+  const { data: rutaLote } = useQuery({
+    queryKey: ["evaluacion-ruta", loteId],
+    queryFn: () => obtenerRutaEvaluacionLote(loteId),
+    enabled: loteId > 0,
+  });
 
   useEffect(() => {
     if (!data) return;
@@ -222,6 +227,7 @@ export default function EvaluacionEnLineaPage() {
       await queryClient.invalidateQueries({ queryKey: ["evaluacion", id] });
       await queryClient.invalidateQueries({ queryKey: ["evaluaciones", "mi-panel"] });
       await queryClient.invalidateQueries({ queryKey: ["lotes"] });
+      await queryClient.invalidateQueries({ queryKey: ["evaluacion-ruta", loteId] });
     },
     onError: (error) => {
       setSavedMessage(null);
@@ -248,6 +254,7 @@ export default function EvaluacionEnLineaPage() {
       setSavedMessage(null);
       await queryClient.invalidateQueries({ queryKey: ["evaluaciones"] });
       await queryClient.invalidateQueries({ queryKey: ["lotes"] });
+      await queryClient.invalidateQueries({ queryKey: ["evaluacion-ruta", loteId] });
       if (creada.evaluacionId) navigate(`/operacion/evaluaciones/${creada.evaluacionId}`, { replace: true });
     },
     onError: (error) => {
@@ -386,15 +393,47 @@ export default function EvaluacionEnLineaPage() {
         <Badge variant="outline" className="ml-auto w-fit border-blue-200 bg-blue-50 px-2 py-0.5 text-[11px] text-blue-700">{cabecera.estadoEvaluacion.replaceAll("_", " ")}</Badge>
       </div>
 
-      {cabecera.versionFaseId && (
+      {rutaLote?.etapas?.length ? (
+        <div className="rounded-xl border border-[var(--border)] bg-white p-2 shadow-[var(--shadow-card)]">
+          <div className="flex gap-2 overflow-x-auto pb-1">
+            {rutaLote.etapas.map((etapa) => {
+              const intentos = rutaLote.intentos.filter((x) => x.versionFaseId === etapa.versionFaseId);
+              const intentoActual = intentos.find((x) => x.evaluacionId === id);
+              const ultimo = intentos[intentos.length - 1];
+              const destino = intentoActual?.evaluacionId ?? ultimo?.evaluacionId ?? etapa.ultimaEvaluacionId;
+              const activa = cabecera.versionFaseId === etapa.versionFaseId;
+              const pendiente = etapa.estadoEtapa === "PENDIENTE";
+              const conforme = etapa.estadoEtapa === "CONFORME";
+              const noConforme = etapa.estadoEtapa === "NO_CONFORME";
+              return (
+                <button key={etapa.versionFaseId} type="button" disabled={!destino}
+                  onClick={() => destino && navigate(`/operacion/evaluaciones/${destino}`)}
+                  className={`min-w-[220px] flex-1 rounded-lg border px-3 py-2 text-left transition ${activa ? "border-blue-400 bg-blue-50 ring-1 ring-blue-200" : destino ? "border-slate-200 bg-white hover:border-blue-300 hover:bg-slate-50" : "cursor-not-allowed border-slate-200 bg-slate-50 opacity-60"}`}>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-xs font-semibold text-slate-500">Etapa {etapa.orden}</span>
+                    <span className={`text-[10px] font-semibold ${conforme ? "text-emerald-700" : noConforme ? "text-amber-700" : activa ? "text-blue-700" : "text-slate-500"}`}>
+                      {conforme ? "✓ CONFORME" : noConforme ? "! NO CONFORME" : pendiente ? "○ PENDIENTE" : "● EN PROCESO"}
+                    </span>
+                  </div>
+                  <div className="mt-1 flex items-center gap-1.5">
+                    <span className="font-semibold">{etapa.codigoReferencia}</span>
+                    {etapa.esFinal && <Badge variant="outline" className="h-5 border-emerald-200 bg-emerald-50 px-1.5 text-[9px] text-emerald-700">FINAL</Badge>}
+                  </div>
+                  <div className="mt-0.5 truncate text-xs text-[var(--text-secondary)]">{etapa.faseCodigo} · {etapa.faseDescripcion}</div>
+                  <div className="mt-1 text-[11px] text-slate-500">{etapa.cantidadCaracteristicas} características{etapa.cantidadIntentos > 0 ? ` · ${etapa.cantidadIntentos} intento${etapa.cantidadIntentos === 1 ? "" : "s"}` : ""}</div>
+                  {intentos.length > 1 && <div className="mt-2 flex flex-wrap gap-1">{intentos.map((it) => <span key={it.evaluacionId} onClick={(e) => { e.stopPropagation(); navigate(`/operacion/evaluaciones/${it.evaluacionId}`); }} className={`rounded border px-1.5 py-0.5 text-[10px] ${it.evaluacionId === id ? "border-blue-300 bg-blue-100 text-blue-800" : "border-slate-200 bg-white text-slate-600"}`}>{it.esReevaluacion ? "Reeval." : "I"}{it.intento}</span>)}</div>}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      ) : cabecera.versionFaseId ? (
         <div className="flex flex-wrap items-center gap-2 rounded-lg border border-blue-200 bg-blue-50/70 px-4 py-2 text-sm">
           <span className="font-semibold text-blue-900">Etapa {cabecera.versionFaseOrden ?? "—"}</span>
           <span className="font-semibold text-blue-800">{cabecera.codigoReferencia ?? cabecera.faseCodigo ?? "—"}</span>
           {cabecera.faseDescripcion && <span className="text-blue-700">· {cabecera.faseDescripcion}</span>}
-          {cabecera.esFinal && <Badge className="border-emerald-200 bg-emerald-50 text-emerald-700" variant="outline">Etapa final</Badge>}
-          {cabecera.esReevaluacion && <Badge className="border-amber-300 bg-amber-50 text-amber-800" variant="outline">Reevaluación · origen #{cabecera.evaluacionPadreId}</Badge>}
         </div>
-      )}
+      ) : null}
 
       <Card className="border-[var(--border)] shadow-[var(--shadow-card)]">
         <CardContent className="grid gap-x-5 gap-y-1 px-4 py-2 xl:grid-cols-[1fr_1.15fr_1.2fr_.8fr_.8fr]">
