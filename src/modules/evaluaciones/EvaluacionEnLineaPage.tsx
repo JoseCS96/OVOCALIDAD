@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { guardarResultado, obtenerEvaluacion, solicitarReapertura, terminarEvaluacion } from "./api";
+import { crearEvaluacion, guardarResultado, iniciarEvaluacion, obtenerEvaluacion, solicitarReapertura, terminarEvaluacion } from "./api";
 import { useAuth } from "@/modules/auth/AuthContext";
 import type { EvaluacionDetalle, GuardarResultadoRequest } from "./types";
 import { obtenerDetalleLote } from "@/modules/lotes/api";
@@ -228,6 +228,33 @@ export default function EvaluacionEnLineaPage() {
     },
   });
 
+  const continuarMutation = useMutation({
+    mutationFn: async ({ reevaluacion }: { reevaluacion: boolean }) => {
+      if (!data) throw new Error("No se encontró la evaluación actual.");
+      const creada = await crearEvaluacion({
+        loteId: data.cabecera.loteId,
+        tipoEvaluacionId: data.cabecera.tipoEvaluacionId,
+        evaluacionPadreId: reevaluacion ? data.cabecera.evaluacionId : null,
+        motivoReevaluacion: reevaluacion ? "Reevaluación de parámetros no conformes" : null,
+        observacion: null,
+      });
+      if (!creada.evaluacionId) throw new Error("No se recibió el identificador de la nueva evaluación.");
+      const iniciada = await iniciarEvaluacion(creada.evaluacionId);
+      return { creada, iniciada };
+    },
+    onSuccess: async ({ creada }) => {
+      setSaveError(null);
+      setSavedMessage(null);
+      await queryClient.invalidateQueries({ queryKey: ["evaluaciones"] });
+      await queryClient.invalidateQueries({ queryKey: ["lotes"] });
+      if (creada.evaluacionId) navigate(`/operacion/evaluaciones/${creada.evaluacionId}`, { replace: true });
+    },
+    onError: (error) => {
+      setSavedMessage(null);
+      setSaveError(error instanceof Error ? error.message : "No se pudo continuar con la evaluación.");
+    },
+  });
+
   const reopenMutation = useMutation({
     mutationFn: () => solicitarReapertura(id, reopenReason.trim()),
     onSuccess: async (response) => {
@@ -335,7 +362,10 @@ export default function EvaluacionEnLineaPage() {
   const estaTerminada = cabecera.estadoEvaluacion === "TERMINADA";
   const estadoLoteCodigo = detalleLote?.lote.estadoLoteCodigo?.toUpperCase() ?? "";
   const loteEnEtapaPosterior = ["LIBERADO", "NO_CONFORME", "CERTIFICADO", "ANULADO"].includes(estadoLoteCodigo);
-  const mostrarSolicitarReapertura = puedeSolicitarReapertura && estaTerminada && !loteEnEtapaPosterior;
+  const esEvaluacionPorEtapa = Boolean(cabecera.versionFaseId);
+  const puedeContinuarEtapa = esEvaluacionPorEtapa && estaTerminada && cabecera.resultadoGeneral === true && cabecera.esFinal === false && !loteEnEtapaPosterior;
+  const puedeReevaluar = esEvaluacionPorEtapa && estaTerminada && cabecera.resultadoGeneral === false && !loteEnEtapaPosterior;
+  const mostrarSolicitarReapertura = puedeSolicitarReapertura && estaTerminada && !esEvaluacionPorEtapa && !loteEnEtapaPosterior;
   const puedeTerminar = puedeTerminarEvaluacion && estaEnProceso;
   const origenLoteId = (location.state as { loteId?: number } | null)?.loteId;
   const volverA = origenLoteId ? `/operacion/lotes/${origenLoteId}` : "/operacion/evaluaciones";
@@ -384,8 +414,8 @@ export default function EvaluacionEnLineaPage() {
       ) : (
         <div className="flex items-center gap-2 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-1 text-[11px] leading-none text-emerald-900">
           <ShieldCheck className="h-4 w-4 shrink-0" />
-          <span className="font-semibold">Evaluación terminada.</span>
-          <span className="text-emerald-800">La captura está bloqueada. Terminar no libera el lote ni determina el resultado final de Calidad.</span>
+          <span className="font-semibold">{cabecera.resultadoGeneral === false ? "Etapa no conforme." : "Evaluación terminada."}</span>
+          <span className="text-emerald-800">{cabecera.resultadoGeneral === false ? "La captura está bloqueada. Puedes reevaluar únicamente los parámetros que no cumplieron." : cabecera.esFinal ? "La etapa final quedó consolidada." : "La captura está bloqueada. Si la etapa es conforme, continúa con la siguiente etapa."}</span>
         </div>
       )}
 
@@ -440,6 +470,8 @@ export default function EvaluacionEnLineaPage() {
           <div className="flex flex-col gap-3 border-t border-[var(--border)] bg-white px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="text-sm">{saveError && <span className="text-red-600">{saveError}</span>}{savedMessage && <span className="text-emerald-700">{savedMessage}</span>}</div>
             <div className="flex gap-2">
+              {puedeContinuarEtapa && <Button disabled={continuarMutation.isPending} onClick={() => continuarMutation.mutate({ reevaluacion: false })}><PlayCircle size={16} />{continuarMutation.isPending ? "Preparando..." : "Continuar siguiente etapa"}</Button>}
+              {puedeReevaluar && <Button disabled={continuarMutation.isPending} onClick={() => continuarMutation.mutate({ reevaluacion: true })}><RotateCcw size={16} />{continuarMutation.isPending ? "Preparando..." : "Reevaluar no conformes"}</Button>}
               {mostrarSolicitarReapertura && <Button variant="outline" disabled={reopenMutation.isPending} onClick={() => { setSaveError(null); setSavedMessage(null); setReopenOpen(true); }}><RotateCcw size={16} />Solicitar reapertura</Button>}
               {puedeTerminarEvaluacion && <Button variant="outline" disabled={!puedeTerminar || mutation.isPending || finishMutation.isPending} onClick={finishEvaluation}><ShieldCheck size={16} />{finishMutation.isPending ? "Terminando..." : "Terminar evaluación"}</Button>}
               {puedeRegistrarResultados && <Button onClick={save} disabled={!estaEnProceso || mutation.isPending || finishMutation.isPending}><Save size={16} />{mutation.isPending ? "Guardando..." : "Guardar avance"}</Button>}
