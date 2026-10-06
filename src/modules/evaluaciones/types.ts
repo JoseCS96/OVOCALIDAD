@@ -326,3 +326,18 @@ export type ConsolidacionEvaluacionResultado = {
   codigoResultado: number;
   mensaje: string;
 };
+
+export type CrearEvaluacionRequest = {
+  loteId: number;
+  tipoEvaluacionId: number;
+  evaluacionPadreId?: number | null;
+  motivoReevaluacion?: string | null;
+  observacion?: string | null;
+};
+
+export type CrearEvaluacionResponse = OperacionResponse & {
+  productoCodigo?: string | null;
+  versionId?: number | null;
+  intento?: number | null;
+  usuarioEvaluador?: string | null;
+};
