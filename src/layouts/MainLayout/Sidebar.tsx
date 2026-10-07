@@ -16,7 +16,8 @@ function Sidebar({ collapsed, onToggle }: SidebarProps) {
       ...group,
       items: group.items.filter((item) =>
         (!item.moduloCodigo || tieneModulo(item.moduloCodigo)) &&
-        (!item.permiso || tienePermiso(item.permiso))
+        (!item.permiso || tienePermiso(item.permiso)) &&
+        (!item.perfilesPermitidos || item.perfilesPermitidos.some(tienePerfil))
       ),
     }))
     .filter((group) => group.items.length > 0);
