@@ -1,8 +1,99 @@
 export type PlantillaLista={certificadoPlantillaId:number;versionFtId:number;nombre:string;descripcion:string|null;documentoId:number;documentoCodigo:string;documentoDescripcionDocumento:string;productoCodigo:string|null;versionNumero:number|null;estVerId:number;cantidadSecciones:number;cantidadCaracteristicas:number};
-export type ParametroFt={versionFtCaracteristicaId:number;versionId:number;caracteristicaId:number;determinacion:string;tipoCaractId:number|null;tipoCaractDescripcion:string|null;tipoCriterioId:number;valorCuantitativoInicial:number|null;valorCuantitativoFinal:number|null;valorCuantitativoIgual:number|null;valorCualitativo:string|null;unidadDeMedida:string|null;metEnsayoId:number|null;metEnsayoDescripcion:string|null;obligatorioCertificado:boolean;ordenCertificado:number};
-export type Seccion={certificadoPlantillaSeccionId:number;certificadoPlantillaId:number;tipoSeccion:string;titulo:string|null;orden:number;visible:boolean};
-export type CaracteristicaPlantilla={certificadoPlantillaCaracteristicaId:number;certificadoPlantillaSeccionId:number;versionFtCaracteristicaId:number;caracteristicaId:number;determinacion:string;tipoCaractDescripcion:string|null;obligatorioCertificado:boolean;orden:number};
-export type PlantillaDetalle={certificadoPlantillaId:number;versionFtId:number;nombre:string;descripcion:string|null;documentoCodigo:string;documentoDescripcionDocumento:string;productoCodigo:string|null;versionNumero:number|null;secciones:Seccion[];caracteristicas:CaracteristicaPlantilla[]};
+
+export type ParametroFt={
+ versionFtCaracteristicaId:number;
+ versionId:number;
+ caracteristicaId:number;
+ determinacion:string;
+ tipoCaractId:number|null;
+ tipoCaractDescripcion:string|null;
+ faseId:number|null;
+ versionFaseId:number|null;
+ faseCodigo:string|null;
+ faseDescripcion:string|null;
+ tipoCriterioId:number;
+ valorCuantitativoInicial:number|null;
+ valorCuantitativoFinal:number|null;
+ valorCuantitativoIgual:number|null;
+ valorCualitativo:string|null;
+ unidadDeMedida:string|null;
+ metEnsayoId:number|null;
+ metEnsayoDescripcion:string|null;
+ obligatorioCertificado:boolean;
+ ordenCertificado:number;
+};
+
+export type Seccion={
+ certificadoPlantillaSeccionId:number;
+ certificadoPlantillaId:number;
+ tipoSeccion:string;
+ titulo:string|null;
+ orden:number;
+ visible:boolean;
+ modoSeleccion:"MANUAL"|"TIPO"|"FASE"|"TIPO_FASE";
+ versionFaseId:number|null;
+ faseId:number|null;
+ faseCodigo:string|null;
+ faseDescripcion:string|null;
+ tipoCaractId:number|null;
+ tipoCaractDescripcion:string|null;
+};
+
+export type CaracteristicaPlantilla={
+ certificadoPlantillaCaracteristicaId:number;
+ certificadoPlantillaSeccionId:number;
+ versionFtCaracteristicaId:number;
+ caracteristicaId:number;
+ determinacion:string;
+ tipoCaractId:number|null;
+ tipoCaractDescripcion:string|null;
+ faseId:number|null;
+ versionFaseId:number|null;
+ faseCodigo:string|null;
+ faseDescripcion:string|null;
+ obligatorioCertificado:boolean;
+ orden:number;
+};
+
+export type PlantillaDetalle={
+ certificadoPlantillaId:number;
+ versionFtId:number;
+ nombre:string;
+ descripcion:string|null;
+ documentoCodigo:string;
+ documentoDescripcionDocumento:string;
+ productoCodigo:string|null;
+ versionNumero:number|null;
+ estVerId:number;
+ estadoVersionFt:string;
+ secciones:Seccion[];
+ caracteristicas:CaracteristicaPlantilla[];
+};
+
 export type OperacionPlantilla={codigoResultado:number;mensaje:string;certificadoPlantillaId:number};
-export type SeccionDiseno={tipoSeccion:string;titulo:string;orden:number;visible:boolean;caracteristicas:{versionFtCaracteristicaId:number;orden:number}[]};
-export type FichaTecnicaCertificado={versionId:number;documentoId:number;documentoCodigo:string;documentoDescripcionDocumento:string;productoCodigo:string|null;versionNumero:number|null;versionInicioVigencia:string|null;estVerId:number;estadoVersion:string;cantidadParametrosCertificables:number};
+
+export type CaracteristicaDiseno={versionFtCaracteristicaId:number;orden:number};
+
+export type SeccionDiseno={
+ tipoSeccion:string;
+ titulo:string;
+ orden:number;
+ visible:boolean;
+ modoSeleccion:"MANUAL"|"TIPO"|"FASE"|"TIPO_FASE";
+ versionFaseId:number|null;
+ tipoCaractId:number|null;
+ caracteristicas:CaracteristicaDiseno[];
+};
+
+export type FichaTecnicaCertificado={
+ versionId:number;
+ documentoId:number;
+ documentoCodigo:string;
+ documentoDescripcionDocumento:string;
+ productoCodigo:string|null;
+ versionNumero:number|null;
+ versionInicioVigencia:string|null;
+ estVerId:number;
+ estadoVersion:string;
+ cantidadParametrosCertificables:number;
+};
