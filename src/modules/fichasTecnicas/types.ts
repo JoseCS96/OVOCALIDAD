@@ -8,6 +8,6 @@ export type FichaTecnicaGestion={versionId:number;documentoId:number;documentoCo
 
 export type EliminarFichaTecnicaResponse={codigoResultado:number;mensaje:string;versionId:number};
 
-export type SeccionFt={versSeccId:number;versionId:number;seccionId:number;seccionDescripcion:string;idTipoSeccion:number|null;tipoSeccionDescripcion:string|null;orden:number|null;puedeEliminarse:boolean;permiteReordenar:boolean;contenido:string|null};
-export type OperacionSeccionFt={codigoResultado:number;mensaje:string;versSeccId?:number|null;versionId?:number|null;seccionId?:number|null;orden?:number|null;versionSeccionContenidoId?:number|null};
-export type ReordenarSeccionesFt={secciones:Array<{versSeccId:number;orden:number}>};
+export type SeccionFt={versionFtSeccionId:number;versionId:number;codigo:string;titulo:string;tipoContenido:"TEXTO"|"LISTA"|"TABLA"|"CARACTERISTICAS";orden:number;visible:boolean;esSistema:boolean;contenido:string|null};
+export type OperacionSeccionFt={codigoResultado:number;mensaje:string;versionFtSeccionId?:number|null;versionId?:number|null;orden?:number|null};
+export type ReordenarSeccionesFt={secciones:Array<{versionFtSeccionId:number;orden:number}>};
