@@ -123,8 +123,6 @@ export default function EditarFichaTecnicaPage(){
  const esCaracteristicas=activa?.tipoContenido==="CARACTERISTICAS"||activa?.codigo==="CARACTERISTICAS";
  const estado=(ft.data.estadoVersion??"").toUpperCase();
  const accionPrincipal=estado==="BORRADOR"?"ENVIAR_REVISION":estado==="PENDIENTE_REVISION"?"VERIFICAR":estado==="VERIFICADO"?"PUBLICAR":estado==="PUBLICADO"?"VIGENTAR":null;
- const textoAccion=accionPrincipal==="ENVIAR_REVISION"?"Enviar a revisión":accionPrincipal==="VERIFICAR"?"Verificar":accionPrincipal==="PUBLICAR"?"Publicar":accionPrincipal==="VIGENTAR"?"Vigentar":null;
- const puedeObservar=estado==="PENDIENTE_REVISION"||estado==="VERIFICADO";
 
  return <PageContainer className="space-y-5">
   <div className="flex items-start justify-between gap-4">
