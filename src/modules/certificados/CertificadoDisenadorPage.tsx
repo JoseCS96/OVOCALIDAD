@@ -49,8 +49,26 @@ export default function CertificadoDisenadorPage(){
  const normalizar=(items:SeccionDiseno[])=>items.map((s,i)=>({...s,orden:i+1,caracteristicas:s.caracteristicas.map((c,j)=>({...c,orden:j+1}))}));
  const actual=seleccion>=0?secciones[seleccion]:undefined;
  const ocupados=useMemo(()=>new Set(secciones.flatMap((s,i)=>i===seleccion?[]:s.caracteristicas.map(c=>c.versionFtCaracteristicaId))),[secciones,seleccion]);
- const tipos=useMemo(()=>Array.from(new Map((parametros.data??[]).filter(x=>x.tipoCaractId!=null).map(x=>[x.tipoCaractId!,x.tipoCaractDescripcion??"Sin tipo"]])).entries()),[parametros.data]);
- const fases=useMemo(()=>Array.from(new Map((parametros.data??[]).filter(x=>x.versionFaseId!=null).map(x=>[x.versionFaseId!,x.faseDescripcion||x.faseCodigo||"Sin fase"])).entries()),[parametros.data]);
+ const tipos=useMemo(
+  ()=>Array.from(
+   new Map(
+    (parametros.data??[])
+     .filter(x=>x.tipoCaractId!=null)
+     .map(x=>[x.tipoCaractId as number,x.tipoCaractDescripcion??"Sin tipo"] as const)
+   ).entries()
+  ),
+  [parametros.data]
+ );
+ const fases=useMemo(
+  ()=>Array.from(
+   new Map(
+    (parametros.data??[])
+     .filter(x=>x.versionFaseId!=null)
+     .map(x=>[x.versionFaseId as number,x.faseDescripcion||x.faseCodigo||"Sin fase"] as const)
+   ).entries()
+  ),
+  [parametros.data]
+ );
 
  const compatibles=(p:ParametroFt,s:SeccionDiseno)=>{
   if(s.modoSeleccion==="TIPO")return p.tipoCaractId===s.tipoCaractId;
