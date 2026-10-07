@@ -15,10 +15,11 @@ import EspecificacionTecnicaPage from "@/modules/especificaciones/Especificacion
 import EspecificacionTecnicaDetallePage from "@/modules/especificaciones/EspecificacionTecnicaDetallePage";
 import EspecificacionesTecnicasPage from "@/modules/especificaciones/EspecificacionesTecnicasPage";
 import NuevaEspecificacionTecnicaPage from "@/modules/especificaciones/NuevaEspecificacionTecnicaPage";
+import FichasTecnicasPage from "@/modules/fichas-tecnicas/FichasTecnicasPage";
+import FichaTecnicaPage from "@/modules/fichas-tecnicas/FichaTecnicaPage";
 
 const pages = [
   { path: "/productos", title: "Productos", eyebrow: "Gestión documental", description: "Maestro de productos y códigos asociados al proceso de calidad.", icon: Package },
-  { path: "/documentos/fichas-tecnicas", title: "Fichas técnicas", eyebrow: "Gestión documental", description: "Consulta y control de fichas técnicas utilizadas para certificación.", icon: FileCheck2 },
   { path: "/documentos/versiones", title: "Versiones documentales", eyebrow: "Gestión documental", description: "Historial y vigencia de documentos de calidad.", icon: Boxes },
   { path: "/operacion/resultados", title: "Resultados", eyebrow: "Operación", description: "Registro y consulta de resultados de análisis por lote y característica.", icon: BarChart3 },
   { path: "/certificacion/certificados", title: "Certificados", eyebrow: "Certificación", description: "Generación, aprobación y emisión de certificados de calidad.", icon: ShieldCheck },
@@ -45,6 +46,8 @@ export default function AppRouter() {
           <Route path="/documentos/especificaciones/:versionId" element={<EspecificacionTecnicaDetallePage />} />
           <Route path="/documentos/especificaciones/:versionId/editar" element={<EspecificacionTecnicaPage />} />
           <Route path="/documentos/especificaciones" element={<EspecificacionesTecnicasPage />} />
+          <Route path="/documentos/fichas-tecnicas" element={<FichasTecnicasPage />} />
+          <Route path="/documentos/fichas-tecnicas/:versionId/editar" element={<FichaTecnicaPage />} />
           {pages.map((page) => <Route key={page.path} path={page.path} element={<ModulePlaceholder {...page} />} />)}
         </Route>
       </Route>
