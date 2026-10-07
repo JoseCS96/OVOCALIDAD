@@ -27,13 +27,13 @@ import CargosMantenimientoPage from "@/modules/mantenimientos/CargosMantenimient
 import ResponsablesMantenimientoPage from "@/modules/mantenimientos/ResponsablesMantenimientoPage";
 import TrazabilidadPage from "@/modules/trazabilidad/TrazabilidadPage";
 import TrazabilidadDetallePage from "@/modules/trazabilidad/TrazabilidadDetallePage";
+import CertificadosPage from "@/modules/certificados/CertificadosPage";
 
 const pages = [
   { path: "/productos", title: "Productos", eyebrow: "Gestión documental", description: "Maestro de productos y códigos asociados al proceso de calidad.", icon: Package },
   { path: "/documentos/fichas-tecnicas", title: "Fichas técnicas", eyebrow: "Gestión documental", description: "Consulta y control de fichas técnicas utilizadas para certificación.", icon: FileCheck2 },
   { path: "/documentos/versiones", title: "Versiones documentales", eyebrow: "Gestión documental", description: "Historial y vigencia de documentos de calidad.", icon: Boxes },
   { path: "/operacion/resultados", title: "Resultados", eyebrow: "Operación", description: "Registro y consulta de resultados de análisis por lote y característica.", icon: BarChart3 },
-  { path: "/certificacion/certificados", title: "Certificados", eyebrow: "Certificación", description: "Generación, aprobación y emisión de certificados de calidad.", icon: ShieldCheck },
   { path: "/certificacion/liberaciones", title: "Liberaciones", eyebrow: "Certificación", description: "Control de liberaciones totales y parciales asociadas a lotes.", icon: FileCheck2 },
   { path: "/reportes", title: "Reportes", eyebrow: "Sistema", description: "Indicadores operativos y ejecutivos del proceso de calidad.", icon: BarChart3 },
   { path: "/administracion", title: "Administración", eyebrow: "Sistema", description: "Configuración de catálogos, parámetros y seguridad de OVOCALIDAD.", icon: Settings },
@@ -49,6 +49,7 @@ export default function AppRouter() {
           <Route path="/operacion/lotes" element={<LotesPage />} />
           <Route path="/operacion/lotes/:loteId" element={<LoteDetallePage />} />
           <Route path="/trazabilidad" element={<TrazabilidadPage />} />
+          <Route path="/certificacion/certificados" element={<CertificadosPage />} />
           <Route path="/trazabilidad/:loteId" element={<TrazabilidadDetallePage />} />
           <Route path="/operacion/evaluaciones" element={<EvaluacionesPage />} />
           <Route path="/operacion/evaluaciones/consolidacion" element={<ConsolidacionCalidadPage />} />
