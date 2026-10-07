@@ -25,7 +25,7 @@ export const navigationGroups: NavigationGroup[] = [
     { label: "Resultados", path: "/operacion/resultados", icon: BarChart3, moduloCodigo: "LABORATORIO", permiso: "RESULTADO.VER" },
   ]},
   { title: "Certificación", items: [
-    { label: "Certificados", path: "/certificacion/certificados", icon: ShieldCheck, permiso: "CERTIFICADO.VER" },
+    { label: "Certificados", path: "/certificacion/certificados", icon: ShieldCheck },
     { label: "Liberaciones", path: "/certificacion/liberaciones", icon: FileCheck2, permiso: "LIBERACION.VER" },
   ]},
   { title: "Mantenimientos", perfilesPermitidos: ["JEFE_CALIDAD"], items: [
