@@ -5,3 +5,4 @@ export type CaracteristicaPlantilla={certificadoPlantillaCaracteristicaId:number
 export type PlantillaDetalle={certificadoPlantillaId:number;versionFtId:number;nombre:string;descripcion:string|null;documentoCodigo:string;documentoDescripcionDocumento:string;productoCodigo:string|null;versionNumero:number|null;secciones:Seccion[];caracteristicas:CaracteristicaPlantilla[]};
 export type OperacionPlantilla={codigoResultado:number;mensaje:string;certificadoPlantillaId:number};
 export type SeccionDiseno={tipoSeccion:string;titulo:string;orden:number;visible:boolean;caracteristicas:{versionFtCaracteristicaId:number;orden:number}[]};
+export type FichaTecnicaCertificado={versionId:number;documentoId:number;documentoCodigo:string;documentoDescripcionDocumento:string;productoCodigo:string|null;versionNumero:number|null;versionInicioVigencia:string|null;estVerId:number;estadoVersion:string;cantidadParametrosCertificables:number};
