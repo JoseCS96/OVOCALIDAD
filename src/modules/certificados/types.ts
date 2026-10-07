@@ -28,6 +28,7 @@ export type Seccion={
  certificadoPlantillaId:number;
  tipoSeccion:string;
  titulo:string|null;
+ contenido:string|null;
  orden:number;
  visible:boolean;
  modoSeleccion:"MANUAL"|"TIPO"|"FASE"|"TIPO_FASE";
@@ -77,6 +78,7 @@ export type CaracteristicaDiseno={versionFtCaracteristicaId:number;orden:number}
 export type SeccionDiseno={
  tipoSeccion:string;
  titulo:string;
+ contenido:string|null;
  orden:number;
  visible:boolean;
  modoSeleccion:"MANUAL"|"TIPO"|"FASE"|"TIPO_FASE";
