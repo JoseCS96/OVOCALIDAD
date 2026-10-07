@@ -12,7 +12,7 @@ export async function obtenerFt(versionId:number){const {data}=await api.get<Fic
 export async function eliminarFtBorrador(versionId:number){const {data}=await api.delete<EliminarFichaTecnicaResponse>(`/api/fichas-tecnicas/${versionId}`);return validar(data)}
 
 export async function listarSeccionesFt(versionId:number){const {data}=await api.get<SeccionFt[]>(`/api/fichas-tecnicas/${versionId}/secciones`);return data}
-export async function guardarContenidoSeccionFt(versionId:number,versSeccId:number,contenido:string|null){const {data}=await api.put<OperacionSeccionFt>(`/api/fichas-tecnicas/${versionId}/secciones/${versSeccId}/contenido`,{contenido});return validar(data)}
-export async function agregarSeccionFt(versionId:number,seccionId:number,orden:number|null=null){const {data}=await api.post<OperacionSeccionFt>(`/api/fichas-tecnicas/${versionId}/secciones`,{seccionId,orden});return validar(data)}
-export async function quitarSeccionFt(versionId:number,versSeccId:number){const {data}=await api.delete<OperacionSeccionFt>(`/api/fichas-tecnicas/${versionId}/secciones/${versSeccId}`);return validar(data)}
+export async function guardarContenidoSeccionFt(versionId:number,versionFtSeccionId:number,request:{titulo:string;contenido:string|null;visible:boolean}){const {data}=await api.put<OperacionSeccionFt>(`/api/fichas-tecnicas/${versionId}/secciones/${versionFtSeccionId}/contenido`,request);return validar(data)}
+export async function agregarSeccionFt(versionId:number,request:{titulo:string;tipoContenido:"TEXTO"|"LISTA"|"TABLA";orden:number|null}){const {data}=await api.post<OperacionSeccionFt>(`/api/fichas-tecnicas/${versionId}/secciones`,request);return validar(data)}
+export async function quitarSeccionFt(versionId:number,versionFtSeccionId:number){const {data}=await api.delete<OperacionSeccionFt>(`/api/fichas-tecnicas/${versionId}/secciones/${versionFtSeccionId}`);return validar(data)}
 export async function reordenarSeccionesFt(versionId:number,request:ReordenarSeccionesFt){const {data}=await api.put<OperacionSeccionFt>(`/api/fichas-tecnicas/${versionId}/secciones/orden`,request);return validar(data)}
