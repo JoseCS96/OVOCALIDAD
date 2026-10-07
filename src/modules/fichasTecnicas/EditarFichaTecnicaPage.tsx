@@ -10,7 +10,7 @@ import {obtenerCatalogosEt} from "@/modules/especificaciones/api";
 import EstructuraFtPanel from "./components/EstructuraFtPanel";
 import {
  agregarSeccionFt,guardarCaracteristicaFt,guardarContenidoSeccionFt,listarCaracteristicasFt,
- listarSeccionesFt,obtenerFt,quitarSeccionFt,reordenarSeccionesFt
+ listarSeccionesFt,obtenerFt,quitarSeccionFt,reordenarSeccionesFt,cambiarEstadoFt,listarHistorialEstadoFt
 } from "./api";
 import type {CaracteristicaFt,SeccionFt} from "./types";
 
@@ -22,6 +22,7 @@ export default function EditarFichaTecnicaPage(){
  const ft=useQuery({queryKey:["ft",id],queryFn:()=>obtenerFt(id),enabled:Number.isFinite(id)});
  const chars=useQuery({queryKey:["ft-caracteristicas",id],queryFn:()=>listarCaracteristicasFt(id),enabled:Number.isFinite(id)});
  const secciones=useQuery({queryKey:["ft-secciones",id],queryFn:()=>listarSeccionesFt(id),enabled:Number.isFinite(id)});
+ const historial=useQuery({queryKey:["ft-historial",id],queryFn:()=>listarHistorialEstadoFt(id),enabled:Number.isFinite(id)});
  const cats=useQuery({queryKey:["catalogos-et"],queryFn:obtenerCatalogosEt});
 
  const [editando,setEditando]=useState<Record<number,CaracteristicaFt>>({});
@@ -29,6 +30,8 @@ export default function EditarFichaTecnicaPage(){
  const [seccionesEditadas,setSeccionesEditadas]=useState<Record<number,SeccionFt>>({});
  const [seccionActiva,setSeccionActiva]=useState<number|null>(null);
  const [modalAgregar,setModalAgregar]=useState(false);
+ const [comentarioWorkflow,setComentarioWorkflow]=useState("");
+ const [mostrarHistorial,setMostrarHistorial]=useState(false);
  const [nuevaSeccion,setNuevaSeccion]=useState({titulo:"",tipoContenido:"TEXTO" as "TEXTO"|"LISTA"|"TABLA"});
 
  const filas=useMemo(()=>[...(chars.data??[])].sort((a,b)=>(a.versionFaseOrden??9999)-(b.versionFaseOrden??9999)||(a.ordenTecnico??9999)-(b.ordenTecnico??9999)||a.versionFtCaracteristicaId-b.versionFtCaracteristicaId),[chars.data]);
@@ -75,6 +78,16 @@ export default function EditarFichaTecnicaPage(){
   onSuccess:()=>qc.invalidateQueries({queryKey:["ft-secciones",id]})
  });
 
+ const cambiarEstado=useMutation({
+  mutationFn:(accion:"ENVIAR_REVISION"|"OBSERVAR"|"VERIFICAR"|"PUBLICAR"|"VIGENTAR")=>cambiarEstadoFt(id,{accion,comentario:comentarioWorkflow.trim()||null}),
+  onSuccess:()=>{
+   setComentarioWorkflow("");
+   qc.invalidateQueries({queryKey:["ft",id]});
+   qc.invalidateQueries({queryKey:["fichas-tecnicas"]});
+   qc.invalidateQueries({queryKey:["ft-historial",id]});
+  }
+ });
+
  const moverSeccion=useMutation({
   mutationFn:async({versionFtSeccionId,direccion}:{versionFtSeccionId:number;direccion:-1|1})=>{
    const arr=[...filasSecciones];
@@ -105,8 +118,12 @@ export default function EditarFichaTecnicaPage(){
 
  const activaBase=filasSecciones.find(x=>x.versionFtSeccionId===seccionActiva)??filasSecciones[0];
  const activa=activaBase?seccionValor(activaBase):undefined;
- const busy=moverSeccion.isPending||quitarSeccion.isPending||agregarSeccion.isPending||guardarSeccion.isPending;
+ const busy=moverSeccion.isPending||quitarSeccion.isPending||agregarSeccion.isPending||guardarSeccion.isPending||cambiarEstado.isPending;
  const esCaracteristicas=activa?.tipoContenido==="CARACTERISTICAS"||activa?.codigo==="CARACTERISTICAS";
+ const estado=(ft.data.estadoVersion??"").toUpperCase();
+ const accionPrincipal=estado==="BORRADOR"?"ENVIAR_REVISION":estado==="PENDIENTE_REVISION"?"VERIFICAR":estado==="VERIFICADO"?"PUBLICAR":estado==="PUBLICADO"?"VIGENTAR":null;
+ const textoAccion=accionPrincipal==="ENVIAR_REVISION"?"Enviar a revisión":accionPrincipal==="VERIFICAR"?"Verificar":accionPrincipal==="PUBLICAR"?"Publicar":accionPrincipal==="VIGENTAR"?"Vigentar":null;
+ const puedeObservar=estado==="PENDIENTE_REVISION"||estado==="VERIFICADO";
 
  return <PageContainer className="space-y-5">
   <div className="flex items-start justify-between gap-4">
@@ -114,8 +131,24 @@ export default function EditarFichaTecnicaPage(){
     <h1 className="mt-1 text-2xl font-semibold">{ft.data.productoCodigo} · {ft.data.documentoCodigo}</h1>
     <p className="mt-1 text-sm text-[var(--text-secondary)]">{ft.data.documentoDescripcionDocumento} · v{ft.data.versionNumero} · {ft.data.estadoVersion}</p>
    </div>
-   <Button variant="outline" onClick={()=>nav("/documentos/fichas-tecnicas")}><ArrowLeft/>Volver</Button>
+   <div className="flex flex-wrap gap-2">
+    {accionPrincipal&&<Button disabled={cambiarEstado.isPending} onClick={()=>cambiarEstado.mutate(accionPrincipal)}>{textoAccion}</Button>}
+    {puedeObservar&&<Button variant="outline" disabled={cambiarEstado.isPending} onClick={()=>{if(!comentarioWorkflow.trim()){window.alert("Ingresa un comentario para observar la FT.");return}cambiarEstado.mutate("OBSERVAR")}}>Observar</Button>}
+    <Button variant="outline" onClick={()=>setMostrarHistorial(v=>!v)}>Trazabilidad</Button>
+    <Button variant="outline" onClick={()=>nav("/documentos/fichas-tecnicas")}><ArrowLeft/>Volver</Button>
+   </div>
   </div>
+
+  {(puedeObservar||mostrarHistorial)&&<Card><CardContent className="space-y-3 p-4">
+   {puedeObservar&&<div><label className="text-sm font-medium">Comentario de observación</label><textarea className="mt-1 min-h-[80px] w-full rounded-md border bg-white p-3 text-sm" value={comentarioWorkflow} onChange={e=>setComentarioWorkflow(e.target.value)} placeholder="Motivo de la observación..."/></div>}
+   {mostrarHistorial&&<div>
+    <h3 className="font-semibold">Trazabilidad de estados</h3>
+    <div className="mt-3 overflow-x-auto"><table className="w-full min-w-[760px] text-sm"><thead><tr className="border-b text-left"><th className="p-2">Fecha</th><th className="p-2">Origen</th><th className="p-2">Acción</th><th className="p-2">Destino</th><th className="p-2">Usuario</th><th className="p-2">Comentario</th></tr></thead><tbody>
+     {(historial.data??[]).map(h=><tr key={h.versionHistorialEstadoId} className="border-b"><td className="p-2">{new Date(h.fecha).toLocaleString()}</td><td className="p-2">{h.estadoOrigen??"—"}</td><td className="p-2">{h.accion}</td><td className="p-2 font-medium">{h.estadoDestino}</td><td className="p-2">{h.usuario}</td><td className="p-2">{h.comentario??"—"}</td></tr>)}
+     {!historial.isLoading&&(historial.data??[]).length===0&&<tr><td colSpan={6} className="p-4 text-center text-[var(--text-secondary)]">Aún no hay cambios de estado registrados.</td></tr>}
+    </tbody></table></div>
+   </div>}
+  </CardContent></Card>}
 
   <Card><CardContent className="p-5">
    <div className="flex flex-wrap items-center justify-between gap-3">
