@@ -6,7 +6,7 @@ import PageContainer from "@/components/common/PageContainer";
 import {Button} from "@/components/ui/button";
 import {Card,CardContent} from "@/components/ui/card";
 import {Input} from "@/components/ui/input";
-import {obtenerCatalogosEt,obtenerSeccionesEt} from "@/modules/especificaciones/api";
+import {obtenerCatalogosEt} from "@/modules/especificaciones/api";
 import {
  agregarSeccionFt,guardarCaracteristicaFt,guardarContenidoSeccionFt,listarCaracteristicasFt,
  listarSeccionesFt,obtenerFt,quitarSeccionFt,reordenarSeccionesFt
@@ -20,13 +20,12 @@ export default function EditarFichaTecnicaPage(){
  const ft=useQuery({queryKey:["ft",id],queryFn:()=>obtenerFt(id),enabled:Number.isFinite(id)});
  const chars=useQuery({queryKey:["ft-caracteristicas",id],queryFn:()=>listarCaracteristicasFt(id),enabled:Number.isFinite(id)});
  const secciones=useQuery({queryKey:["ft-secciones",id],queryFn:()=>listarSeccionesFt(id),enabled:Number.isFinite(id)});
- const seccionesCatalogo=useQuery({queryKey:["secciones-et-catalogo"],queryFn:obtenerSeccionesEt});
  const cats=useQuery({queryKey:["catalogos-et"],queryFn:obtenerCatalogosEt});
 
  const [editando,setEditando]=useState<Record<number,CaracteristicaFt>>({});
  const [tipoFiltro,setTipoFiltro]=useState("TODOS");
- const [contenidoEditado,setContenidoEditado]=useState<Record<number,string>>({});
- const [seccionNueva,setSeccionNueva]=useState("");
+ const [seccionesEditadas,setSeccionesEditadas]=useState<Record<number,SeccionFt>>({});
+ const [nuevaSeccion,setNuevaSeccion]=useState({titulo:"",tipoContenido:"TEXTO" as "TEXTO"|"LISTA"|"TABLA"});
 
  const filas=useMemo(()=>chars.data??[],[chars.data]);
  const filasSecciones=useMemo(()=>[...(secciones.data??[])].sort((a,b)=>(a.orden??9999)-(b.orden??9999)),[secciones.data]);
@@ -36,10 +35,6 @@ export default function EditarFichaTecnicaPage(){
  },[filas]);
  const filasFiltradas=useMemo(()=>tipoFiltro==="TODOS"?filas:filas.filter(x=>x.tipoCaractDescripcion===tipoFiltro),[filas,tipoFiltro]);
 
- const disponibles=useMemo(()=>{
-  const usados=new Set(filasSecciones.map(x=>x.seccionId));
-  return (seccionesCatalogo.data?.secciones??[]).filter(x=>!usados.has(x.seccionId));
- },[seccionesCatalogo.data,filasSecciones]);
 
  const guardar=useMutation({
   mutationFn:(x:CaracteristicaFt)=>guardarCaracteristicaFt(id,{
@@ -55,33 +50,36 @@ export default function EditarFichaTecnicaPage(){
  });
 
  const guardarSeccion=useMutation({
-  mutationFn:(x:SeccionFt)=>guardarContenidoSeccionFt(id,x.versSeccId,contenidoEditado[x.versSeccId]??x.contenido??""),
+  mutationFn:(x:SeccionFt)=>guardarContenidoSeccionFt(id,x.versionFtSeccionId,{titulo:x.titulo,contenido:x.contenido,visible:x.visible}),
   onSuccess:(_,x)=>{
-   setContenidoEditado(a=>{const n={...a};delete n[x.versSeccId];return n});
+   setSeccionesEditadas(a=>{const n={...a};delete n[x.versionFtSeccionId];return n});
    qc.invalidateQueries({queryKey:["ft-secciones",id]});
   }
  });
 
  const agregarSeccion=useMutation({
-  mutationFn:(seccionId:number)=>agregarSeccionFt(id,seccionId,null),
-  onSuccess:()=>{setSeccionNueva("");qc.invalidateQueries({queryKey:["ft-secciones",id]})}
+  mutationFn:()=>agregarSeccionFt(id,{titulo:nuevaSeccion.titulo.trim(),tipoContenido:nuevaSeccion.tipoContenido,orden:null}),
+  onSuccess:()=>{setNuevaSeccion({titulo:"",tipoContenido:"TEXTO"});qc.invalidateQueries({queryKey:["ft-secciones",id]})}
  });
 
  const quitarSeccion=useMutation({
-  mutationFn:(versSeccId:number)=>quitarSeccionFt(id,versSeccId),
+  mutationFn:(versionFtSeccionId:number)=>quitarSeccionFt(id,versionFtSeccionId),
   onSuccess:()=>qc.invalidateQueries({queryKey:["ft-secciones",id]})
  });
 
  const moverSeccion=useMutation({
-  mutationFn:async({versSeccId,direccion}:{versSeccId:number;direccion:-1|1})=>{
+  mutationFn:async({versionFtSeccionId,direccion}:{versionFtSeccionId:number;direccion:-1|1})=>{
    const arr=[...filasSecciones];
-   const i=arr.findIndex(x=>x.versSeccId===versSeccId),j=i+direccion;
+   const i=arr.findIndex(x=>x.versionFtSeccionId===versionFtSeccionId),j=i+direccion;
    if(i<0||j<0||j>=arr.length)return;
    [arr[i],arr[j]]=[arr[j],arr[i]];
-   await reordenarSeccionesFt(id,{secciones:arr.map((x,k)=>({versSeccId:x.versSeccId,orden:k+1}))});
+   await reordenarSeccionesFt(id,{secciones:arr.map((x,k)=>({versionFtSeccionId:x.versionFtSeccionId,orden:k+1}))});
   },
   onSuccess:()=>qc.invalidateQueries({queryKey:["ft-secciones",id]})
  });
+
+ const seccionValor=(x:SeccionFt)=>seccionesEditadas[x.versionFtSeccionId]??x;
+ const patchSeccion=(x:SeccionFt,p:Partial<SeccionFt>)=>setSeccionesEditadas(a=>({...a,[x.versionFtSeccionId]:{...seccionValor(x),...p}}));
 
  const valor=(x:CaracteristicaFt)=>editando[x.versionFtCaracteristicaId]??x;
  const patch=(x:CaracteristicaFt,p:Partial<CaracteristicaFt>)=>setEditando(a=>({...a,[x.versionFtCaracteristicaId]:{...valor(x),...p}}));
@@ -111,33 +109,48 @@ export default function EditarFichaTecnicaPage(){
 
   <Card><CardContent className="space-y-4 p-4">
    <div className="flex flex-wrap items-end gap-2">
-    <label className="min-w-72 flex-1 space-y-1"><span className="text-sm font-medium">Agregar sección</span>
-     <select className="h-10 w-full rounded-md border bg-white px-3 text-sm" value={seccionNueva} onChange={e=>setSeccionNueva(e.target.value)}>
-      <option value="">Seleccione una sección disponible</option>
-      {disponibles.map(s=><option key={s.seccionId} value={s.seccionId}>{s.seccionDescripcion}</option>)}
+    <label className="min-w-72 flex-1 space-y-1">
+     <span className="text-sm font-medium">Agregar sección adicional de FT</span>
+     <Input value={nuevaSeccion.titulo} onChange={e=>setNuevaSeccion(v=>({...v,titulo:e.target.value}))} placeholder="Ej. Información nutricional complementaria"/>
+    </label>
+    <label className="space-y-1">
+     <span className="text-sm font-medium">Tipo</span>
+     <select className="h-10 rounded-md border bg-white px-3 text-sm" value={nuevaSeccion.tipoContenido} onChange={e=>setNuevaSeccion(v=>({...v,tipoContenido:e.target.value as "TEXTO"|"LISTA"|"TABLA"}))}>
+      <option value="TEXTO">Texto</option><option value="LISTA">Lista</option><option value="TABLA">Tabla</option>
      </select>
     </label>
-    <Button type="button" disabled={!seccionNueva||agregarSeccion.isPending} onClick={()=>agregarSeccion.mutate(Number(seccionNueva))}><Plus/>Agregar</Button>
+    <Button type="button" disabled={!nuevaSeccion.titulo.trim()||agregarSeccion.isPending} onClick={()=>agregarSeccion.mutate()}><Plus/>Agregar</Button>
    </div>
 
-   <div className="space-y-3">
-    {filasSecciones.map((s,index)=>{
-     const texto=contenidoEditado[s.versSeccId]??s.contenido??"";
-     const cambiado=Object.prototype.hasOwnProperty.call(contenidoEditado,s.versSeccId);
-     return <div key={s.versSeccId} className="rounded-lg border p-4">
+   <div className="grid gap-3">
+    {filasSecciones.map((base,index)=>{
+     const s=seccionValor(base);
+     const cambiado=!!seccionesEditadas[base.versionFtSeccionId];
+     return <div key={base.versionFtSeccionId} className="rounded-lg border bg-white p-4">
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-       <div><p className="font-semibold">{index+1}. {s.seccionDescripcion}</p><p className="text-xs text-[var(--text-secondary)]">{s.tipoSeccionDescripcion??"Sección FT"}</p></div>
-       <div className="flex gap-1">
-        <Button type="button" size="sm" variant="outline" disabled={index===0||moverSeccion.isPending} onClick={()=>moverSeccion.mutate({versSeccId:s.versSeccId,direccion:-1})}><ChevronUp/></Button>
-        <Button type="button" size="sm" variant="outline" disabled={index===filasSecciones.length-1||moverSeccion.isPending} onClick={()=>moverSeccion.mutate({versSeccId:s.versSeccId,direccion:1})}><ChevronDown/></Button>
-        <Button type="button" size="sm" variant="outline" className="text-red-600" disabled={quitarSeccion.isPending} onClick={()=>{if(window.confirm(`¿Retirar la sección "${s.seccionDescripcion}" de esta FT?`))quitarSeccion.mutate(s.versSeccId)}}><Trash2/>Quitar</Button>
+       <div className="flex-1">
+        <div className="flex items-center gap-2">
+         <span className="text-xs font-semibold text-[var(--text-secondary)]">{index+1}</span>
+         <Input className="max-w-xl font-semibold" value={s.titulo} onChange={e=>patchSeccion(base,{titulo:e.target.value})}/>
+         <span className="rounded-full border px-2 py-1 text-[11px]">{s.tipoContenido}</span>
+        </div>
+        <p className="mt-1 text-xs text-[var(--text-secondary)]">{s.esSistema?"Sección base de la Hoja/Ficha Técnica":"Sección adicional"}</p>
+       </div>
+       <div className="flex flex-wrap items-center gap-2">
+        <label className="flex items-center gap-2 text-xs"><input type="checkbox" checked={s.visible} onChange={e=>patchSeccion(base,{visible:e.target.checked})}/>Visible</label>
+        <Button type="button" size="sm" variant="outline" disabled={index===0||moverSeccion.isPending} onClick={()=>moverSeccion.mutate({versionFtSeccionId:s.versionFtSeccionId,direccion:-1})}><ChevronUp/></Button>
+        <Button type="button" size="sm" variant="outline" disabled={index===filasSecciones.length-1||moverSeccion.isPending} onClick={()=>moverSeccion.mutate({versionFtSeccionId:s.versionFtSeccionId,direccion:1})}><ChevronDown/></Button>
+        {!s.esSistema&&<Button type="button" size="sm" variant="outline" className="text-red-600" disabled={quitarSeccion.isPending} onClick={()=>{if(window.confirm(`¿Retirar la sección "${s.titulo}" de esta FT?`))quitarSeccion.mutate(s.versionFtSeccionId)}}><Trash2/>Quitar</Button>}
        </div>
       </div>
-      <textarea className="min-h-28 w-full rounded-md border bg-white px-3 py-2 text-sm" value={texto} onChange={e=>setContenidoEditado(a=>({...a,[s.versSeccId]:e.target.value}))} placeholder="Contenido de la sección en la ficha técnica..."/>
+
+      {s.tipoContenido==="CARACTERISTICAS"
+       ?<div className="rounded-md bg-slate-50 p-3 text-sm text-[var(--text-secondary)]">Esta sección se genera automáticamente con las características configuradas de la FT. Los criterios y valores se editan en el bloque de características de abajo.</div>
+       :<textarea className="min-h-28 w-full rounded-md border bg-white px-3 py-2 text-sm" value={s.contenido??""} onChange={e=>patchSeccion(base,{contenido:e.target.value})} placeholder={s.tipoContenido==="TABLA"?"Contenido de tabla / filas de la sección...":s.tipoContenido==="LISTA"?"Un elemento por línea...":"Contenido de la sección..."}/>}
       <div className="mt-2 flex justify-end"><Button type="button" size="sm" disabled={!cambiado||guardarSeccion.isPending} onClick={()=>guardarSeccion.mutate(s)}><Save/>Guardar sección</Button></div>
      </div>
     })}
-    {!filasSecciones.length&&<div className="rounded-lg border border-dashed p-6 text-center text-sm text-[var(--text-secondary)]">Esta FT todavía no tiene secciones configuradas.</div>}
+    {!filasSecciones.length&&<div className="rounded-lg border border-dashed p-6 text-center text-sm text-[var(--text-secondary)]">No se encontraron secciones de FT. Verifica que la migración de diseño propio esté ejecutada.</div>}
    </div>
   </CardContent></Card>
 
