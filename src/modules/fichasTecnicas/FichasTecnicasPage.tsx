@@ -77,9 +77,7 @@ export default function FichasTecnicasPage(){
             <button type="button" disabled={flujo.isPending} onClick={()=>{if(window.confirm("¿Enviar esta Ficha Técnica a revisión?"))flujo.mutate({versionId:x.versionId,accion:"ENVIAR_REVISION"})}} className="flex w-full items-center gap-2 px-3 py-2 text-sm hover:bg-slate-50 disabled:opacity-50">
              <Send className="size-4"/>Enviar a revisión
             </button>
-            <button type="button" disabled={eliminar.isPending||flujo.isPending} onClick={()=>confirmarEliminar(x.versionId,x.documentoCodigo,x.versionNumero)} className="flex w-full items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 disabled:opacity-50">
-             <Trash2 className="size-4"/>Eliminar borrador
-            </button>
+
            </>}
 
            {x.estadoVersion==="PENDIENTE_REVISION"&&<>
@@ -107,8 +105,12 @@ export default function FichasTecnicasPage(){
            }
 
            {x.estadoVersion==="VIGENTE"&&
-            <div className="px-3 py-2 text-xs text-[var(--text-secondary)]">Sin acciones adicionales</div>
+            <div className="px-3 py-2 text-xs text-[var(--text-secondary)]">Sin acciones de workflow</div>
            }
+
+           <button type="button" disabled={eliminar.isPending||flujo.isPending} onClick={()=>{setMenu(null);confirmarEliminar(x.versionId,x.documentoCodigo,x.versionNumero)}} className="flex w-full items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 disabled:opacity-50">
+            <Trash2 className="size-4"/>Eliminar FT (pruebas)
+           </button>
           </div>}
          </div>
         </div>
