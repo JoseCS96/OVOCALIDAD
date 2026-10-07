@@ -35,7 +35,7 @@ export type DetalleEt = {
 };
 export type ProductoEt={productoCodigo:string;productoDescripcion:string};
 export type CaracteristicaCatalogoEt={caracteristicaId:number;caracteristicaDescripcion:string;unidad:string|null;tipoCaractId:number;tipoCaracteristica:string;metEnsayoId:number|null;metodoEnsayo:string|null};
-export type CriterioEt={tipoCriterioId:number;tipoCriterio:string};
+export type CriterioEt={tipoCriterioId:number;tipoCriterio:string;tipoCriterioDescripcionUsuario:string};
 export type FaseEt={faseId:number;faseCodigo:string;faseDescripcion:string;estado:string};
 export type VersionFaseEt={versionFaseId:number;versionId:number;orden:number;codigoReferencia:string;descripcion:string|null;faseId:number;faseCodigo:string;faseDescripcion:string;esFinal:boolean;esObligatoria:boolean;cantidadCaracteristicas:number};
 export type GuardarFaseEt={versionFaseId:number|null;faseId:number;codigoReferencia:string;descripcion:string|null;orden:number;esFinal:boolean;esObligatoria:boolean};
