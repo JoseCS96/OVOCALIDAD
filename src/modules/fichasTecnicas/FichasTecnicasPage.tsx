@@ -18,7 +18,7 @@ export default function FichasTecnicasPage(){
  });
 
  const flujo=useMutation({
-  mutationFn:({versionId,accion,comentario}:{versionId:number;accion:"ENVIAR_REVISION"|"OBSERVAR"|"VERIFICAR"|"PUBLICAR"|"VIGENTAR";comentario?:string|null}) =>
+  mutationFn:({versionId,accion,comentario}:{versionId:number;accion:"ENVIAR_REVISION"|"OBSERVAR"|"VERIFICAR"|"PUBLICAR"|"VIGENTAR"|"RETORNAR_BORRADOR";comentario?:string|null}) =>
    cambiarEstadoFt(versionId,{accion,comentario:comentario??null}),
   onSuccess:async()=>{
    setMenu(null);
@@ -107,6 +107,10 @@ export default function FichasTecnicasPage(){
            {x.estadoVersion==="VIGENTE"&&
             <div className="px-3 py-2 text-xs text-[var(--text-secondary)]">Sin acciones de workflow</div>
            }
+
+           <button type="button" disabled={flujo.isPending} onClick={()=>{if(x.estadoVersion==="BORRADOR"){window.alert("La Ficha Técnica ya se encuentra en BORRADOR.");setMenu(null);return}if(window.confirm("¿Enviar esta Ficha Técnica nuevamente a BORRADOR? Esta opción está habilitada temporalmente para pruebas."))flujo.mutate({versionId:x.versionId,accion:"RETORNAR_BORRADOR"})}} className="flex w-full items-center gap-2 px-3 py-2 text-sm text-amber-700 hover:bg-amber-50 disabled:opacity-50">
+            <XCircle className="size-4"/>Enviar a borrador (pruebas)
+           </button>
 
            <button type="button" disabled={eliminar.isPending||flujo.isPending} onClick={()=>{setMenu(null);confirmarEliminar(x.versionId,x.documentoCodigo,x.versionNumero)}} className="flex w-full items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 disabled:opacity-50">
             <Trash2 className="size-4"/>Eliminar FT (pruebas)
