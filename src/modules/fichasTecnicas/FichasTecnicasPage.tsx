@@ -18,7 +18,7 @@ export default function FichasTecnicasPage(){
  });
 
  const confirmarEliminar=(versionId:number,codigo:string,version:number|null)=>{
-  const ok=window.confirm(`¿Eliminar la versión ${version??""} de ${codigo}?\n\nSolo se eliminará si continúa en estado BORRADOR y no tiene dependencias.`);
+  const ok=window.confirm(`¿Eliminar la versión ${version??""} de ${codigo}?\n\nEsta opción está habilitada temporalmente para limpieza de datos de prueba. No se permitirá eliminar una FT que ya tenga certificados emitidos.`);
   if(ok) eliminar.mutate(versionId);
  };
 
@@ -55,7 +55,7 @@ export default function FichasTecnicasPage(){
        <td className="p-3 text-right">
         <div className="flex justify-end gap-2">
          <Button size="sm" variant="outline" onClick={()=>nav(`/documentos/fichas-tecnicas/${x.versionId}/editar`)}><Pencil/>Configurar</Button>
-         {x.estadoVersion==="BORRADOR"&&<Button size="sm" variant="outline" className="text-red-600 hover:text-red-700" disabled={eliminar.isPending} onClick={()=>confirmarEliminar(x.versionId,x.documentoCodigo,x.versionNumero)}><Trash2/>Eliminar</Button>}
+         <Button size="sm" variant="outline" className="text-red-600 hover:text-red-700" disabled={eliminar.isPending} onClick={()=>confirmarEliminar(x.versionId,x.documentoCodigo,x.versionNumero)}><Trash2/>Eliminar</Button>
         </div>
        </td>
       </tr>)}
