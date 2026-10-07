@@ -1,5 +1,5 @@
 import {api} from "@/lib/api";
-import type {CrearFichaTecnicaRequest,CrearFichaTecnicaResponse,CaracteristicaFt,GuardarCaracteristicaFt,OperacionFt} from "./types";
+import type {CrearFichaTecnicaRequest,CrearFichaTecnicaResponse,CaracteristicaFt,GuardarCaracteristicaFt,OperacionFt,FichaTecnicaGestion} from "./types";
 function validar<T extends {codigoResultado:number;mensaje:string}>(data:T){if(data.codigoResultado!==0)throw new Error(data.mensaje);return data}
 export async function crearFt(request:CrearFichaTecnicaRequest){const {data}=await api.post<CrearFichaTecnicaResponse>("/api/fichas-tecnicas",request);return validar(data)}
 export async function listarCaracteristicasFt(versionId:number){const {data}=await api.get<CaracteristicaFt[]>(`/api/fichas-tecnicas/${versionId}/caracteristicas`);return data}
