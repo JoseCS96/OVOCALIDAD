@@ -5,3 +5,5 @@ export type GuardarCaracteristicaFt={versionFtCaracteristicaId:number|null;carac
 export type OperacionFt={codigoResultado:number;mensaje:string;versionFtCaracteristicaId?:number|null};
 
 export type FichaTecnicaGestion={versionId:number;documentoId:number;documentoCodigo:string;documentoDescripcionDocumento:string;productoCodigo:string|null;versionNumero:number|null;versionInicioVigencia:string|null;estVerId:number;estadoVersion:string;versionNroPaginas:number|null;versionDescripcion:string|null;cantidadCaracteristicas:number;cantidadParametrosCertificables:number};
+
+export type EliminarFichaTecnicaResponse={codigoResultado:number;mensaje:string;versionId:number};
