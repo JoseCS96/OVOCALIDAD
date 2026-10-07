@@ -1,126 +1,55 @@
-import { useMemo, useState } from "react";
-import { Activity, CheckCircle2, ChevronDown, ChevronRight, Search, ShieldCheck, UserRound } from "lucide-react";
-import { obtenerTrazabilidadLote } from "./api";
-import type { TrazabilidadEvaluacion, TrazabilidadLote } from "./types";
+import { useEffect, useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { ChevronLeft, ChevronRight, Eye, FilterX, RefreshCw, Search } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import PageContainer from "@/components/common/PageContainer";
+import PageHeader from "@/components/common/PageHeader";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { listarLotes } from "@/modules/lotes/api";
+import type { LotesFiltros } from "@/modules/lotes/types";
 
-const fecha = (v?: string | null) => v ? new Date(v).toLocaleString("es-PE") : "—";
-const valor = (r: TrazabilidadLote["resultados"][number]) =>
-  r.resultadoNumerico !== null ? `${r.resultadoNumerico}${r.unidadDeMedida ? ` ${r.unidadDeMedida}` : ""}` : (r.resultadoTexto || "—");
-const especificacion = (r: TrazabilidadLote["resultados"][number]) => {
-  switch (r.tipoCriterio) {
-    case "RANGO": return `${r.valorCuantitativoInicial} – ${r.valorCuantitativoFinal} ${r.unidadDeMedida || ""}`;
-    case "MINIMO": return `≥ ${r.valorCuantitativoInicial} ${r.unidadDeMedida || ""}`;
-    case "MAXIMO": return `≤ ${r.valorCuantitativoFinal} ${r.unidadDeMedida || ""}`;
-    case "MAYOR_QUE": return `> ${r.valorCuantitativoInicial} ${r.unidadDeMedida || ""}`;
-    case "MENOR_QUE": return `< ${r.valorCuantitativoFinal} ${r.unidadDeMedida || ""}`;
-    case "IGUAL": return `= ${r.valorCuantitativoIgual} ${r.unidadDeMedida || ""}`;
-    default: return r.valorCualitativo || "—";
-  }
-};
+const estados=[{id:1,label:"Pendiente"},{id:2,label:"En evaluación"},{id:3,label:"Liberado"},{id:4,label:"No conforme"},{id:5,label:"Certificado"},{id:6,label:"Anulado"}];
+const fecha=(v:string|null)=>v?new Intl.DateTimeFormat("es-PE",{dateStyle:"medium",timeStyle:"short"}).format(new Date(v)):"—";
+const badge=(c:string)=>c==="LIBERADO"?"border-emerald-200 bg-emerald-50 text-emerald-700":c==="NO_CONFORME"||c==="ANULADO"?"border-red-200 bg-red-50 text-red-700":c==="CERTIFICADO"?"border-violet-200 bg-violet-50 text-violet-700":"border-blue-200 bg-blue-50 text-blue-700";
 
-export default function TrazabilidadPage() {
-  const [loteId, setLoteId] = useState("");
-  const [data, setData] = useState<TrazabilidadLote | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [abiertas, setAbiertas] = useState<Set<number>>(new Set());
-
-  const buscar = async () => {
-    const id = Number(loteId);
-    if (!Number.isInteger(id) || id <= 0) { setError("Ingresa un LoteId válido."); return; }
-    setLoading(true); setError("");
-    try { setData(await obtenerTrazabilidadLote(id)); }
-    catch { setData(null); setError("No fue posible obtener la trazabilidad del lote."); }
-    finally { setLoading(false); }
-  };
-
-  const evaluacionesPorEtapa = useMemo(() => {
-    const map = new Map<number, TrazabilidadEvaluacion[]>();
-    data?.evaluaciones.forEach(e => {
-      if (!e.versionFaseId) return;
-      map.set(e.versionFaseId, [...(map.get(e.versionFaseId) || []), e]);
-    });
-    return map;
-  }, [data]);
-
-  const toggle = (id:number) => setAbiertas(prev => { const n=new Set(prev); n.has(id)?n.delete(id):n.add(id); return n; });
-
-  return <div className="space-y-6">
-    <div>
-      <p className="text-xs font-semibold uppercase tracking-[0.2em] text-sky-700">Sistema</p>
-      <h1 className="mt-1 text-2xl font-semibold text-slate-900">Trazabilidad del lote</h1>
-      <p className="mt-1 text-sm text-slate-500">Historia completa desde la creación, evaluaciones y reevaluaciones hasta la liberación.</p>
-    </div>
-
-    <div className="rounded-2xl border bg-white p-4 shadow-sm">
-      <div className="flex max-w-xl gap-2">
-        <input value={loteId} onChange={e=>setLoteId(e.target.value)} onKeyDown={e=>e.key==="Enter"&&buscar()} placeholder="LoteId, por ejemplo 62" className="h-10 flex-1 rounded-xl border px-3 text-sm outline-none focus:ring-2 focus:ring-sky-200" />
-        <button onClick={buscar} disabled={loading} className="inline-flex h-10 items-center gap-2 rounded-xl bg-slate-900 px-4 text-sm font-medium text-white disabled:opacity-50"><Search size={16}/>{loading?"Consultando...":"Consultar"}</button>
-      </div>
-      {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
-    </div>
-
-    {data && <>
-      <section className="rounded-2xl border bg-white p-5 shadow-sm">
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div><p className="text-xs font-semibold uppercase text-slate-400">Lote</p><h2 className="text-2xl font-semibold">{data.lote.codigoLote}</h2><p className="mt-1 text-sm text-slate-600">{data.lote.productoDescripcion || data.lote.productoCodigo}</p></div>
-          <span className="rounded-full bg-emerald-50 px-3 py-1 text-sm font-semibold text-emerald-700">{data.lote.estadoLoteCodigo}</span>
-        </div>
-        <div className="mt-5 grid gap-4 border-t pt-4 md:grid-cols-4">
-          <div><p className="text-xs text-slate-400">Código Génesis</p><p className="font-medium">{data.lote.codigoGenesis || "—"}</p></div>
-          <div><p className="text-xs text-slate-400">Especificación técnica</p><p className="font-medium">{data.lote.documentoCodigo} · V{data.lote.versionNumero}</p></div>
-          <div><p className="text-xs text-slate-400">Producción</p><p className="font-medium">{fecha(data.lote.fechaHoraProduccion)}</p></div>
-          <div><p className="text-xs text-slate-400">Creado por</p><p className="font-medium">{data.lote.audUsuarioCreacion || "—"}</p></div>
-        </div>
-      </section>
-
-      <section className="rounded-2xl border bg-white p-5 shadow-sm">
-        <h3 className="font-semibold text-slate-900">Ruta de calidad</h3>
-        <div className="mt-4 grid gap-3 md:grid-cols-3">
-          {data.etapas.map(etapa => {
-            const evs=evaluacionesPorEtapa.get(etapa.versionFaseId)||[];
-            const ultima=evs.at(-1);
-            return <div key={etapa.versionFaseId} className="rounded-xl border p-4">
-              <div className="flex justify-between"><span className="text-xs font-semibold text-sky-700">ETAPA {etapa.orden}</span>{etapa.esFinal&&<span className="text-xs font-semibold text-emerald-700">FINAL</span>}</div>
-              <p className="mt-1 text-lg font-semibold">{etapa.codigoReferencia}</p><p className="text-sm text-slate-500">{etapa.faseCodigo} · {etapa.faseDescripcion}</p>
-              <div className="mt-3 flex justify-between text-xs text-slate-500"><span>{etapa.cantidadCaracteristicas} características</span><span>{evs.length} intento(s)</span></div>
-              {ultima&&<p className={"mt-2 text-xs font-semibold "+(ultima.resultadoGeneral===false?"text-red-600":ultima.resultadoGeneral===true?"text-emerald-700":"text-amber-700")}>{ultima.resultadoDescripcion}</p>}
-            </div>;
-          })}
-        </div>
-      </section>
-
-      <section className="rounded-2xl border bg-white p-5 shadow-sm">
-        <h3 className="font-semibold">Evaluaciones y resultados</h3>
-        <div className="mt-4 space-y-3">
-          {data.evaluaciones.map(e => {
-            const rs=data.resultados.filter(r=>r.evaluacionId===e.evaluacionId);
-            const open=abiertas.has(e.evaluacionId);
-            return <div key={e.evaluacionId} className="overflow-hidden rounded-xl border">
-              <button onClick={()=>toggle(e.evaluacionId)} className="flex w-full items-center gap-3 p-4 text-left hover:bg-slate-50">
-                {open?<ChevronDown size={17}/>:<ChevronRight size={17}/>}
-                <div className="min-w-0 flex-1"><div className="flex flex-wrap items-center gap-2"><span className="font-semibold">I{e.intento} · {e.codigoReferencia || "Evaluación"}</span>{e.evaluacionPadreId&&<span className="rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700">Reevaluación de I{data.evaluaciones.find(x=>x.evaluacionId===e.evaluacionPadreId)?.intento ?? e.evaluacionPadreId}</span>}</div><p className="text-xs text-slate-500">{e.usuarioEvaluador || "Sin evaluador"} · {fecha(e.fechaInicio)} → {fecha(e.fechaFin)}</p></div>
-                <span className={"text-xs font-semibold "+(e.resultadoGeneral===false?"text-red-600":e.resultadoGeneral===true?"text-emerald-700":"text-amber-700")}>{e.resultadoDescripcion}</span>
-              </button>
-              {open&&<div className="border-t bg-slate-50/50 p-4">
-                <div className="overflow-x-auto"><table className="w-full text-sm"><thead><tr className="text-left text-xs text-slate-500"><th className="pb-2">Característica</th><th className="pb-2">Especificación</th><th className="pb-2">Resultado</th><th className="pb-2">Cumple</th><th className="pb-2">Auditoría</th></tr></thead><tbody>{rs.map(r=><tr key={r.evaluacionResultadoId} className="border-t"><td className="py-2 font-medium">{r.caracteristica}</td><td className="py-2">{especificacion(r)}</td><td className="py-2">{valor(r)}</td><td className="py-2">{r.cumple===true?"Sí":r.cumple===false?"No":"—"}</td><td className="py-2 text-xs text-slate-500">{r.audUsuarioCreacion || "—"}<br/>{fecha(r.fechaResultado)}</td></tr>)}</tbody></table></div>
-              </div>}
-            </div>;
-          })}
-        </div>
-      </section>
-
-      <section className="rounded-2xl border bg-white p-5 shadow-sm">
-        <div className="flex items-center gap-2"><Activity size={18}/><h3 className="font-semibold">Historial de estados</h3></div>
-        {data.historialEstados.length===0 ? <div className="mt-4 rounded-xl border border-dashed p-4 text-sm text-slate-500">Este lote es anterior a la instalación del historial de estados. Sus evaluaciones y resultados sí permanecen disponibles arriba.</div> :
-        <div className="mt-4 space-y-4">{data.historialEstados.map(h=><div key={h.loteHistorialEstadoId} className="flex gap-3"><div className="mt-1"><CheckCircle2 size={18} className="text-emerald-600"/></div><div><p className="font-medium">{h.accion.replaceAll("_"," ")}</p><p className="text-sm text-slate-600">{h.estadoOrigen || "SIN ESTADO"} → <b>{h.estadoDestino}</b></p><div className="mt-1 flex flex-wrap gap-3 text-xs text-slate-400"><span className="inline-flex items-center gap-1"><UserRound size={12}/>{h.usuario}</span><span>{fecha(h.fecha)}</span></div></div></div>)}</div>}
-      </section>
-
-      <section className="rounded-2xl border bg-slate-900 p-5 text-white">
-        <div className="flex items-center gap-2"><ShieldCheck size={18}/><h3 className="font-semibold">Resumen de auditoría</h3></div>
-        <p className="mt-2 text-sm text-slate-300">{data.evaluaciones.length} evaluaciones/intentos · {data.resultados.length} resultados históricos · {data.historialEstados.length} cambios de estado auditados.</p>
-        <p className="mt-1 text-xs text-slate-400">Última modificación del lote: {data.lote.audUsuarioModificacion || data.lote.audUsuarioCreacion || "—"} · {fecha(data.lote.audFechaActualizacion || data.lote.audFechaCreacion)}</p>
-      </section>
-    </>}
-  </div>;
+export default function TrazabilidadPage(){
+ const nav=useNavigate(); const [draft,setDraft]=useState<LotesFiltros>({}); const [filtros,setFiltros]=useState<LotesFiltros>({}); const [page,setPage]=useState(1); const pageSize=10;
+ const {data=[],isLoading,isError,isFetching,refetch}=useQuery({queryKey:["trazabilidad","lotes",filtros],queryFn:()=>listarLotes(filtros)});
+ useEffect(()=>setPage(1),[filtros]);
+ const ordered=useMemo(()=>[...data].sort((a,b)=>new Date(b.fechaHoraProduccion).getTime()-new Date(a.fechaHoraProduccion).getTime()),[data]);
+ const totalPages=Math.max(1,Math.ceil(ordered.length/pageSize)); const rows=ordered.slice((page-1)*pageSize,page*pageSize);
+ useEffect(()=>{if(page>totalPages)setPage(totalPages)},[page,totalPages]);
+ const apply=()=>setFiltros({codigoLote:draft.codigoLote?.trim()||undefined,productoCodigo:draft.productoCodigo?.trim()||undefined,estadoLoteId:draft.estadoLoteId,fechaDesde:draft.fechaDesde||undefined,fechaHasta:draft.fechaHasta||undefined});
+ const clear=()=>{setDraft({});setFiltros({})};
+ return <PageContainer className="space-y-5">
+  <PageHeader eyebrow="Sistema" title="Trazabilidad de lotes" description="Consulta y reconstrucción del historial completo de cada lote."
+   actions={<Button variant="outline" onClick={()=>refetch()} disabled={isFetching}><RefreshCw size={15} className={isFetching?"animate-spin":""}/>Actualizar</Button>}/>
+  <Card className="border-[var(--border)] shadow-[var(--shadow-card)]"><CardContent className="p-5">
+   <div className="grid gap-3 lg:grid-cols-6">
+    <div className="relative lg:col-span-2"><Search className="absolute left-3 top-3 h-4 w-4 text-[var(--text-secondary)]"/><Input className="pl-9" placeholder="Código de lote" value={draft.codigoLote??""} onChange={e=>setDraft(x=>({...x,codigoLote:e.target.value}))} onKeyDown={e=>e.key==="Enter"&&apply()}/></div>
+    <Input placeholder="Código de producto" value={draft.productoCodigo??""} onChange={e=>setDraft(x=>({...x,productoCodigo:e.target.value}))}/>
+    <select className="h-9 rounded-md border border-[var(--border)] bg-white px-3 text-sm" value={draft.estadoLoteId??""} onChange={e=>setDraft(x=>({...x,estadoLoteId:e.target.value?Number(e.target.value):undefined}))}><option value="">Todos los estados</option>{estados.map(x=><option key={x.id} value={x.id}>{x.label}</option>)}</select>
+    <Button onClick={apply}><Search size={15}/>Buscar</Button><Button variant="outline" onClick={clear}><FilterX size={15}/>Limpiar</Button>
+    <Input type="date" value={draft.fechaDesde??""} onChange={e=>setDraft(x=>({...x,fechaDesde:e.target.value}))}/>
+    <Input type="date" value={draft.fechaHasta??""} onChange={e=>setDraft(x=>({...x,fechaHasta:e.target.value}))}/>
+   </div>
+  </CardContent></Card>
+  <Card className="overflow-hidden border-[var(--border)] shadow-[var(--shadow-card)]"><CardContent className="p-0">
+   <div className="overflow-x-auto"><table className="w-full min-w-[1050px] text-left text-sm">
+    <thead className="bg-[var(--surface-muted)] text-xs uppercase tracking-[.08em] text-[var(--text-secondary)]"><tr><th className="px-5 py-3">Lote / producto</th><th className="px-5 py-3">Producción</th><th className="px-5 py-3">ET aplicada</th><th className="px-5 py-3">Estado</th><th className="px-5 py-3">Evaluaciones</th><th className="px-5 py-3">Última actividad</th><th className="px-5 py-3 text-right">Acción</th></tr></thead>
+    <tbody>{isLoading?<tr><td colSpan={7} className="p-12 text-center text-slate-500">Cargando trazabilidad...</td></tr>:isError?<tr><td colSpan={7} className="p-12 text-center text-red-600">No se pudo consultar los lotes.</td></tr>:rows.length===0?<tr><td colSpan={7} className="p-12 text-center text-slate-500">No existen lotes para los filtros seleccionados.</td></tr>:rows.map(l=><tr key={l.loteId} className="border-t border-[var(--border)] hover:bg-[var(--surface-muted)]/60">
+     <td className="px-5 py-4"><p className="font-semibold">{l.codigoLote}</p><p className="mt-1 max-w-[320px] truncate text-xs text-[var(--text-secondary)]">{l.productoCodigo} · {l.productoDescripcion}</p></td>
+     <td className="px-5 py-4">{fecha(l.fechaHoraProduccion)}</td><td className="px-5 py-4"><p className="font-medium">V{l.versionNumero}</p><p className="text-xs text-slate-500">Versión ID {l.versionId}</p></td>
+     <td className="px-5 py-4"><Badge variant="outline" className={badge(l.estadoLoteCodigo)}>{l.estadoLoteDescripcion}</Badge></td>
+     <td className="px-5 py-4"><p className="font-medium">{l.totalEvaluaciones} intento(s)</p><p className="text-xs text-slate-500">{l.evaluacionesTerminadas} terminada(s)</p></td>
+     <td className="px-5 py-4 text-xs">{fecha(l.audFechaActualizacion||l.audFechaCreacion)}</td>
+     <td className="px-5 py-4 text-right"><Button variant="outline" size="sm" onClick={()=>nav(`/trazabilidad/${l.loteId}`)}><Eye size={15}/>Ver trazabilidad</Button></td>
+    </tr>)}</tbody>
+   </table></div>
+   {!isLoading&&!isError&&data.length>0&&<div className="flex items-center justify-between border-t px-5 py-3"><p className="text-xs text-slate-500">Mostrando <b>{(page-1)*pageSize+1}–{Math.min(page*pageSize,data.length)}</b> de <b>{data.length}</b> lotes</p><div className="flex items-center gap-2"><Button variant="outline" size="sm" disabled={page===1} onClick={()=>setPage(x=>x-1)}><ChevronLeft size={15}/>Anterior</Button><span className="text-xs text-slate-500">Página {page} de {totalPages}</span><Button variant="outline" size="sm" disabled={page===totalPages} onClick={()=>setPage(x=>x+1)}>Siguiente<ChevronRight size={15}/></Button></div></div>}
+  </CardContent></Card>
+ </PageContainer>;
 }
