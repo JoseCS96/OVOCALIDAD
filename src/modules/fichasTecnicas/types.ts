@@ -7,3 +7,7 @@ export type OperacionFt={codigoResultado:number;mensaje:string;versionFtCaracter
 export type FichaTecnicaGestion={versionId:number;documentoId:number;documentoCodigo:string;documentoDescripcionDocumento:string;productoCodigo:string|null;versionNumero:number|null;versionInicioVigencia:string|null;estVerId:number;estadoVersion:string;versionNroPaginas:number|null;versionDescripcion:string|null;cantidadCaracteristicas:number;cantidadParametrosCertificables:number};
 
 export type EliminarFichaTecnicaResponse={codigoResultado:number;mensaje:string;versionId:number};
+
+export type SeccionFt={versSeccId:number;versionId:number;seccionId:number;seccionDescripcion:string;idTipoSeccion:number|null;tipoSeccionDescripcion:string|null;orden:number|null;puedeEliminarse:boolean;permiteReordenar:boolean;contenido:string|null};
+export type OperacionSeccionFt={codigoResultado:number;mensaje:string;versSeccId?:number|null;versionId?:number|null;seccionId?:number|null;orden?:number|null;versionSeccionContenidoId?:number|null};
+export type ReordenarSeccionesFt={secciones:Array<{versSeccId:number;orden:number}>};
