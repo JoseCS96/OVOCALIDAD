@@ -33,7 +33,7 @@ export default function EstructuraFtPanel({estructura,activa,busy,onSeleccionar,
      <Button variant="ghost" size="icon-sm" disabled={busy||i===0} onClick={()=>onMover(s,-1)}><ArrowUp/></Button>
      <Button variant="ghost" size="icon-sm" disabled={busy||i===estructura.length-1} onClick={()=>onMover(s,1)}><ArrowDown/></Button>
     </div>
-    {!s.esSistema&&<Button className="mr-1" variant="ghost" size="icon-sm" disabled={busy} title="Quitar sección" onClick={()=>onQuitar(s)}><X/></Button>}
+    {s.tipoContenido!=="CARACTERISTICAS"&&s.codigo!=="CARACTERISTICAS"&&<Button className="mr-1" variant="ghost" size="icon-sm" disabled={busy} title="Quitar sección" onClick={()=>onQuitar(s)}><X/></Button>}
    </div>)}
   </div>
  </CardContent></Card>
