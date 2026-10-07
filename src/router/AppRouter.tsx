@@ -51,8 +51,10 @@ export default function AppRouter() {
           <Route path="/operacion/lotes" element={<LotesPage />} />
           <Route path="/operacion/lotes/:loteId" element={<LoteDetallePage />} />
           <Route path="/trazabilidad" element={<TrazabilidadPage />} />
-          <Route path="/certificacion/certificados" element={<CertificadosPage />} />
-          <Route path="/certificacion/certificados/plantillas/:id" element={<CertificadoDisenadorPage />} />
+          <Route element={<ProtectedRoute perfilesPermitidos={["JEFE_CALIDAD", "ANALISTA_CALIDAD"]} />}>
+            <Route path="/certificacion/certificados" element={<CertificadosPage />} />
+            <Route path="/certificacion/certificados/plantillas/:id" element={<CertificadoDisenadorPage />} />
+          </Route>
           <Route path="/trazabilidad/:loteId" element={<TrazabilidadDetallePage />} />
           <Route path="/operacion/evaluaciones" element={<EvaluacionesPage />} />
           <Route path="/operacion/evaluaciones/consolidacion" element={<ConsolidacionCalidadPage />} />
