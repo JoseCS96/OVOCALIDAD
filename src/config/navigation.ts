@@ -6,6 +6,7 @@ export type NavigationItem = {
   icon: LucideIcon;
   moduloCodigo?: string;
   permiso?: string;
+  perfilesPermitidos?: string[];
 };
 
 export type NavigationGroup = { title: string; items: NavigationItem[]; perfilesPermitidos?: string[] };
@@ -25,7 +26,7 @@ export const navigationGroups: NavigationGroup[] = [
     { label: "Resultados", path: "/operacion/resultados", icon: BarChart3, moduloCodigo: "LABORATORIO", permiso: "RESULTADO.VER" },
   ]},
   { title: "Certificación", items: [
-    { label: "Certificados", path: "/certificacion/certificados", icon: ShieldCheck },
+    { label: "Certificados", path: "/certificacion/certificados", icon: ShieldCheck, permiso: "CERTIFICADO.VER", perfilesPermitidos: ["JEFE_CALIDAD", "ANALISTA_CALIDAD"] },
     { label: "Liberaciones", path: "/certificacion/liberaciones", icon: FileCheck2, permiso: "LIBERACION.VER" },
   ]},
   { title: "Mantenimientos", perfilesPermitidos: ["JEFE_CALIDAD"], items: [
