@@ -26,6 +26,7 @@ import ContenidosRotuladoMantenimientoPage from "@/modules/mantenimientos/Conten
 import CargosMantenimientoPage from "@/modules/mantenimientos/CargosMantenimientoPage";
 import ResponsablesMantenimientoPage from "@/modules/mantenimientos/ResponsablesMantenimientoPage";
 import TrazabilidadPage from "@/modules/trazabilidad/TrazabilidadPage";
+import TrazabilidadDetallePage from "@/modules/trazabilidad/TrazabilidadDetallePage";
 
 const pages = [
   { path: "/productos", title: "Productos", eyebrow: "Gestión documental", description: "Maestro de productos y códigos asociados al proceso de calidad.", icon: Package },
@@ -48,6 +49,7 @@ export default function AppRouter() {
           <Route path="/operacion/lotes" element={<LotesPage />} />
           <Route path="/operacion/lotes/:loteId" element={<LoteDetallePage />} />
           <Route path="/trazabilidad" element={<TrazabilidadPage />} />
+          <Route path="/trazabilidad/:loteId" element={<TrazabilidadDetallePage />} />
           <Route path="/operacion/evaluaciones" element={<EvaluacionesPage />} />
           <Route path="/operacion/evaluaciones/consolidacion" element={<ConsolidacionCalidadPage />} />
           <Route path="/operacion/evaluaciones/disposicion" element={<DisposicionPreviewPage />} />
