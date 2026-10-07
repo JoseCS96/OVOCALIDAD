@@ -97,3 +97,38 @@ export type FichaTecnicaCertificado={
  estadoVersion:string;
  cantidadParametrosCertificables:number;
 };
+
+
+export type CertificadoEmpresa={
+ certificadoEmpresaId:number;
+ razonSocial:string;
+ nombreComercial:string|null;
+ direccion:string|null;
+ telefono:string|null;
+ fax:string|null;
+ correo:string|null;
+ sitioWeb:string|null;
+ ruc:string|null;
+ estado:boolean;
+ audUsuarioCreacion:string;
+ audFechaCreacion:string;
+ audUsuarioModificacion:string|null;
+ audFechaActualizacion:string|null;
+};
+
+export type GuardarCertificadoEmpresa={
+ razonSocial:string;
+ nombreComercial:string|null;
+ direccion:string|null;
+ telefono:string|null;
+ fax:string|null;
+ correo:string|null;
+ sitioWeb:string|null;
+ ruc:string|null;
+};
+
+export type OperacionEmpresaCertificado={
+ codigoResultado:number;
+ mensaje:string;
+ certificadoEmpresaId:number;
+};
