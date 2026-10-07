@@ -80,7 +80,7 @@ export default function EditarFichaTecnicaPage(){
  });
 
  const cambiarEstado=useMutation({
-  mutationFn:(accion:"ENVIAR_REVISION"|"OBSERVAR"|"VERIFICAR"|"PUBLICAR"|"VIGENTAR")=>cambiarEstadoFt(id,{accion,comentario:comentarioWorkflow.trim()||null}),
+  mutationFn:(accion:"ENVIAR_REVISION"|"OBSERVAR"|"VERIFICAR"|"PUBLICAR"|"VIGENTAR"|"RETORNAR_BORRADOR")=>cambiarEstadoFt(id,{accion,comentario:comentarioWorkflow.trim()||null}),
   onSuccess:()=>{
    setComentarioWorkflow("");
    qc.invalidateQueries({queryKey:["ft",id]});
@@ -165,6 +165,10 @@ export default function EditarFichaTecnicaPage(){
         <CheckCircle2 className="size-4"/>Pasar a vigente
        </button>
       }
+
+      <button type="button" disabled={cambiarEstado.isPending} onClick={()=>{if(estado==="BORRADOR"){window.alert("La Ficha Técnica ya se encuentra en BORRADOR.");setMenuWorkflow(false);return}setMenuWorkflow(false);if(window.confirm("¿Enviar esta Ficha Técnica nuevamente a BORRADOR? Esta opción está habilitada temporalmente para pruebas."))cambiarEstado.mutate("RETORNAR_BORRADOR")}} className="flex w-full items-center gap-2 px-3 py-2 text-sm text-amber-700 hover:bg-amber-50 disabled:opacity-50">
+       <XCircle className="size-4"/>Enviar a borrador (pruebas)
+      </button>
 
       <button type="button" onClick={()=>{setMenuWorkflow(false);setMostrarHistorial(v=>!v)}} className="flex w-full items-center gap-2 px-3 py-2 text-sm hover:bg-slate-50">
        <Eye className="size-4"/>Trazabilidad
