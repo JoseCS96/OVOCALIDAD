@@ -1,5 +1,5 @@
 import {api} from "@/lib/api";
-import type {CrearFichaTecnicaRequest,CrearFichaTecnicaResponse,CaracteristicaFt,GuardarCaracteristicaFt,OperacionFt,FichaTecnicaGestion,EliminarFichaTecnicaResponse,SeccionFt,OperacionSeccionFt,ReordenarSeccionesFt} from "./types";
+import type {CrearFichaTecnicaRequest,CrearFichaTecnicaResponse,CaracteristicaFt,GuardarCaracteristicaFt,OperacionFt,FichaTecnicaGestion,EliminarFichaTecnicaResponse,SeccionFt,OperacionSeccionFt,ReordenarSeccionesFt,CambiarEstadoFtRequest,CambiarEstadoFtResponse,HistorialEstadoFt} from "./types";
 function validar<T extends {codigoResultado:number;mensaje:string}>(data:T){if(data.codigoResultado!==0)throw new Error(data.mensaje);return data}
 export async function crearFt(request:CrearFichaTecnicaRequest){const {data}=await api.post<CrearFichaTecnicaResponse>("/api/fichas-tecnicas",request);return validar(data)}
 export async function listarCaracteristicasFt(versionId:number){const {data}=await api.get<CaracteristicaFt[]>(`/api/fichas-tecnicas/${versionId}/caracteristicas`);return data}
@@ -16,3 +16,6 @@ export async function guardarContenidoSeccionFt(versionId:number,versionFtSeccio
 export async function agregarSeccionFt(versionId:number,request:{titulo:string;tipoContenido:"TEXTO"|"LISTA"|"TABLA";orden:number|null}){const {data}=await api.post<OperacionSeccionFt>(`/api/fichas-tecnicas/${versionId}/secciones`,request);return validar(data)}
 export async function quitarSeccionFt(versionId:number,versionFtSeccionId:number){const {data}=await api.delete<OperacionSeccionFt>(`/api/fichas-tecnicas/${versionId}/secciones/${versionFtSeccionId}`);return validar(data)}
 export async function reordenarSeccionesFt(versionId:number,request:ReordenarSeccionesFt){const {data}=await api.put<OperacionSeccionFt>(`/api/fichas-tecnicas/${versionId}/secciones/orden`,request);return validar(data)}
+
+export async function cambiarEstadoFt(versionId:number,request:CambiarEstadoFtRequest){const {data}=await api.post<CambiarEstadoFtResponse>(`/api/fichas-tecnicas/${versionId}/cambiar-estado`,request);return validar(data)}
+export async function listarHistorialEstadoFt(versionId:number){const {data}=await api.get<HistorialEstadoFt[]>(`/api/fichas-tecnicas/${versionId}/historial-estados`);return data}
