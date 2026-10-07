@@ -1,6 +1,6 @@
 import {useEffect,useMemo,useState} from "react";
 import {useMutation,useQuery,useQueryClient} from "@tanstack/react-query";
-import {ArrowLeft,Check,Filter,Plus,Save,X} from "lucide-react";
+import {ArrowLeft,Check,CheckCircle2,Eye,Filter,MoreVertical,Plus,Save,Send,Upload,X,XCircle} from "lucide-react";
 import {useNavigate,useParams} from "react-router-dom";
 import PageContainer from "@/components/common/PageContainer";
 import {Button} from "@/components/ui/button";
@@ -32,6 +32,7 @@ export default function EditarFichaTecnicaPage(){
  const [modalAgregar,setModalAgregar]=useState(false);
  const [comentarioWorkflow,setComentarioWorkflow]=useState("");
  const [mostrarHistorial,setMostrarHistorial]=useState(false);
+ const [menuWorkflow,setMenuWorkflow]=useState(false);
  const [nuevaSeccion,setNuevaSeccion]=useState({titulo:"",tipoContenido:"TEXTO" as "TEXTO"|"LISTA"|"TABLA"});
 
  const filas=useMemo(()=>[...(chars.data??[])].sort((a,b)=>(a.versionFaseOrden??9999)-(b.versionFaseOrden??9999)||(a.ordenTecnico??9999)-(b.ordenTecnico??9999)||a.versionFtCaracteristicaId-b.versionFtCaracteristicaId),[chars.data]);
@@ -131,23 +132,61 @@ export default function EditarFichaTecnicaPage(){
     <h1 className="mt-1 text-2xl font-semibold">{ft.data.productoCodigo} · {ft.data.documentoCodigo}</h1>
     <p className="mt-1 text-sm text-[var(--text-secondary)]">{ft.data.documentoDescripcionDocumento} · v{ft.data.versionNumero} · {ft.data.estadoVersion}</p>
    </div>
-   <div className="flex flex-wrap gap-2">
-    {accionPrincipal&&<Button disabled={cambiarEstado.isPending} onClick={()=>cambiarEstado.mutate(accionPrincipal)}>{textoAccion}</Button>}
-    {puedeObservar&&<Button variant="outline" disabled={cambiarEstado.isPending} onClick={()=>{if(!comentarioWorkflow.trim()){window.alert("Ingresa un comentario para observar la FT.");return}cambiarEstado.mutate("OBSERVAR")}}>Observar</Button>}
-    <Button variant="outline" onClick={()=>setMostrarHistorial(v=>!v)}>Trazabilidad</Button>
+   <div className="flex flex-wrap items-center gap-2">
+    <div className="relative">
+     <Button variant="outline" size="icon-sm" aria-label="Más acciones" onClick={()=>setMenuWorkflow(v=>!v)}>
+      <MoreVertical/>
+     </Button>
+
+     {menuWorkflow&&<div className="absolute right-0 z-40 mt-1 w-56 overflow-hidden rounded-lg border bg-white py-1 text-left shadow-lg">
+      {estado==="BORRADOR"&&
+       <button type="button" disabled={cambiarEstado.isPending} onClick={()=>{setMenuWorkflow(false);if(window.confirm("¿Enviar esta Ficha Técnica a revisión?"))cambiarEstado.mutate("ENVIAR_REVISION")}} className="flex w-full items-center gap-2 px-3 py-2 text-sm hover:bg-slate-50 disabled:opacity-50">
+        <Send className="size-4"/>Enviar a revisión
+       </button>
+      }
+
+      {estado==="PENDIENTE_REVISION"&&<>
+       <button type="button" disabled={cambiarEstado.isPending} onClick={()=>{setMenuWorkflow(false);if(window.confirm("¿Verificar esta Ficha Técnica?"))cambiarEstado.mutate("VERIFICAR")}} className="flex w-full items-center gap-2 px-3 py-2 text-sm hover:bg-slate-50 disabled:opacity-50">
+        <CheckCircle2 className="size-4"/>Verificar
+       </button>
+       <button type="button" disabled={cambiarEstado.isPending} onClick={()=>{const comentario=window.prompt("Motivo de la observación:");setMenuWorkflow(false);if(comentario?.trim()){setComentarioWorkflow(comentario.trim());cambiarEstadoFt(id,{accion:"OBSERVAR",comentario:comentario.trim()}).then(()=>{setComentarioWorkflow("");qc.invalidateQueries({queryKey:["ft",id]});qc.invalidateQueries({queryKey:["fichas-tecnicas"]});qc.invalidateQueries({queryKey:["ft-historial",id]})})}}} className="flex w-full items-center gap-2 px-3 py-2 text-sm text-amber-700 hover:bg-amber-50 disabled:opacity-50">
+        <XCircle className="size-4"/>Observar
+       </button>
+      </>}
+
+      {estado==="VERIFICADO"&&<>
+       <button type="button" disabled={cambiarEstado.isPending} onClick={()=>{setMenuWorkflow(false);if(window.confirm("¿Publicar esta Ficha Técnica? Todavía no quedará vigente."))cambiarEstado.mutate("PUBLICAR")}} className="flex w-full items-center gap-2 px-3 py-2 text-sm hover:bg-slate-50 disabled:opacity-50">
+        <Upload className="size-4"/>Publicar FT
+       </button>
+       <button type="button" disabled={cambiarEstado.isPending} onClick={()=>{const comentario=window.prompt("Motivo de la observación:");setMenuWorkflow(false);if(comentario?.trim()){setComentarioWorkflow(comentario.trim());cambiarEstadoFt(id,{accion:"OBSERVAR",comentario:comentario.trim()}).then(()=>{setComentarioWorkflow("");qc.invalidateQueries({queryKey:["ft",id]});qc.invalidateQueries({queryKey:["fichas-tecnicas"]});qc.invalidateQueries({queryKey:["ft-historial",id]})})}}} className="flex w-full items-center gap-2 px-3 py-2 text-sm text-amber-700 hover:bg-amber-50 disabled:opacity-50">
+        <XCircle className="size-4"/>Observar
+       </button>
+      </>}
+
+      {estado==="PUBLICADO"&&
+       <button type="button" disabled={cambiarEstado.isPending} onClick={()=>{setMenuWorkflow(false);if(window.confirm("¿Pasar esta Ficha Técnica a VIGENTE?"))cambiarEstado.mutate("VIGENTAR")}} className="flex w-full items-center gap-2 px-3 py-2 text-sm hover:bg-slate-50 disabled:opacity-50">
+        <CheckCircle2 className="size-4"/>Pasar a vigente
+       </button>
+      }
+
+      <button type="button" onClick={()=>{setMenuWorkflow(false);setMostrarHistorial(v=>!v)}} className="flex w-full items-center gap-2 px-3 py-2 text-sm hover:bg-slate-50">
+       <Eye className="size-4"/>Trazabilidad
+      </button>
+     </div>}
+    </div>
+
     <Button variant="outline" onClick={()=>nav("/documentos/fichas-tecnicas")}><ArrowLeft/>Volver</Button>
    </div>
   </div>
 
-  {(puedeObservar||mostrarHistorial)&&<Card><CardContent className="space-y-3 p-4">
-   {puedeObservar&&<div><label className="text-sm font-medium">Comentario de observación</label><textarea className="mt-1 min-h-[80px] w-full rounded-md border bg-white p-3 text-sm" value={comentarioWorkflow} onChange={e=>setComentarioWorkflow(e.target.value)} placeholder="Motivo de la observación..."/></div>}
-   {mostrarHistorial&&<div>
+  {mostrarHistorial&&<Card><CardContent className="space-y-3 p-4">
+   <div>
     <h3 className="font-semibold">Trazabilidad de estados</h3>
     <div className="mt-3 overflow-x-auto"><table className="w-full min-w-[760px] text-sm"><thead><tr className="border-b text-left"><th className="p-2">Fecha</th><th className="p-2">Origen</th><th className="p-2">Acción</th><th className="p-2">Destino</th><th className="p-2">Usuario</th><th className="p-2">Comentario</th></tr></thead><tbody>
      {(historial.data??[]).map(h=><tr key={h.versionHistorialEstadoId} className="border-b"><td className="p-2">{new Date(h.fecha).toLocaleString()}</td><td className="p-2">{h.estadoOrigen??"—"}</td><td className="p-2">{h.accion}</td><td className="p-2 font-medium">{h.estadoDestino}</td><td className="p-2">{h.usuario}</td><td className="p-2">{h.comentario??"—"}</td></tr>)}
      {!historial.isLoading&&(historial.data??[]).length===0&&<tr><td colSpan={6} className="p-4 text-center text-[var(--text-secondary)]">Aún no hay cambios de estado registrados.</td></tr>}
     </tbody></table></div>
-   </div>}
+   </div>
   </CardContent></Card>}
 
   <Card><CardContent className="p-5">
