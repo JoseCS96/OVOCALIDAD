@@ -15,7 +15,7 @@ export const navigationGroups: NavigationGroup[] = [
   { title: "Gestión documental", items: [
     { label: "Productos", path: "/productos", icon: Package, permiso: "PRODUCTO.VER" },
     { label: "Especificaciones técnicas", path: "/documentos/especificaciones", icon: FileText, moduloCodigo: "ESPECIFICACIONES_TECNICAS", permiso: "ET.VER" },
-    { label: "Fichas técnicas", path: "/documentos/fichas-tecnicas", icon: FileCheck2, permiso: "FICHA_TECNICA.VER" },
+    { label: "Fichas técnicas", path: "/documentos/fichas-tecnicas", icon: FileCheck2, moduloCodigo: "FICHAS_TECNICAS", permiso: "FT.VER" },
     { label: "Versiones", path: "/documentos/versiones", icon: Boxes, permiso: "VERSION_DOCUMENTAL.VER" },
   ]},
   { title: "Operación", items: [
