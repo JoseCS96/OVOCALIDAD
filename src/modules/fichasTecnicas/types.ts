@@ -11,3 +11,8 @@ export type EliminarFichaTecnicaResponse={codigoResultado:number;mensaje:string;
 export type SeccionFt={versionFtSeccionId:number;versionId:number;codigo:string;titulo:string;tipoContenido:"TEXTO"|"LISTA"|"TABLA"|"CARACTERISTICAS";orden:number;visible:boolean;esSistema:boolean;contenido:string|null};
 export type OperacionSeccionFt={codigoResultado:number;mensaje:string;versionFtSeccionId?:number|null;versionId?:number|null;orden?:number|null};
 export type ReordenarSeccionesFt={secciones:Array<{versionFtSeccionId:number;orden:number}>};
+
+export type AccionWorkflowFt="ENVIAR_REVISION"|"OBSERVAR"|"VERIFICAR"|"PUBLICAR"|"VIGENTAR"|"RETORNAR_BORRADOR";
+export type CambiarEstadoFtRequest={accion:AccionWorkflowFt;comentario:string|null};
+export type CambiarEstadoFtResponse={codigoResultado:number;mensaje:string;versionId?:number|null;estVerOrigenId?:number|null;estadoOrigen?:string|null;estVerDestinoId?:number|null;estadoDestino?:string|null;accion?:string|null;comentario?:string|null;versionVigenteAnteriorId?:number|null;fechaVigencia?:string|null};
+export type HistorialEstadoFt={versionHistorialEstadoId:number;versionId:number;estVerOrigenId:number|null;estadoOrigen:string|null;estVerDestinoId:number;estadoDestino:string;accion:string;comentario:string|null;usuario:string;fecha:string};
