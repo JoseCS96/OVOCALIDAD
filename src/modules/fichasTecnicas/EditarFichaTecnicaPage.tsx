@@ -16,20 +16,6 @@ import type {CaracteristicaFt,SeccionFt} from "./types";
 
 const numero=(v:string)=>v===""?null:Number(v);
 
-const etiquetaCriterio=(codigo?:string|null)=>{
- const c=(codigo??"").toUpperCase();
- switch(c){
-  case "MINIMO": return "Mayor o igual que (>=)";
-  case "MAXIMO": return "Menor o igual que (<=)";
-  case "RANGO": return "Rango";
-  case "AUSENCIA": return "Ausencia";
-  case "CUALITATIVO": return "Cualitativo";
-  case "MAYOR_QUE": return "Mayor que (>)";
-  case "MENOR_QUE": return "Menor que (<)";
-  case "IGUAL": return "Igual (=)";
-  default: return codigo??"";
- }
-};
 
 export default function EditarFichaTecnicaPage(){
  const id=Number(useParams().versionId),nav=useNavigate(),qc=useQueryClient();
@@ -233,7 +219,7 @@ function CaracteristicasPanel({filas,filasFiltradas,tipos,tipoFiltro,setTipoFilt
     {filasFiltradas.map(base=>{const x=valor(base),crit=criterioNombre(x);return <tr key={base.versionFtCaracteristicaId} className="border-b align-top last:border-0">
      <td className="p-3">{x.tipoCaractDescripcion}</td>
      <td className="p-3 font-semibold">{x.caracteristicaDescripcion}<div className="mt-0.5 text-xs font-normal text-[var(--text-secondary)]">Orden técnico {x.ordenTecnico??"—"} · {x.faseCodigo??"Sin fase"}</div></td>
-     <td className="p-3"><select className="h-9 min-w-36 rounded-md border bg-white px-2" value={x.tipoCriterioId} onChange={e=>cambiarCriterio(base,Number(e.target.value))}>{(cats?.tiposCriterio??[]).map((t:any)=><option key={t.tipoCriterioId} value={t.tipoCriterioId}>{etiquetaCriterio(t.tipoCriterio)}</option>)}</select></td>
+     <td className="p-3"><select className="h-9 min-w-36 rounded-md border bg-white px-2" value={x.tipoCriterioId} onChange={e=>cambiarCriterio(base,Number(e.target.value))}>{(cats?.tiposCriterio??[]).map((t:any)=><option key={t.tipoCriterioId} value={t.tipoCriterioId}>{t.tipoCriterioDescripcionUsuario||t.tipoCriterio}</option>)}</select></td>
      <td className="p-3">{crit==="RANGO"?<div className="flex items-center gap-2"><Input className="w-28" type="number" step="any" value={x.valorCuantitativoInicial??""} onChange={e=>patch(base,{valorCuantitativoInicial:numero(e.target.value)})}/><span>–</span><Input className="w-28" type="number" step="any" value={x.valorCuantitativoFinal??""} onChange={e=>patch(base,{valorCuantitativoFinal:numero(e.target.value)})}/></div>:crit==="CUALITATIVO"||crit==="AUSENCIA"?<Input className="min-w-52" value={x.valorCualitativo??""} onChange={e=>patch(base,{valorCualitativo:e.target.value||null})}/>:<Input className="w-32" type="number" step="any" value={crit==="IGUAL"?(x.valorCuantitativoIgual??""):(crit==="MAXIMO"||crit==="MENOR_QUE"?(x.valorCuantitativoFinal??""):(x.valorCuantitativoInicial??""))} onChange={e=>{const v=numero(e.target.value);if(crit==="IGUAL")patch(base,{valorCuantitativoIgual:v,valorCuantitativoInicial:null,valorCuantitativoFinal:null});else if(crit==="MAXIMO"||crit==="MENOR_QUE")patch(base,{valorCuantitativoFinal:v,valorCuantitativoInicial:null,valorCuantitativoIgual:null});else patch(base,{valorCuantitativoInicial:v,valorCuantitativoFinal:null,valorCuantitativoIgual:null})}}/>}</td>
      <td className="p-3"><Input className="w-28" value={x.unidadDeMedida??""} onChange={e=>patch(base,{unidadDeMedida:e.target.value||null})}/></td>
      <td className="p-3 text-center"><input type="checkbox" checked={x.imprimeCertificado} onChange={e=>patch(base,{imprimeCertificado:e.target.checked,obligatorioCertificado:e.target.checked?x.obligatorioCertificado:false,ordenCertificado:e.target.checked?(x.ordenCertificado??x.ordenTecnico??1):null})}/></td>
