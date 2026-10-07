@@ -34,7 +34,6 @@ import CertificadoDisenadorPage from "@/modules/certificados/CertificadoDisenado
 
 const pages = [
   { path: "/productos", title: "Productos", eyebrow: "Gestión documental", description: "Maestro de productos y códigos asociados al proceso de calidad.", icon: Package },
-  { path: "/documentos/fichas-tecnicas", title: "Fichas técnicas", eyebrow: "Gestión documental", description: "Consulta y control de fichas técnicas utilizadas para certificación.", icon: FileCheck2 },
   { path: "/documentos/versiones", title: "Versiones documentales", eyebrow: "Gestión documental", description: "Historial y vigencia de documentos de calidad.", icon: Boxes },
   { path: "/operacion/resultados", title: "Resultados", eyebrow: "Operación", description: "Registro y consulta de resultados de análisis por lote y característica.", icon: BarChart3 },
   { path: "/certificacion/liberaciones", title: "Liberaciones", eyebrow: "Certificación", description: "Control de liberaciones totales y parciales asociadas a lotes.", icon: FileCheck2 },
