@@ -6,10 +6,11 @@ import PageContainer from "@/components/common/PageContainer";
 import {Button} from "@/components/ui/button";
 import {Card,CardContent} from "@/components/ui/card";
 import {Input} from "@/components/ui/input";
+import {DropdownMenu,DropdownMenuContent,DropdownMenuItem,DropdownMenuTrigger} from "@/components/ui/dropdown-menu";
 import {cambiarEstadoFt,eliminarFtBorrador,listarFt} from "./api";
 
 export default function FichasTecnicasPage(){
- const nav=useNavigate(),qc=useQueryClient(),[busqueda,setBusqueda]=useState(""),[menu,setMenu]=useState<number|null>(null);
+ const nav=useNavigate(),qc=useQueryClient(),[busqueda,setBusqueda]=useState("");
  const q=useQuery({queryKey:["fichas-tecnicas",busqueda],queryFn:()=>listarFt(busqueda)});
 
  const eliminar=useMutation({
@@ -21,7 +22,6 @@ export default function FichasTecnicasPage(){
   mutationFn:({versionId,accion,comentario}:{versionId:number;accion:"ENVIAR_REVISION"|"OBSERVAR"|"VERIFICAR"|"PUBLICAR"|"VIGENTAR"|"RETORNAR_BORRADOR";comentario?:string|null}) =>
    cambiarEstadoFt(versionId,{accion,comentario:comentario??null}),
   onSuccess:async()=>{
-   setMenu(null);
    await qc.invalidateQueries({queryKey:["fichas-tecnicas"]});
   }
  });
@@ -67,56 +67,55 @@ export default function FichasTecnicasPage(){
           {x.estadoVersion==="BORRADOR"?<><Pencil/>Configurar</>:<><Eye/>Ver detalle</>}
          </Button>
 
-         <div className="relative">
-          <Button variant="outline" size="icon-sm" aria-label="Más acciones" onClick={()=>setMenu(menu===x.versionId?null:x.versionId)}>
-           <MoreVertical/>
-          </Button>
+         <DropdownMenu>
+          <DropdownMenuTrigger render={<Button variant="outline" size="icon-sm" aria-label="Más acciones"><MoreVertical/></Button>} />
+          <DropdownMenuContent align="end" className="w-64">
 
-          {menu===x.versionId&&<div className="absolute right-0 z-30 mt-1 w-56 overflow-hidden rounded-lg border bg-white py-1 text-left shadow-lg">
            {x.estadoVersion==="BORRADOR"&&<>
-            <button type="button" disabled={flujo.isPending} onClick={()=>{if(window.confirm("¿Enviar esta Ficha Técnica a revisión?"))flujo.mutate({versionId:x.versionId,accion:"ENVIAR_REVISION"})}} className="flex w-full items-center gap-2 px-3 py-2 text-sm hover:bg-slate-50 disabled:opacity-50">
+            <DropdownMenuItem disabled={flujo.isPending} onClick={()=>{if(window.confirm("¿Enviar esta Ficha Técnica a revisión?"))flujo.mutate({versionId:x.versionId,accion:"ENVIAR_REVISION"})}} className="gap-2">
              <Send className="size-4"/>Enviar a revisión
-            </button>
+            </DropdownMenuItem>
 
            </>}
 
            {x.estadoVersion==="PENDIENTE_REVISION"&&<>
-            <button type="button" disabled={flujo.isPending} onClick={()=>{if(window.confirm("¿Verificar esta Ficha Técnica?"))flujo.mutate({versionId:x.versionId,accion:"VERIFICAR"})}} className="flex w-full items-center gap-2 px-3 py-2 text-sm hover:bg-slate-50 disabled:opacity-50">
+            <DropdownMenuItem disabled={flujo.isPending} onClick={()=>{if(window.confirm("¿Verificar esta Ficha Técnica?"))flujo.mutate({versionId:x.versionId,accion:"VERIFICAR"})}} className="gap-2">
              <CheckCircle2 className="size-4"/>Verificar
-            </button>
-            <button type="button" disabled={flujo.isPending} onClick={()=>{const comentario=window.prompt("Motivo de la observación:");if(comentario?.trim())flujo.mutate({versionId:x.versionId,accion:"OBSERVAR",comentario:comentario.trim()})}} className="flex w-full items-center gap-2 px-3 py-2 text-sm text-amber-700 hover:bg-amber-50 disabled:opacity-50">
+            </DropdownMenuItem>
+            <DropdownMenuItem disabled={flujo.isPending} onClick={()=>{const comentario=window.prompt("Motivo de la observación:");if(comentario?.trim())flujo.mutate({versionId:x.versionId,accion:"OBSERVAR",comentario:comentario.trim()})}} className="gap-2 text-amber-700">
              <XCircle className="size-4"/>Observar
-            </button>
+            </DropdownMenuItem>
            </>}
 
            {x.estadoVersion==="VERIFICADO"&&<>
-            <button type="button" disabled={flujo.isPending} onClick={()=>{if(window.confirm("¿Publicar esta Ficha Técnica? Todavía no quedará vigente."))flujo.mutate({versionId:x.versionId,accion:"PUBLICAR"})}} className="flex w-full items-center gap-2 px-3 py-2 text-sm hover:bg-slate-50 disabled:opacity-50">
+            <DropdownMenuItem disabled={flujo.isPending} onClick={()=>{if(window.confirm("¿Publicar esta Ficha Técnica? Todavía no quedará vigente."))flujo.mutate({versionId:x.versionId,accion:"PUBLICAR"})}} className="gap-2">
              <Upload className="size-4"/>Publicar FT
-            </button>
-            <button type="button" disabled={flujo.isPending} onClick={()=>{const comentario=window.prompt("Motivo de la observación:");if(comentario?.trim())flujo.mutate({versionId:x.versionId,accion:"OBSERVAR",comentario:comentario.trim()})}} className="flex w-full items-center gap-2 px-3 py-2 text-sm text-amber-700 hover:bg-amber-50 disabled:opacity-50">
+            </DropdownMenuItem>
+            <DropdownMenuItem disabled={flujo.isPending} onClick={()=>{const comentario=window.prompt("Motivo de la observación:");if(comentario?.trim())flujo.mutate({versionId:x.versionId,accion:"OBSERVAR",comentario:comentario.trim()})}} className="gap-2 text-amber-700">
              <XCircle className="size-4"/>Observar
-            </button>
+            </DropdownMenuItem>
            </>}
 
            {x.estadoVersion==="PUBLICADO"&&
-            <button type="button" disabled={flujo.isPending} onClick={()=>{if(window.confirm("¿Pasar esta Ficha Técnica a VIGENTE?"))flujo.mutate({versionId:x.versionId,accion:"VIGENTAR"})}} className="flex w-full items-center gap-2 px-3 py-2 text-sm hover:bg-slate-50 disabled:opacity-50">
+            <DropdownMenuItem disabled={flujo.isPending} onClick={()=>{if(window.confirm("¿Pasar esta Ficha Técnica a VIGENTE?"))flujo.mutate({versionId:x.versionId,accion:"VIGENTAR"})}} className="gap-2">
              <CheckCircle2 className="size-4"/>Pasar a vigente
-            </button>
+            </DropdownMenuItem>
            }
 
            {x.estadoVersion==="VIGENTE"&&
             <div className="px-3 py-2 text-xs text-[var(--text-secondary)]">Sin acciones de workflow</div>
            }
 
-           <button type="button" disabled={flujo.isPending} onClick={()=>{if(x.estadoVersion==="BORRADOR"){window.alert("La Ficha Técnica ya se encuentra en BORRADOR.");setMenu(null);return}if(window.confirm("¿Enviar esta Ficha Técnica nuevamente a BORRADOR? Esta opción está habilitada temporalmente para pruebas."))flujo.mutate({versionId:x.versionId,accion:"RETORNAR_BORRADOR"})}} className="flex w-full items-center gap-2 px-3 py-2 text-sm text-amber-700 hover:bg-amber-50 disabled:opacity-50">
+           <DropdownMenuItem disabled={flujo.isPending} onClick={()=>{if(x.estadoVersion==="BORRADOR"){window.alert("La Ficha Técnica ya se encuentra en BORRADOR.");return}if(window.confirm("¿Enviar esta Ficha Técnica nuevamente a BORRADOR? Esta opción está habilitada temporalmente para pruebas."))flujo.mutate({versionId:x.versionId,accion:"RETORNAR_BORRADOR"})}} className="gap-2 text-amber-700">
             <XCircle className="size-4"/>Enviar a borrador (pruebas)
-           </button>
+           </DropdownMenuItem>
 
-           <button type="button" disabled={eliminar.isPending||flujo.isPending} onClick={()=>{setMenu(null);confirmarEliminar(x.versionId,x.documentoCodigo,x.versionNumero)}} className="flex w-full items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 disabled:opacity-50">
+           <DropdownMenuItem disabled={eliminar.isPending||flujo.isPending} onClick={()=>{confirmarEliminar(x.versionId,x.documentoCodigo,x.versionNumero)}} className="gap-2 text-red-600">
             <Trash2 className="size-4"/>Eliminar FT (pruebas)
-           </button>
-          </div>}
-         </div>
+           </DropdownMenuItem>
+
+          </DropdownMenuContent>
+         </DropdownMenu>
         </div>
        </td>
       </tr>)}
