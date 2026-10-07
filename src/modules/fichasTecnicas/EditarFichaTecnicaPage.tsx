@@ -122,7 +122,6 @@ export default function EditarFichaTecnicaPage(){
  const busy=moverSeccion.isPending||quitarSeccion.isPending||agregarSeccion.isPending||guardarSeccion.isPending||cambiarEstado.isPending;
  const esCaracteristicas=activa?.tipoContenido==="CARACTERISTICAS"||activa?.codigo==="CARACTERISTICAS";
  const estado=(ft.data.estadoVersion??"").toUpperCase();
- const accionPrincipal=estado==="BORRADOR"?"ENVIAR_REVISION":estado==="PENDIENTE_REVISION"?"VERIFICAR":estado==="VERIFICADO"?"PUBLICAR":estado==="PUBLICADO"?"VIGENTAR":null;
 
  return <PageContainer className="space-y-5">
   <div className="flex items-start justify-between gap-4">
