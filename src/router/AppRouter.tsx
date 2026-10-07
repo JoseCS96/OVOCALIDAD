@@ -25,6 +25,7 @@ import MetodosEnsayoMantenimientoPage from "@/modules/mantenimientos/MetodosEnsa
 import ContenidosRotuladoMantenimientoPage from "@/modules/mantenimientos/ContenidosRotuladoMantenimientoPage";
 import CargosMantenimientoPage from "@/modules/mantenimientos/CargosMantenimientoPage";
 import ResponsablesMantenimientoPage from "@/modules/mantenimientos/ResponsablesMantenimientoPage";
+import TrazabilidadPage from "@/modules/trazabilidad/TrazabilidadPage";
 
 const pages = [
   { path: "/productos", title: "Productos", eyebrow: "Gestión documental", description: "Maestro de productos y códigos asociados al proceso de calidad.", icon: Package },
@@ -33,7 +34,6 @@ const pages = [
   { path: "/operacion/resultados", title: "Resultados", eyebrow: "Operación", description: "Registro y consulta de resultados de análisis por lote y característica.", icon: BarChart3 },
   { path: "/certificacion/certificados", title: "Certificados", eyebrow: "Certificación", description: "Generación, aprobación y emisión de certificados de calidad.", icon: ShieldCheck },
   { path: "/certificacion/liberaciones", title: "Liberaciones", eyebrow: "Certificación", description: "Control de liberaciones totales y parciales asociadas a lotes.", icon: FileCheck2 },
-  { path: "/trazabilidad", title: "Trazabilidad", eyebrow: "Sistema", description: "Consulta integral del historial de documentos, lotes, evaluaciones y certificados.", icon: Boxes },
   { path: "/reportes", title: "Reportes", eyebrow: "Sistema", description: "Indicadores operativos y ejecutivos del proceso de calidad.", icon: BarChart3 },
   { path: "/administracion", title: "Administración", eyebrow: "Sistema", description: "Configuración de catálogos, parámetros y seguridad de OVOCALIDAD.", icon: Settings },
 ];
@@ -47,6 +47,7 @@ export default function AppRouter() {
           <Route index element={<Dashboard />} />
           <Route path="/operacion/lotes" element={<LotesPage />} />
           <Route path="/operacion/lotes/:loteId" element={<LoteDetallePage />} />
+          <Route path="/trazabilidad" element={<TrazabilidadPage />} />
           <Route path="/operacion/evaluaciones" element={<EvaluacionesPage />} />
           <Route path="/operacion/evaluaciones/consolidacion" element={<ConsolidacionCalidadPage />} />
           <Route path="/operacion/evaluaciones/disposicion" element={<DisposicionPreviewPage />} />
