@@ -139,26 +139,37 @@ export default function CertificadoDisenadorPage() {
                   <div className="mt-4 border-t pt-4">
                     <p className="mb-3 text-sm font-medium">Parámetros disponibles según Ficha Técnica</p>
                     {parametros.isLoading ? <p className="text-sm">Cargando parámetros...</p> : (
-                      <div className="space-y-2">
-                        {(parametros.data ?? []).map((parametro) => {
-                          const activo = seccion.caracteristicas.some((c) => c.versionFtCaracteristicaId === parametro.versionFtCaracteristicaId);
-                          const ocupado = seleccionados.has(parametro.versionFtCaracteristicaId) && !activo;
+                      <div className="space-y-4">
+                        {Array.from(new Set((parametros.data ?? []).map((p) => p.tipoCaractDescripcion?.trim() || "OTROS"))).map((tipo) => {
+                          const items = (parametros.data ?? []).filter((p) => (p.tipoCaractDescripcion?.trim() || "OTROS") === tipo);
                           return (
-                            <button
-                              type="button"
-                              disabled={ocupado}
-                              key={parametro.versionFtCaracteristicaId}
-                              onClick={() => alternarParametro(indice, parametro.versionFtCaracteristicaId, parametro.obligatorioCertificado)}
-                              className={"flex w-full items-center justify-between rounded-lg border px-3 py-2 text-left text-sm transition hover:bg-slate-50 " + (activo ? "border-slate-500 bg-slate-50 " : "") + (ocupado ? "opacity-40 " : "")}
-                            >
-                              <span>
-                                <b>{parametro.determinacion}</b>
-                                <span className="ml-2 text-xs text-[var(--text-secondary)]">
-                                  {parametro.tipoCaractDescripcion}{parametro.unidadDeMedida ? " · " + parametro.unidadDeMedida : ""}
-                                </span>
-                              </span>
-                              <span>{parametro.obligatorioCertificado ? <LockKeyhole size={16} /> : activo ? <Check size={16} /> : null}</span>
-                            </button>
+                            <div key={tipo} className="overflow-hidden rounded-lg border bg-white">
+                              <div className="flex items-center justify-between border-b bg-slate-50 px-3 py-2">
+                                <span className="text-xs font-semibold tracking-wide text-slate-700">{tipo}</span>
+                                <span className="text-xs text-[var(--text-secondary)]">{items.length} parámetro{items.length === 1 ? "" : "s"}</span>
+                              </div>
+                              <div className="space-y-2 p-2">
+                                {items.map((parametro) => {
+                                  const activo = seccion.caracteristicas.some((x) => x.versionFtCaracteristicaId === parametro.versionFtCaracteristicaId);
+                                  const ocupado = seleccionados.has(parametro.versionFtCaracteristicaId) && !activo;
+                                  return (
+                                    <button
+                                      type="button"
+                                      disabled={ocupado}
+                                      key={parametro.versionFtCaracteristicaId}
+                                      onClick={() => alternarParametro(indice, parametro.versionFtCaracteristicaId, parametro.obligatorioCertificado)}
+                                      className={"flex w-full items-center justify-between rounded-md border px-3 py-2 text-left text-sm transition hover:bg-slate-50 " + (activo ? "border-slate-500 bg-slate-50 " : "") + (ocupado ? "opacity-40 " : "")}
+                                    >
+                                      <span>
+                                        <b>{parametro.determinacion}</b>
+                                        <span className="ml-2 text-xs text-[var(--text-secondary)]">{parametro.unidadDeMedida || "Sin unidad"}</span>
+                                      </span>
+                                      <span>{parametro.obligatorioCertificado ? <LockKeyhole size={16} /> : activo ? <Check size={16} /> : null}</span>
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            </div>
                           );
                         })}
                       </div>
