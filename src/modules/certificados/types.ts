@@ -1,4 +1,17 @@
-export type PlantillaLista={certificadoPlantillaId:number;versionFtId:number;nombre:string;descripcion:string|null;documentoId:number;documentoCodigo:string;documentoDescripcionDocumento:string;productoCodigo:string|null;versionNumero:number|null;estVerId:number;cantidadSecciones:number;cantidadCaracteristicas:number};
+export type PlantillaLista={
+ certificadoPlantillaId:number;
+ versionFtId:number;
+ nombre:string;
+ descripcion:string|null;
+ documentoId:number;
+ documentoCodigo:string;
+ documentoDescripcionDocumento:string;
+ productoCodigo:string|null;
+ versionNumero:number|null;
+ estVerId:number;
+ cantidadSecciones:number;
+ cantidadCaracteristicas:number;
+};
 
 export type ParametroFt={
  versionFtCaracteristicaId:number;
@@ -26,9 +39,21 @@ export type ParametroFt={
 export type Seccion={
  certificadoPlantillaSeccionId:number;
  certificadoPlantillaId:number;
- tipoSeccion:string;
- titulo:string|null;
+ certificadoSeccionId:number;
+ seccionCodigo:string;
+ seccionDescripcion:string;
+ tipoContenido:string;
+ puedeEliminarse:boolean;
+ permiteReordenar:boolean;
+ orden:number;
+ visible:boolean;
  contenido:string|null;
+};
+
+export type ResultadoPlantilla={
+ certificadoPlantillaResultadoId:number;
+ certificadoPlantillaSeccionId:number;
+ titulo:string;
  orden:number;
  visible:boolean;
  modoSeleccion:"MANUAL"|"TIPO"|"FASE"|"TIPO_FASE";
@@ -41,8 +66,8 @@ export type Seccion={
 };
 
 export type CaracteristicaPlantilla={
- certificadoPlantillaCaracteristicaId:number;
- certificadoPlantillaSeccionId:number;
+ certificadoPlantillaResultadoCaracteristicaId:number;
+ certificadoPlantillaResultadoId:number;
  versionFtCaracteristicaId:number;
  caracteristicaId:number;
  determinacion:string;
@@ -68,23 +93,42 @@ export type PlantillaDetalle={
  estVerId:number;
  estadoVersionFt:string;
  secciones:Seccion[];
+ resultados:ResultadoPlantilla[];
  caracteristicas:CaracteristicaPlantilla[];
 };
 
-export type OperacionPlantilla={codigoResultado:number;mensaje:string;certificadoPlantillaId:number};
+export type OperacionPlantilla={
+ codigoResultado:number;
+ mensaje:string;
+ certificadoPlantillaId:number;
+};
 
-export type CaracteristicaDiseno={versionFtCaracteristicaId:number;orden:number};
+export type CaracteristicaDiseno={
+ versionFtCaracteristicaId:number;
+ orden:number;
+};
 
-export type SeccionDiseno={
- tipoSeccion:string;
+export type ResultadoDiseno={
  titulo:string;
- contenido:string|null;
  orden:number;
  visible:boolean;
  modoSeleccion:"MANUAL"|"TIPO"|"FASE"|"TIPO_FASE";
  versionFaseId:number|null;
  tipoCaractId:number|null;
  caracteristicas:CaracteristicaDiseno[];
+};
+
+export type SeccionDiseno={
+ certificadoSeccionId:number;
+ seccionCodigo:string;
+ seccionDescripcion:string;
+ tipoContenido:string;
+ puedeEliminarse:boolean;
+ permiteReordenar:boolean;
+ orden:number;
+ visible:boolean;
+ contenido:string|null;
+ resultados:ResultadoDiseno[];
 };
 
 export type FichaTecnicaCertificado={
@@ -99,7 +143,6 @@ export type FichaTecnicaCertificado={
  estadoVersion:string;
  cantidadParametrosCertificables:number;
 };
-
 
 export type CertificadoEmpresa={
  certificadoEmpresaId:number;
