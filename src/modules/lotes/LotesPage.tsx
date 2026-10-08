@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowDownUp, ChevronLeft, ChevronRight, Eye, FilterX, MoreHorizontal, Play, Plus, RefreshCw, Search, Trash2 } from "lucide-react";
+import { ArrowDownUp, ChevronLeft, ChevronRight, Eye, FileCheck2, FilterX, MoreHorizontal, Play, Plus, RefreshCw, Search, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import PageContainer from "@/components/common/PageContainer";
@@ -16,7 +16,7 @@ import GenerarLoteModal from "./GenerarLoteModal";
 import type { LotesFiltros } from "./types";
 import { useAuth } from "@/modules/auth/AuthContext";
 
-type SortKey = "codigoLote" | "productoCodigo" | "fechaHoraProduccion" | "faseDescripcion" | "lineaOrigenCodigo" | "estadoLoteDescripcion" | "estadoEvaluacionDescripcion";
+type SortKey = "codigoLote" | "productoCodigo" | "fechaHoraProduccion" | "faseDescripcion" | "lineaOrigenCodigo" | "estadoLoteDescripcion" | "estadoEvaluacionDescripcion" | "estadoCertificacionDescripcion";
 type SortDirection = "asc" | "desc";
 
 const estadoLoteOptions = [
@@ -59,6 +59,17 @@ function formatDate(value: string | null) {
     dateStyle: "medium",
     timeStyle: "short",
   }).format(new Date(value));
+}
+
+function certificacionBadgeClass(codigo?: string | null) {
+  switch (codigo) {
+    case "CERTIFICADO_EMITIDO":
+      return "border-violet-200 bg-violet-50 text-violet-700";
+    case "LISTO_PARA_CERTIFICADO":
+      return "border-emerald-200 bg-emerald-50 text-emerald-700";
+    default:
+      return "border-slate-200 bg-slate-50 text-slate-500";
+  }
 }
 
 export default function LotesPage() {
@@ -277,17 +288,18 @@ export default function LotesPage() {
                   <th className="px-5 py-3"><button type="button" onClick={() => sortBy("lineaOrigenCodigo")} className="group inline-flex items-center gap-1.5 whitespace-nowrap font-semibold uppercase tracking-[0.08em] hover:text-[var(--primary)]">Línea<ArrowDownUp size={13} className={sortKey === "lineaOrigenCodigo" ? "text-[var(--primary)]" : "opacity-45 group-hover:opacity-100"} /></button></th>
                   <th className="px-5 py-3"><button type="button" onClick={() => sortBy("estadoLoteDescripcion")} className="group inline-flex items-center gap-1.5 whitespace-nowrap font-semibold uppercase tracking-[0.08em] hover:text-[var(--primary)]">Estado lote<ArrowDownUp size={13} className={sortKey === "estadoLoteDescripcion" ? "text-[var(--primary)]" : "opacity-45 group-hover:opacity-100"} /></button></th>
                   <th className="px-5 py-3"><button type="button" onClick={() => sortBy("estadoEvaluacionDescripcion")} className="group inline-flex items-center gap-1.5 whitespace-nowrap font-semibold uppercase tracking-[0.08em] hover:text-[var(--primary)]">Evaluación<ArrowDownUp size={13} className={sortKey === "estadoEvaluacionDescripcion" ? "text-[var(--primary)]" : "opacity-45 group-hover:opacity-100"} /></button></th>
+                  <th className="px-5 py-3"><button type="button" onClick={() => sortBy("estadoCertificacionDescripcion")} className="group inline-flex items-center gap-1.5 whitespace-nowrap font-semibold uppercase tracking-[0.08em] hover:text-[var(--primary)]">Certificación<ArrowDownUp size={13} className={sortKey === "estadoCertificacionDescripcion" ? "text-[var(--primary)]" : "opacity-45 group-hover:opacity-100"} /></button></th>
                   <th className="px-5 py-3">Avance evaluación</th>
                   <th className="px-5 py-3 text-right">Acciones</th>
                 </tr>
               </thead>
               <tbody>
                 {isLoading ? (
-                  <tr><td colSpan={9} className="px-5 py-12 text-center text-[var(--text-secondary)]">Cargando lotes...</td></tr>
+                  <tr><td colSpan={10} className="px-5 py-12 text-center text-[var(--text-secondary)]">Cargando lotes...</td></tr>
                 ) : isError ? (
-                  <tr><td colSpan={9} className="px-5 py-12 text-center text-red-600">No se pudo consultar la API de lotes.</td></tr>
+                  <tr><td colSpan={10} className="px-5 py-12 text-center text-red-600">No se pudo consultar la API de lotes.</td></tr>
                 ) : data.length === 0 ? (
-                  <tr><td colSpan={9} className="px-5 py-12 text-center text-[var(--text-secondary)]">No hay lotes para los filtros seleccionados.</td></tr>
+                  <tr><td colSpan={10} className="px-5 py-12 text-center text-[var(--text-secondary)]">No hay lotes para los filtros seleccionados.</td></tr>
                 ) : pagedData.map((lote) => (
                   <tr key={lote.loteId} className="border-t border-[var(--border)] hover:bg-[var(--surface-muted)]/70">
                     <td className="px-5 py-4">
@@ -316,6 +328,14 @@ export default function LotesPage() {
                           </Badge>
                           <div className="mt-1 text-xs text-[var(--text-secondary)]">Intento {lote.intentoEvaluacion ?? "—"}</div>
                         </div>
+                      )}
+                    </td>
+                    <td className="px-5 py-4">
+                      <Badge variant="outline" className={certificacionBadgeClass(lote.estadoCertificacionCodigo)}>
+                        {lote.estadoCertificacionDescripcion}
+                      </Badge>
+                      {lote.numeroCertificado && (
+                        <div className="mt-1 text-xs text-[var(--text-secondary)]">{lote.numeroCertificado}</div>
                       )}
                     </td>
                     <td className="px-5 py-4">
@@ -353,6 +373,18 @@ export default function LotesPage() {
                             <DropdownMenuItem onClick={() => navigate(`/operacion/evaluaciones/${lote.evaluacionId}`)}>
                               <Play size={15} />
                               Continuar evaluación
+                            </DropdownMenuItem>
+                          )}
+                          {lote.estadoCertificacionCodigo === "LISTO_PARA_CERTIFICADO" && (
+                            <DropdownMenuItem onClick={() => navigate(`/certificacion/certificados/emitir/${lote.loteId}`)}>
+                              <FileCheck2 size={15} />
+                              Emitir certificado
+                            </DropdownMenuItem>
+                          )}
+                          {lote.estadoCertificacionCodigo === "CERTIFICADO_EMITIDO" && lote.certificadoId && (
+                            <DropdownMenuItem onClick={() => navigate(`/certificacion/certificados?tab=emitidos&certificadoId=${lote.certificadoId}`)}>
+                              <FileCheck2 size={15} />
+                              Ver certificado
                             </DropdownMenuItem>
                           )}
                           <DropdownMenuItem onClick={() => navigate(`/operacion/lotes/${lote.loteId}`)}>
