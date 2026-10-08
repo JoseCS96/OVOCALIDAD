@@ -53,8 +53,13 @@ export async function obtenerMiSolicitudFirma(tipoDocumento:string,entidadId:num
 }
 
 export async function firmarDocumento(solicitudId:number,password:string){
- const {data}=await api.post<OperacionFirmaDocumento>(`/api/firmas/solicitudes/${solicitudId}/firmar`,{password});
- return data;
+ try{
+  const {data}=await api.post<OperacionFirmaDocumento>(`/api/firmas/solicitudes/${solicitudId}/firmar`,{password});
+  return data;
+ }catch(e:any){
+  const mensaje=e?.response?.data?.mensaje??e?.response?.data?.Mensaje??e?.message??"No se pudo firmar el documento.";
+  throw new Error(mensaje);
+ }
 }
 
 export async function obtenerFirmaAplicadaDocumento(tipoDocumento:string,entidadId:number,usuarioDni:string){
