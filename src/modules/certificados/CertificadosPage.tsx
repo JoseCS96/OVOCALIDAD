@@ -41,7 +41,7 @@ export default function CertificadosPage(){
   <div className="flex flex-wrap items-start justify-between gap-4">
    <div>
     <p className="text-xs font-semibold uppercase tracking-[.16em] text-[var(--primary)]">Gestión documental · Certificados</p>
-    <h1 className="mt-1 text-2xl font-semibold">Diseño de certificados</h1>
+    <h1 className="mt-1 text-2xl font-semibold">Certificados de calidad</h1>
     <p className="mt-1 text-sm text-[var(--text-secondary)]">Crea y administra los modelos de certificado asociados a cada Ficha Técnica.</p>
    </div>
    <Button variant="outline" className="bg-white" onClick={()=>nav("/documentos/diseno-certificados/asignacion")}>
