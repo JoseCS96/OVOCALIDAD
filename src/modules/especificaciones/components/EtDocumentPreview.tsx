@@ -1,4 +1,6 @@
+import {useEffect,useState} from "react";
 import logoOvosur from "@/assets/logos/ovosur-logo.png";
+import {obtenerFirmaResponsableDocumento} from "@/modules/firmas/api";
 import type {CaracteristicaEt,DetalleEt,SeccionEt} from "../types";
 
 export default function EtDocumentPreview({data}:{data:DetalleEt}){
@@ -120,12 +122,25 @@ function ResponsablesCabecera({responsables}:{responsables:DetalleEt["responsabl
      {items.map((x,idx)=><div key={x.idRelacion} className={"grid grid-cols-[1.45fr_1fr_1.6fr] text-xs "+(idx<items.length-1?"border-b border-slate-300":"")}>
       <div className="border-r border-slate-300 px-3 py-1.5 text-center">{x.cargoDescripcion??"—"}</div>
       <div className="border-r border-slate-300 px-3 py-1.5 text-center">{x.usuarioNombresApellidos}</div>
-      <div className="min-h-8 px-3 py-1.5 text-center text-slate-400"></div>
+      <div className="min-h-12 px-3 py-1.5 text-center"><FirmaResponsableDocumento usuarioDni={x.usuarioDni}/></div>
      </div>)}
     </div>
    </div>;
   })}
  </div>;
+}
+
+function FirmaResponsableDocumento({usuarioDni}:{usuarioDni:string}){
+ const [src,setSrc]=useState<string|null>(null);
+ useEffect(()=>{
+  let activo=true;
+  obtenerFirmaResponsableDocumento(usuarioDni).then(r=>{
+   if(!activo)return;
+   setSrc(r?.firmaImagen&&r.firmaMimeType?`data:${r.firmaMimeType};base64,${r.firmaImagen}`:null);
+  });
+  return()=>{activo=false};
+ },[usuarioDni]);
+ return src?<img src={src} alt="Firma registrada" className="mx-auto max-h-10 max-w-[150px] object-contain"/>:null;
 }
 
 function reemplazaA(i:DetalleEt["informacionGeneral"]){
