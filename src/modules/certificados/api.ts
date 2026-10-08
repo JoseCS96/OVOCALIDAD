@@ -54,3 +54,12 @@ export async function descargarCertificadoPdf(certificadoId:number,fallbackName?
  a.remove();
  window.setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
+
+
+export async function establecerPlantillaPredeterminada(certificadoPlantillaId:number){
+ const {data}=await api.put<OperacionPlantilla>(
+  `/api/certificados/plantillas/${certificadoPlantillaId}/predeterminada`,
+  {}
+ );
+ return validar(data);
+}
