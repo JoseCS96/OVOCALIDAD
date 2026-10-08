@@ -66,10 +66,10 @@ export default function MaestroCertificadoPage(){
 
  return <PageContainer className="space-y-5">
   <div>
-   <p className="text-xs font-semibold uppercase tracking-[.16em] text-[var(--primary)]">Mantenimientos · Certificación</p>
-   <h1 className="mt-1 text-2xl font-semibold">Maestro de certificado</h1>
+   <p className="text-xs font-semibold uppercase tracking-[.16em] text-[var(--primary)]">Mantenimientos · Certificados</p>
+   <h1 className="mt-1 text-2xl font-semibold">Mantenimiento de certificados</h1>
    <p className="mt-1 text-sm text-[var(--text-secondary)]">
-    Configuración institucional utilizada en la generación de certificados. Aquí se incorporarán también logos, firmantes y parámetros generales.
+    Administra los maestros y parámetros utilizados por la emisión de certificados: datos de empresa, identidad institucional, firmantes y configuración general.
    </p>
   </div>
 
