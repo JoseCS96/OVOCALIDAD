@@ -5,7 +5,7 @@ import { obtenerNotificaciones, marcarModalMostrado, marcarNotificacionLeida } f
 import type { Notificacion } from "@/modules/notificaciones/types";
 import { NavLink, useNavigate } from "react-router-dom";
 import AppLogo from "@/components/branding/AppLogo";
-import { navigationGroups } from "@/config/navigation";
+import { navigationGroups, type NavigationItem } from "@/config/navigation";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -37,8 +37,23 @@ function Topbar({ sidebarCollapsed, onSidebarToggle }: TopbarProps) {
   async function abrirNotificacion(n:Notificacion){try{if(!n.leida){await marcarNotificacionLeida(n.notificacionId);setNotificaciones(ns=>ns.map(x=>x.notificacionId===n.notificacionId?{...x,leida:true,mostrarEnModal:false}:x));}}finally{setCampanaAbierta(false);if(n.urlDestino)navigate(n.urlDestino);}}
   async function verSolicitudes(){await cerrarModal();navigate("/documentos/especificaciones");}
   const navigate = useNavigate();
+
+  const canSee = (item: NavigationItem) =>
+    (!item.moduloCodigo || tieneModulo(item.moduloCodigo)) &&
+    (!item.permiso || tienePermiso(item.permiso));
+
+  const filterItem = (item: NavigationItem): NavigationItem | null => {
+    if (!canSee(item)) return null;
+    const children = item.children?.map(filterItem).filter((x): x is NavigationItem => !!x) ?? [];
+    if (item.children && children.length === 0 && !item.path) return null;
+    return {...item, children};
+  };
+
   const groups = navigationGroups
-    .map((group) => ({ ...group, items: group.items.filter((item) => (!item.moduloCodigo || tieneModulo(item.moduloCodigo)) && (!item.permiso || tienePermiso(item.permiso))) }))
+    .map((group) => ({
+      ...group,
+      items: group.items.map(filterItem).filter((x): x is NavigationItem => !!x),
+    }))
     .filter((group) => group.items.length > 0);
 
   const nombre = acceso?.usuario.nombresApellidos ?? acceso?.usuario.nombreUsuario ?? "Usuario";
@@ -62,11 +77,45 @@ function Topbar({ sidebarCollapsed, onSidebarToggle }: TopbarProps) {
                 <div key={group.title} className="mb-5">
                   <p className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-sky-100/45">{group.title}</p>
                   <div className="space-y-1">
-                    {group.items.map(({ label, path, icon: Icon }) => (
-                      <NavLink key={path} to={path} end={path === "/"} className={({ isActive }) => ["flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium", isActive ? "bg-white text-[var(--primary-strong)]" : "text-white/80 hover:bg-white/8 hover:text-white"].join(" ")}>
-                        <Icon size={17} />{label}
-                      </NavLink>
-                    ))}
+                    {group.items.map((item) => {
+                      const Icon=item.icon;
+
+                      if(item.children?.length){
+                        return <div key={item.label} className="rounded-xl border border-white/8 bg-white/[0.03] p-1.5">
+                          <div className="flex items-center gap-3 px-2 py-2 text-sm font-semibold text-white">
+                            <Icon size={17}/>{item.label}
+                          </div>
+                          <div className="ml-3 border-l border-white/10 pl-2">
+                            {item.children.map((child)=>{
+                              if(!child.path)return null;
+                              const ChildIcon=child.icon;
+                              return <NavLink
+                                key={child.path}
+                                to={child.path}
+                                end={child.path==="/"}
+                                className={({isActive})=>[
+                                  "flex items-center gap-3 rounded-lg px-3 py-2 text-sm",
+                                  isActive?"bg-white text-[var(--primary-strong)]":"text-white/75 hover:bg-white/8 hover:text-white"
+                                ].join(" ")}
+                              >
+                                <ChildIcon size={15}/>{child.label}
+                              </NavLink>;
+                            })}
+                          </div>
+                        </div>;
+                      }
+
+                      if(!item.path)return null;
+
+                      return <NavLink
+                        key={item.path}
+                        to={item.path}
+                        end={item.path==="/"}
+                        className={({ isActive }) => ["flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium", isActive ? "bg-white text-[var(--primary-strong)]" : "text-white/80 hover:bg-white/8 hover:text-white"].join(" ")}
+                      >
+                        <Icon size={17} />{item.label}
+                      </NavLink>;
+                    })}
                   </div>
                 </div>
               ))}
