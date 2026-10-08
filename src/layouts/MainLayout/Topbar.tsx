@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { obtenerNotificaciones, marcarModalMostrado, marcarNotificacionLeida } from "@/modules/notificaciones/api";
 import type { Notificacion } from "@/modules/notificaciones/types";
+import { listarMisSolicitudesFirma, type FirmaDocumentoSolicitud } from "@/modules/firmas/api";
 import { NavLink, useNavigate } from "react-router-dom";
 import AppLogo from "@/components/branding/AppLogo";
 import { navigationGroups, type NavigationItem } from "@/config/navigation";
@@ -26,12 +27,34 @@ function getInitials(name: string) {
 function Topbar({ sidebarCollapsed, onSidebarToggle }: TopbarProps) {
   const { acceso, logout, tieneModulo, tienePermiso } = useAuth();
   const [notificaciones,setNotificaciones]=useState<Notificacion[]>([]);
+  const [firmasPendientes,setFirmasPendientes]=useState<FirmaDocumentoSolicitud[]>([]);
   const [campanaAbierta,setCampanaAbierta]=useState(false);
   const [modalAbierto,setModalAbierto]=useState(false);
   const pendientes=useMemo(()=>notificaciones.filter(n=>n.mostrarEnCampana&&!n.leida),[notificaciones]);
   const pendientesModal=useMemo(()=>notificaciones.filter(n=>n.mostrarEnModal&&!n.leida),[notificaciones]);
+  const pendientesTotal=pendientes.length+firmasPendientes.length;
 
-  useEffect(()=>{if(!acceso)return;obtenerNotificaciones().then(data=>{setNotificaciones(data);setModalAbierto(data.some((n: Notificacion)=>n.mostrarEnModal&&!n.leida));}).catch(()=>{});},[acceso?.usuario.nombreUsuario]);
+  useEffect(()=>{
+    if(!acceso)return;
+    let activo=true;
+    const cargar=async()=>{
+      try{
+        const [data,firmas]=await Promise.all([
+          obtenerNotificaciones(),
+          listarMisSolicitudesFirma("PENDIENTE")
+        ]);
+        if(!activo)return;
+        setNotificaciones(data);
+        setFirmasPendientes(firmas);
+        setModalAbierto(data.some((n: Notificacion)=>n.mostrarEnModal&&!n.leida));
+      }catch{}
+    };
+    void cargar();
+    const timer=window.setInterval(()=>void cargar(),60000);
+    const refrescar=()=>void cargar();
+    window.addEventListener("ovocalidad:firmas-updated",refrescar);
+    return()=>{activo=false;window.clearInterval(timer);window.removeEventListener("ovocalidad:firmas-updated",refrescar)};
+  },[acceso?.usuario.nombreUsuario]);
 
   async function cerrarModal(){setModalAbierto(false);try{await marcarModalMostrado();setNotificaciones(ns=>ns.map(n=>n.mostrarEnModal?{...n,mostradaModal:true,cantidadVecesModal:n.cantidadVecesModal+1}:n));}catch{}}
   async function abrirNotificacion(n:Notificacion){try{if(!n.leida){await marcarNotificacionLeida(n.notificacionId);setNotificaciones(ns=>ns.map(x=>x.notificacionId===n.notificacionId?{...x,leida:true,mostrarEnModal:false}:x));}}finally{setCampanaAbierta(false);if(n.urlDestino)navigate(n.urlDestino);}}
@@ -126,8 +149,11 @@ function Topbar({ sidebarCollapsed, onSidebarToggle }: TopbarProps) {
         <div className="min-w-0"><p className="truncate text-sm font-semibold text-[var(--text)]">Centro de Operaciones</p><p className="truncate text-xs text-[var(--text-secondary)]">Calidad · OVOSUR</p></div>
         <div className="ml-auto hidden w-full max-w-md lg:block"><div className="relative"><Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} /><Input aria-label="Buscar en OVOCALIDAD" placeholder="Buscar lotes, productos, documentos..." className="h-10 rounded-xl border-[var(--border)] bg-[var(--surface-muted)] pl-9 shadow-none" /></div></div>
         <div className="relative">
-          <Button variant="ghost" size="icon" className="relative" aria-label="Notificaciones" onClick={()=>setCampanaAbierta(v=>!v)}><Bell size={18} />{pendientes.length>0&&<span className="absolute -right-1 -top-1 min-w-5 rounded-full bg-red-600 px-1 text-center text-[10px] font-bold leading-5 text-white">{pendientes.length>99?"99+":pendientes.length}</span>}</Button>
-          {campanaAbierta&&<div className="absolute right-0 z-50 mt-2 w-[380px] overflow-hidden rounded-2xl border bg-white shadow-xl"><div className="flex items-center justify-between border-b px-4 py-3"><div><p className="font-semibold">Notificaciones</p><p className="text-xs text-slate-500">{pendientes.length} pendiente{pendientes.length===1?"":"s"}</p></div></div><div className="max-h-[420px] overflow-y-auto">{notificaciones.length?notificaciones.map(n=><button key={n.notificacionId} onClick={()=>void abrirNotificacion(n)} className={"block w-full border-b px-4 py-3 text-left hover:bg-slate-50 "+(!n.leida?"bg-amber-50/50":"")}><p className="text-sm font-semibold">{n.titulo}</p><p className="mt-1 text-xs leading-5 text-slate-600">{n.mensaje}</p><p className="mt-1 text-[11px] text-slate-400">{new Date(n.audFechaCreacion).toLocaleString("es-PE")}</p></button>):<div className="p-8 text-center text-sm text-slate-500">No tienes notificaciones.</div>}</div></div>}
+          <Button variant="ghost" size="icon" className="relative" aria-label="Notificaciones" onClick={()=>setCampanaAbierta(v=>!v)}><Bell size={18} />{pendientesTotal>0&&<span className="absolute -right-1 -top-1 min-w-5 rounded-full bg-red-600 px-1 text-center text-[10px] font-bold leading-5 text-white">{pendientesTotal>99?"99+":pendientesTotal}</span>}</Button>
+          {campanaAbierta&&<div className="absolute right-0 z-50 mt-2 w-[380px] overflow-hidden rounded-2xl border bg-white shadow-xl"><div className="flex items-center justify-between border-b px-4 py-3"><div><p className="font-semibold">Notificaciones</p><p className="text-xs text-slate-500">{pendientesTotal} pendiente{pendientesTotal===1?"":"s"}</p></div></div><div className="max-h-[420px] overflow-y-auto">
+ {firmasPendientes.map(f=><button key={"firma-"+f.documentoFirmaSolicitudId} onClick={()=>{setCampanaAbierta(false);if(f.urlDocumento)navigate(f.urlDocumento)}} className="block w-full border-b bg-sky-50/60 px-4 py-3 text-left hover:bg-sky-50"><p className="text-sm font-semibold">Firma pendiente · {f.documentoCodigo}</p><p className="mt-1 text-xs leading-5 text-slate-600">Debes firmar este documento como {f.tipoResponsabilidad.replaceAll("_"," ").toLowerCase()}.</p><p className="mt-1 text-[11px] text-slate-400">{new Date(f.fechaSolicitud).toLocaleString("es-PE")}</p></button>)}
+ {notificaciones.length?notificaciones.map(n=><button key={n.notificacionId} onClick={()=>void abrirNotificacion(n)} className={"block w-full border-b px-4 py-3 text-left hover:bg-slate-50 "+(!n.leida?"bg-amber-50/50":"")}><p className="text-sm font-semibold">{n.titulo}</p><p className="mt-1 text-xs leading-5 text-slate-600">{n.mensaje}</p><p className="mt-1 text-[11px] text-slate-400">{new Date(n.audFechaCreacion).toLocaleString("es-PE")}</p></button>):firmasPendientes.length===0?<div className="p-8 text-center text-sm text-slate-500">No tienes notificaciones.</div>:null}
+</div></div>}
         </div>
         <div className="group relative">
           <button type="button" className="flex items-center gap-3 rounded-xl px-2 py-1.5 text-left transition hover:bg-slate-50">
