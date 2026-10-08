@@ -56,6 +56,7 @@ export default function AppRouter() {
           <Route element={<ProtectedRoute perfilesPermitidos={["JEFE_CALIDAD", "ANALISTA_CALIDAD"]} />}>
             <Route path="/certificacion/certificados" element={<CertificadosBandejaPage />} />
             <Route path="/certificacion/certificados/configuracion" element={<CertificadosPage />} />
+            <Route path="/documentos/diseno-certificados" element={<CertificadosPage />} />
             <Route path="/certificacion/certificados/emitir/:loteId" element={<CertificadoEmisionPage />} />
             <Route path="/certificacion/certificados/plantillas/:id" element={<CertificadoDisenadorPage />} />
           </Route>
