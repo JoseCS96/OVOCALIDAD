@@ -39,6 +39,7 @@ export const navigationGroups: NavigationGroup[] = [
     { label: "Contenido del Rotulado", path: "/mantenimientos/contenidos-rotulado", icon: Wrench },
     { label: "Cargos", path: "/mantenimientos/cargos", icon: Wrench },
     { label: "Responsables", path: "/mantenimientos/responsables", icon: Wrench },
+    { label: "Maestro certificado", path: "/mantenimientos/certificados", icon: ShieldCheck },
   ]},
   { title: "Sistema", items: [
     { label: "Trazabilidad", path: "/trazabilidad", icon: Boxes, permiso: "TRAZABILIDAD.VER" },
