@@ -7,7 +7,12 @@ type Props = { icon: LucideIcon; text: string; to: string; collapsed?: boolean }
 function SidebarItem({ icon: Icon, text, to, collapsed = false }: Props) {
   const location=useLocation();
   const hasSearch=to.includes("?");
-  const exactTarget=location.pathname+location.search===to;
+  const requiresExactPath=
+    to==="/documentos/diseno-certificados" ||
+    to==="/documentos/diseno-certificados/asignacion";
+  const exactTarget=hasSearch
+    ? location.pathname+location.search===to
+    : location.pathname===to;
 
   return (
     <NavLink
@@ -15,7 +20,7 @@ function SidebarItem({ icon: Icon, text, to, collapsed = false }: Props) {
       end={to === "/" || to === "/operacion/evaluaciones"}
       title={collapsed ? text : undefined}
       className={({ isActive }) => {
-        const active=hasSearch?exactTarget:isActive;
+        const active=(hasSearch||requiresExactPath)?exactTarget:isActive;
         return [
           "group flex w-full items-center rounded-xl px-3 py-2.5 text-left transition-all duration-200",
           collapsed ? "justify-center" : "justify-between gap-3",
@@ -24,7 +29,7 @@ function SidebarItem({ icon: Icon, text, to, collapsed = false }: Props) {
       }}
     >
       {({ isActive }) => {
-        const active=hasSearch?exactTarget:isActive;
+        const active=(hasSearch||requiresExactPath)?exactTarget:isActive;
         return <>
           <span className={["flex min-w-0 items-center", collapsed ? "justify-center" : "gap-3"].join(" ")}>
             <Icon size={18} strokeWidth={1.9} className={active ? "text-[var(--primary)]" : "text-sky-100/80 group-hover:text-white"} />
