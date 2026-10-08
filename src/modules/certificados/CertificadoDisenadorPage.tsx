@@ -7,14 +7,14 @@ import {Button} from "@/components/ui/button";
 import {Card,CardContent} from "@/components/ui/card";
 import {Input} from "@/components/ui/input";
 import {guardarDiseno,obtenerEmpresaCertificado,obtenerPlantilla,parametrosFt} from "./api";
-import type {ParametroFt,SeccionDiseno} from "./types";
+import type {ParametroFt,ResultadoDiseno,SeccionDiseno} from "./types";
 
 const normalizarSecciones=(items:SeccionDiseno[])=>items.map((s,i)=>({
  ...s,
  orden:i+1,
  resultados:s.resultados.map((r,j)=>({
   ...r,
-  modoSeleccion:"MANUAL",
+  modoSeleccion:"MANUAL" as const,
   versionFaseId:null,
   tipoCaractId:null,
   orden:j+1,
