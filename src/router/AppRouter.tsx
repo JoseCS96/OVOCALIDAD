@@ -30,6 +30,8 @@ import ResponsablesMantenimientoPage from "@/modules/mantenimientos/Responsables
 import TrazabilidadPage from "@/modules/trazabilidad/TrazabilidadPage";
 import TrazabilidadDetallePage from "@/modules/trazabilidad/TrazabilidadDetallePage";
 import CertificadosPage from "@/modules/certificados/CertificadosPage";
+import CertificadosBandejaPage from "@/modules/certificados/CertificadosBandejaPage";
+import CertificadoEmisionPage from "@/modules/certificados/CertificadoEmisionPage";
 import CertificadoDisenadorPage from "@/modules/certificados/CertificadoDisenadorPage";
 
 const pages = [
@@ -52,7 +54,9 @@ export default function AppRouter() {
           <Route path="/operacion/lotes/:loteId" element={<LoteDetallePage />} />
           <Route path="/trazabilidad" element={<TrazabilidadPage />} />
           <Route element={<ProtectedRoute perfilesPermitidos={["JEFE_CALIDAD", "ANALISTA_CALIDAD"]} />}>
-            <Route path="/certificacion/certificados" element={<CertificadosPage />} />
+            <Route path="/certificacion/certificados" element={<CertificadosBandejaPage />} />
+            <Route path="/certificacion/certificados/configuracion" element={<CertificadosPage />} />
+            <Route path="/certificacion/certificados/emitir/:loteId" element={<CertificadoEmisionPage />} />
             <Route path="/certificacion/certificados/plantillas/:id" element={<CertificadoDisenadorPage />} />
           </Route>
           <Route path="/trazabilidad/:loteId" element={<TrazabilidadDetallePage />} />
