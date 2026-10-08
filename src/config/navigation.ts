@@ -17,6 +17,7 @@ export const navigationGroups: NavigationGroup[] = [
     { label: "Productos", path: "/productos", icon: Package, permiso: "PRODUCTO.VER" },
     { label: "Especificaciones técnicas", path: "/documentos/especificaciones", icon: FileText, moduloCodigo: "ESPECIFICACIONES_TECNICAS", permiso: "ET.VER" },
     { label: "Fichas técnicas", path: "/documentos/fichas-tecnicas", icon: FileCheck2, moduloCodigo: "FICHAS_TECNICAS", permiso: "FT.VER" },
+    { label: "Diseño de certificados", path: "/documentos/diseno-certificados", icon: ShieldCheck, permiso: "CERTIFICADO.VER", perfilesPermitidos: ["JEFE_CALIDAD", "ANALISTA_CALIDAD"] },
     { label: "Versiones", path: "/documentos/versiones", icon: Boxes, permiso: "VERSION_DOCUMENTAL.VER" },
   ]},
   { title: "Operación", items: [
