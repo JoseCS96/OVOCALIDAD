@@ -8,6 +8,7 @@ import {Button} from "@/components/ui/button";
 import {Card,CardContent} from "@/components/ui/card";
 import {Input} from "@/components/ui/input";
 import {listarLotes} from "@/modules/lotes/api";
+import {useAuth} from "@/modules/auth/AuthContext";
 import type {LoteListado} from "@/modules/lotes/types";
 
 type Tab="por-emitir"|"emitidos";
@@ -16,6 +17,8 @@ type SortDirection="asc"|"desc";
 
 export default function CertificadosBandejaPage(){
  const nav=useNavigate();
+ const {tienePermiso}=useAuth();
+ const puedeEmitir=tienePermiso("CERTIFICADO.EMITIR");
  const [params,setParams]=useSearchParams();
  const tab=(params.get("tab")==="emitidos"?"emitidos":"por-emitir") as Tab;
  const [busqueda,setBusqueda]=useState("");
@@ -83,7 +86,7 @@ export default function CertificadosBandejaPage(){
         <Th label="Certificación" active={sortKey==="estadoCertificacionDescripcion"} onClick={()=>ordenar("estadoCertificacionDescripcion")}/>
         <th className="px-4 py-3 text-right">Acciones</th>
        </tr></thead>
-       <tbody>{visibles.map(l=><Fila key={l.loteId} lote={l} tab={tab} onEmitir={()=>nav(`/certificacion/certificados/emitir/${l.loteId}`)} onVer={()=>nav(`/operacion/lotes/${l.loteId}`)}/>)}</tbody>
+       <tbody>{visibles.map(l=><Fila key={l.loteId} lote={l} tab={tab} puedeEmitir={puedeEmitir} onEmitir={()=>nav(`/certificacion/certificados/emitir/${l.loteId}`)} onVer={()=>nav(`/operacion/lotes/${l.loteId}`)}/>)}</tbody>
       </table>
      </div>
      <div className="flex flex-col gap-3 border-t bg-white px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
@@ -97,10 +100,10 @@ export default function CertificadosBandejaPage(){
 }
 
 function Th({label,active,onClick}:{label:string;active:boolean;onClick:()=>void}){return <th className="px-4 py-3"><button type="button" className="inline-flex items-center gap-1.5 font-semibold uppercase" onClick={onClick}>{label}<ArrowDownUp size={13} className={active?"text-[var(--primary)]":"opacity-40"}/></button></th>}
-function Fila({lote,tab,onEmitir,onVer}:{lote:LoteListado;tab:Tab;onEmitir:()=>void;onVer:()=>void}){return <tr className="border-t">
+function Fila({lote,tab,puedeEmitir,onEmitir,onVer}:{lote:LoteListado;tab:Tab;puedeEmitir:boolean;onEmitir:()=>void;onVer:()=>void}){return <tr className="border-t">
  <td className="px-4 py-4"><div className="font-semibold">{lote.codigoLote}</div><div className="mt-1 text-xs text-slate-500">ID {lote.loteId}</div></td>
  <td className="px-4 py-4"><div className="font-medium">{lote.productoCodigo}</div><div className="mt-1 max-w-[360px] truncate text-xs text-slate-500">{lote.productoDescripcion}</div></td>
  <td className="px-4 py-4">{new Date(lote.fechaHoraProduccion).toLocaleString("es-PE")}</td>
  <td className="px-4 py-4">{tab==="por-emitir"?<Badge variant="outline" className="border-emerald-200 bg-emerald-50 text-emerald-700">Listo para certificado</Badge>:<div><Badge variant="outline" className="border-violet-200 bg-violet-50 text-violet-700">Certificado emitido</Badge>{lote.numeroCertificado&&<div className="mt-1 text-xs text-slate-500">{lote.numeroCertificado}</div>}</div>}</td>
- <td className="px-4 py-4"><div className="flex justify-end gap-2">{tab==="por-emitir"&&<Button size="sm" onClick={onEmitir}><FileCheck2 size={14}/>Emitir certificado</Button>}<Button size="sm" variant="outline" className="bg-white" onClick={onVer}>Ver lote</Button></div></td>
+ <td className="px-4 py-4"><div className="flex justify-end gap-2">{tab==="por-emitir"&&puedeEmitir&&<Button size="sm" onClick={onEmitir}><FileCheck2 size={14}/>Emitir certificado</Button>}<Button size="sm" variant="outline" className="bg-white" onClick={onVer}>Ver lote</Button></div></td>
  </tr>}
