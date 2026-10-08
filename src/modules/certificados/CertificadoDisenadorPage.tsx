@@ -7,13 +7,16 @@ import {Button} from "@/components/ui/button";
 import {Card,CardContent} from "@/components/ui/card";
 import {Input} from "@/components/ui/input";
 import {guardarDiseno,obtenerEmpresaCertificado,obtenerPlantilla,parametrosFt} from "./api";
-import type {ParametroFt,ResultadoDiseno,SeccionDiseno} from "./types";
+import type {ParametroFt,SeccionDiseno} from "./types";
 
 const normalizarSecciones=(items:SeccionDiseno[])=>items.map((s,i)=>({
  ...s,
  orden:i+1,
  resultados:s.resultados.map((r,j)=>({
   ...r,
+  modoSeleccion:"MANUAL",
+  versionFaseId:null,
+  tipoCaractId:null,
   orden:j+1,
   caracteristicas:r.caracteristicas.map((x,k)=>({...x,orden:k+1}))
  }))
@@ -67,6 +70,8 @@ export default function CertificadoDisenadorPage(){
  const [secciones,setSecciones]=useState<SeccionDiseno[]>([]);
  const [seccionSeleccionada,setSeccionSeleccionada]=useState(0);
  const [resultadoSeleccionado,setResultadoSeleccionado]=useState(0);
+ const [filtroTipoId,setFiltroTipoId]=useState<number|null>(null);
+ const [filtroFaseId,setFiltroFaseId]=useState<number|null>(null);
 
  useEffect(()=>{
   if(!plantilla.data)return;
@@ -90,9 +95,9 @@ export default function CertificadoDisenadorPage(){
       titulo:r.titulo,
       orden:r.orden,
       visible:r.visible,
-      modoSeleccion:r.modoSeleccion,
-      versionFaseId:r.versionFaseId,
-      tipoCaractId:r.tipoCaractId,
+      modoSeleccion:"MANUAL",
+      versionFaseId:null,
+      tipoCaractId:null,
       caracteristicas:plantilla.data!.caracteristicas
        .filter(c=>c.certificadoPlantillaResultadoId===r.certificadoPlantillaResultadoId)
        .sort((a,b)=>a.orden-b.orden)
@@ -140,12 +145,6 @@ export default function CertificadoDisenadorPage(){
   return ids;
  },[secciones,seccionSeleccionada,resultadoSeleccionado]);
 
- const compatibles=(p:ParametroFt,r:ResultadoDiseno)=>{
-  if(r.modoSeleccion==="TIPO")return p.tipoCaractId===r.tipoCaractId;
-  if(r.modoSeleccion==="FASE")return p.versionFaseId===r.versionFaseId;
-  if(r.modoSeleccion==="TIPO_FASE")return p.tipoCaractId===r.tipoCaractId&&p.versionFaseId===r.versionFaseId;
-  return true;
- };
 
  const guardar=useMutation({
   mutationFn:()=>guardarDiseno(plantillaId,normalizarSecciones(secciones)),
@@ -192,6 +191,8 @@ export default function CertificadoDisenadorPage(){
   ];
   actualizarSeccion({resultados});
   setResultadoSeleccionado(resultados.length-1);
+  setFiltroTipoId(null);
+  setFiltroFaseId(null);
  };
 
  const quitarResultado=(indice:number)=>{
@@ -201,6 +202,8 @@ export default function CertificadoDisenadorPage(){
    .map((r,i)=>({...r,orden:i+1}));
   actualizarSeccion({resultados});
   setResultadoSeleccionado(resultados.length?Math.min(indice,resultados.length-1):0);
+  setFiltroTipoId(null);
+  setFiltroFaseId(null);
  };
 
  const moverResultado=(indice:number,direccion:number)=>{
@@ -211,16 +214,26 @@ export default function CertificadoDisenadorPage(){
   [resultados[indice],resultados[j]]=[resultados[j],resultados[indice]];
   actualizarSeccion({resultados:resultados.map((r,i)=>({...r,orden:i+1}))});
   setResultadoSeleccionado(j);
+  setFiltroTipoId(null);
+  setFiltroFaseId(null);
  };
 
  const alternarParametro=(p:ParametroFt)=>{
-  if(!resultadoActual||ocupados.has(p.versionFtCaracteristicaId)||!compatibles(p,resultadoActual))return;
+  if(!resultadoActual||ocupados.has(p.versionFtCaracteristicaId))return;
   const existe=resultadoActual.caracteristicas.some(x=>x.versionFtCaracteristicaId===p.versionFtCaracteristicaId);
   const caracteristicas=existe
    ?resultadoActual.caracteristicas.filter(x=>x.versionFtCaracteristicaId!==p.versionFtCaracteristicaId)
    :[...resultadoActual.caracteristicas,{versionFtCaracteristicaId:p.versionFtCaracteristicaId,orden:resultadoActual.caracteristicas.length+1}];
   actualizarResultado({caracteristicas:caracteristicas.map((x,i)=>({...x,orden:i+1}))});
  };
+
+ const parametrosFiltrados=useMemo(
+  ()=>(parametros.data??[]).filter(p=>
+   (filtroTipoId==null||p.tipoCaractId===filtroTipoId)&&
+   (filtroFaseId==null||p.versionFaseId===filtroFaseId)
+  ),
+  [parametros.data,filtroTipoId,filtroFaseId]
+ );
 
  const metodosSeleccionados=useMemo(()=>{
   const ids=new Set(secciones.flatMap(s=>s.resultados.flatMap(r=>r.caracteristicas.map(c=>c.versionFtCaracteristicaId))));
@@ -254,7 +267,7 @@ export default function CertificadoDisenadorPage(){
      </div>
 
      <div className="space-y-1">
-      {secciones.map((s,i)=><button key={s.certificadoSeccionId} type="button" onClick={()=>{setSeccionSeleccionada(i);setResultadoSeleccionado(0)}} className={"flex w-full items-center gap-2 rounded-lg border px-3 py-2 text-left text-sm transition "+(seccionSeleccionada===i?"border-slate-400 bg-slate-100":"border-transparent hover:bg-slate-50")}>
+      {secciones.map((s,i)=><button key={s.certificadoSeccionId} type="button" onClick={()=>{setSeccionSeleccionada(i);setResultadoSeleccionado(0);setFiltroTipoId(null);setFiltroFaseId(null)}} className={"flex w-full items-center gap-2 rounded-lg border px-3 py-2 text-left text-sm transition "+(seccionSeleccionada===i?"border-slate-400 bg-slate-100":"border-transparent hover:bg-slate-50")}>
        <span className="w-6 text-xs font-semibold text-slate-400">{String(i+1).padStart(2,"0")}</span>
        <span className="min-w-0 flex-1 truncate">{s.seccionDescripcion}</span>
        {s.seccionCodigo==="RESULTADOS"&&<span className="rounded bg-slate-200 px-1.5 py-.5 text-[10px] font-semibold">{s.resultados.length}</span>}
@@ -320,7 +333,7 @@ export default function CertificadoDisenadorPage(){
 
      <div className="grid gap-4 lg:grid-cols-[260px_minmax(0,1fr)]">
       <div className="space-y-2">
-       {actual.resultados.length===0?<div className="rounded-lg border border-dashed p-4 text-sm text-[var(--text-secondary)]">Aún no hay informes configurados.</div>:actual.resultados.map((r,i)=><button key={i} type="button" onClick={()=>setResultadoSeleccionado(i)} className={"w-full rounded-lg border p-3 text-left "+(resultadoSeleccionado===i?"border-slate-400 bg-slate-100":"bg-white")}><div className="flex items-center justify-between gap-2"><span className="font-medium">{r.titulo}</span><span className="rounded bg-slate-200 px-1.5 py-.5 text-[10px] font-semibold">{r.caracteristicas.length}</span></div><div className="mt-1 text-xs text-slate-500">{r.modoSeleccion}</div></button>)}
+       {actual.resultados.length===0?<div className="rounded-lg border border-dashed p-4 text-sm text-[var(--text-secondary)]">Aún no hay informes configurados.</div>:actual.resultados.map((r,i)=><button key={i} type="button" onClick={()=>setResultadoSeleccionado(i)} className={"w-full rounded-lg border p-3 text-left "+(resultadoSeleccionado===i?"border-slate-400 bg-slate-100":"bg-white")}><div className="flex items-center justify-between gap-2"><span className="font-medium">{r.titulo}</span><span className="rounded bg-slate-200 px-1.5 py-.5 text-[10px] font-semibold">{r.caracteristicas.length}</span></div></button>)}
       </div>
 
       {!resultadoActual?<div className="rounded-lg border border-dashed p-8 text-center text-sm text-[var(--text-secondary)]">Agrega o selecciona un informe de ensayo.</div>:<div className="space-y-4 rounded-lg border p-4">
@@ -331,10 +344,21 @@ export default function CertificadoDisenadorPage(){
         <Button variant="outline" size="sm" onClick={()=>quitarResultado(resultadoSeleccionado)}><Trash2/></Button>
        </div>
 
-       <div className="grid gap-3 md:grid-cols-3">
-        <div><label className="mb-1 block text-xs font-semibold text-slate-600">Modo</label><select className="h-10 w-full rounded-md border bg-background px-3 text-sm" value={resultadoActual.modoSeleccion} onChange={e=>actualizarResultado({modoSeleccion:e.target.value as ResultadoDiseno["modoSeleccion"],tipoCaractId:null,versionFaseId:null,caracteristicas:[]})}><option value="MANUAL">Manual</option><option value="TIPO">Por tipo de análisis</option><option value="FASE">Por fase / etapa</option><option value="TIPO_FASE">Tipo + fase</option></select></div>
-        {(resultadoActual.modoSeleccion==="TIPO"||resultadoActual.modoSeleccion==="TIPO_FASE")&&<div><label className="mb-1 block text-xs font-semibold text-slate-600">Tipo de análisis</label><select className="h-10 w-full rounded-md border bg-background px-3 text-sm" value={resultadoActual.tipoCaractId??""} onChange={e=>actualizarResultado({tipoCaractId:e.target.value?Number(e.target.value):null,caracteristicas:[]})}><option value="">Seleccionar</option>{tipos.map(([id,n])=><option key={id} value={id}>{n}</option>)}</select></div>}
-        {(resultadoActual.modoSeleccion==="FASE"||resultadoActual.modoSeleccion==="TIPO_FASE")&&<div><label className="mb-1 block text-xs font-semibold text-slate-600">Fase / etapa</label><select className="h-10 w-full rounded-md border bg-background px-3 text-sm" value={resultadoActual.versionFaseId??""} onChange={e=>actualizarResultado({versionFaseId:e.target.value?Number(e.target.value):null,caracteristicas:[]})}><option value="">Seleccionar</option>{fases.map(([id,n])=><option key={id} value={id}>{n}</option>)}</select></div>}
+       <div className="grid gap-3 md:grid-cols-2">
+        <div>
+         <label className="mb-1 block text-xs font-semibold text-slate-600">Filtrar por tipo</label>
+         <select className="h-10 w-full rounded-md border bg-background px-3 text-sm" value={filtroTipoId??""} onChange={e=>setFiltroTipoId(e.target.value?Number(e.target.value):null)}>
+          <option value="">Todos los tipos</option>
+          {tipos.map(([id,n])=><option key={id} value={id}>{n}</option>)}
+         </select>
+        </div>
+        <div>
+         <label className="mb-1 block text-xs font-semibold text-slate-600">Filtrar por fase / etapa</label>
+         <select className="h-10 w-full rounded-md border bg-background px-3 text-sm" value={filtroFaseId??""} onChange={e=>setFiltroFaseId(e.target.value?Number(e.target.value):null)}>
+          <option value="">Todas las fases</option>
+          {fases.map(([id,n])=><option key={id} value={id}>{n}</option>)}
+         </select>
+        </div>
        </div>
 
        <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={resultadoActual.visible} onChange={e=>actualizarResultado({visible:e.target.checked})}/>Visible en certificado</label>
@@ -342,7 +366,7 @@ export default function CertificadoDisenadorPage(){
        <div className="overflow-hidden rounded-lg border">
         <table className="w-full text-sm">
          <thead className="bg-slate-50 text-left"><tr><th className="p-3">Usar</th><th className="p-3">Determinación</th><th className="p-3">Tipo</th><th className="p-3">Fase</th><th className="p-3">Unidad</th></tr></thead>
-         <tbody>{(parametros.data??[]).map(p=>{const activo=resultadoActual.caracteristicas.some(x=>x.versionFtCaracteristicaId===p.versionFtCaracteristicaId),ocupado=ocupados.has(p.versionFtCaracteristicaId),compatible=compatibles(p,resultadoActual);return <tr key={p.versionFtCaracteristicaId} className={"border-t "+(!compatible||ocupado?"opacity-40":"")}><td className="p-3"><button type="button" disabled={!compatible||ocupado} onClick={()=>alternarParametro(p)} className={"flex size-7 items-center justify-center rounded border "+(activo?"bg-slate-900 text-white":"bg-white")}>{activo&&<Check className="size-4"/>}</button></td><td className="p-3 font-medium">{p.determinacion}</td><td className="p-3">{p.tipoCaractDescripcion??"—"}</td><td className="p-3">{p.faseDescripcion||p.faseCodigo||"—"}</td><td className="p-3">{p.unidadDeMedida||"—"}</td></tr>})}</tbody>
+         <tbody>{parametrosFiltrados.map(p=>{const activo=resultadoActual.caracteristicas.some(x=>x.versionFtCaracteristicaId===p.versionFtCaracteristicaId),ocupado=ocupados.has(p.versionFtCaracteristicaId);return <tr key={p.versionFtCaracteristicaId} className={"border-t "+(ocupado?"opacity-40":"")}><td className="p-3"><button type="button" disabled={ocupado} onClick={()=>alternarParametro(p)} className={"flex size-7 items-center justify-center rounded border "+(activo?"bg-slate-900 text-white":"bg-white")}>{activo&&<Check className="size-4"/>}</button></td><td className="p-3 font-medium">{p.determinacion}</td><td className="p-3">{p.tipoCaractDescripcion??"—"}</td><td className="p-3">{p.faseDescripcion||p.faseCodigo||"—"}</td><td className="p-3">{p.unidadDeMedida||"—"}</td></tr>})}</tbody>
         </table>
        </div>
       </div>}
