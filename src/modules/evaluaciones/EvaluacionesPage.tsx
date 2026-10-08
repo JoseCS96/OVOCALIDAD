@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowRight, PlayCircle, RefreshCw } from "lucide-react";
+import { ArrowRight, PlayCircle, RefreshCw, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import PageContainer from "@/components/common/PageContainer";
 import PageHeader from "@/components/common/PageHeader";
@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/modules/auth/AuthContext";
-import { iniciarEvaluacion, listarEvaluacionesCalidad, listarEvaluacionesPendientesCalculo } from "./api";
+import { eliminarEvaluacionPrueba, iniciarEvaluacion, listarEvaluacionesCalidad, listarEvaluacionesPendientesCalculo } from "./api";
 
 const fecha = (value: string | null) => value
   ? new Intl.DateTimeFormat("es-PE", { dateStyle: "short", timeStyle: "short" }).format(new Date(value))
@@ -25,6 +25,7 @@ export default function EvaluacionesPage() {
   const puedeIniciar = tienePermiso("EVALUACION.INICIAR");
   const puedeVer = tienePermiso("EVALUACION.VER");
   const puedeConsolidar = tienePermiso("EVALUACION.CONSOLIDAR");
+  const puedeEliminarPrueba = tienePerfil("JEFE_CALIDAD");
   const esAuxiliar = tienePerfil("AUXILIAR_CALIDAD") &&
     !["ANALISTA_CALIDAD", "JEFE_CALIDAD", "ADMINISTRADOR"].some(tienePerfil);
   const [estado, setEstado] = useState("TODOS");
@@ -44,6 +45,21 @@ export default function EvaluacionesPage() {
     () => new Set(pendientesDecision.map(item => item.evaluacionId)),
     [pendientesDecision],
   );
+  const eliminar = useMutation({
+    mutationFn: eliminarEvaluacionPrueba,
+    onSuccess: async () => {
+      setError("");
+      await client.invalidateQueries({ queryKey: ["evaluaciones"] });
+      await client.invalidateQueries({ queryKey: ["lotes"] });
+      if (puedeConsolidar) {
+        await client.invalidateQueries({ queryKey: ["evaluaciones", "pendientes-calculo"] });
+      }
+    },
+    onError: (e) => {
+      setError(e instanceof Error ? e.message : "No se pudo eliminar la evaluación de prueba.");
+    },
+  });
+
   const iniciar = useMutation({
     mutationFn: iniciarEvaluacion,
     onSuccess: async (response) => {
@@ -138,9 +154,30 @@ export default function EvaluacionesPage() {
               </td>
               <td className="px-4 py-4"><p className="font-medium">{item.usuarioEvaluador || "Sin asignar"}</p></td>
               <td className="px-4 py-4 text-xs"><p className="font-medium">{fecha(actividad)}</p>{item.fechaInicio && item.fechaFin && <p className="mt-0.5 text-[var(--text-secondary)]">Finalizada</p>}</td>
-              <td className="px-4 py-4 text-right">{disponible && puedeIniciar
-                ? <Button size="sm" disabled={iniciar.isPending} onClick={() => iniciar.mutate(item.evaluacionId)}><PlayCircle size={14}/>Iniciar</Button>
-                : <Button size="sm" variant="outline" disabled={!puedeVer} onClick={() => navigate(`/operacion/evaluaciones/${item.evaluacionId}`)}>Ver detalle <ArrowRight size={14}/></Button>}</td>
+              <td className="px-4 py-4 text-right">
+                <div className="flex justify-end gap-2">
+                  {disponible && puedeIniciar
+                    ? <Button size="sm" disabled={iniciar.isPending} onClick={() => iniciar.mutate(item.evaluacionId)}><PlayCircle size={14}/>Iniciar</Button>
+                    : <Button size="sm" variant="outline" disabled={!puedeVer} onClick={() => navigate(`/operacion/evaluaciones/${item.evaluacionId}`)}>Ver detalle <ArrowRight size={14}/></Button>}
+                  {puedeEliminarPrueba && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="text-red-700"
+                      disabled={eliminar.isPending}
+                      title="Eliminar evaluación de prueba"
+                      onClick={() => {
+                        const ok = window.confirm(
+                          `¿Eliminar la evaluación ${item.evaluacionId} y sus reevaluaciones dependientes? Esta acción no se puede deshacer.`
+                        );
+                        if (ok) eliminar.mutate(item.evaluacionId);
+                      }}
+                    >
+                      <Trash2 size={14}/>
+                    </Button>
+                  )}
+                </div>
+              </td>
             </tr>;
           })}</tbody></table></div>}
         {error && <p className="border-t border-red-200 px-4 py-3 text-sm text-red-700">{error}</p>}
