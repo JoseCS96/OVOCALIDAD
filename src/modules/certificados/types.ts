@@ -177,3 +177,54 @@ export type OperacionEmpresaCertificado={
  mensaje:string;
  certificadoEmpresaId:number;
 };
+
+
+export type CertificadoCabecera={
+ certificadoId:number|null;
+ loteId:number;
+ codigoLote:string;
+ productoCodigo:string;
+ productoDescripcion:string;
+ fechaHoraProduccion:string;
+ certificadoPlantillaId:number;
+ plantillaNombre:string;
+ versionFtId:number;
+ documentoCodigo:string;
+ versionNumero:number|null;
+ numeroCertificado:string|null;
+ fechaEmision:string;
+ estado:string;
+};
+
+export type CertificadoSeccionVista={
+ tipoSeccion:string;
+ tituloSeccion:string|null;
+ ordenSeccion:number;
+ contenido:string|null;
+};
+
+export type CertificadoResultadoVista={
+ tituloInforme:string;
+ ordenInforme:number;
+ ordenDetalle:number;
+ caracteristicaId:number|null;
+ determinacion:string;
+ resultado:string|null;
+ especificacion:string|null;
+ unidadDeMedida:string|null;
+ metodoEnsayo:string|null;
+};
+
+export type CertificadoVista={
+ cabecera:CertificadoCabecera;
+ secciones:CertificadoSeccionVista[];
+ resultados:CertificadoResultadoVista[];
+};
+
+export type EmitirCertificadoResponse={
+ codigoResultado:number;
+ mensaje:string;
+ certificadoId:number;
+ numeroCertificado:string;
+ fechaEmision:string;
+};
