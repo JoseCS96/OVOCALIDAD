@@ -37,6 +37,7 @@ import CertificadoPrevisualizacionPage from "@/modules/certificados/CertificadoP
 import CertificadoEmitidoPage from "@/modules/certificados/CertificadoEmitidoPage";
 import CertificadoDisenadorPage from "@/modules/certificados/CertificadoDisenadorPage";
 import CertificadoAsignacionPredeterminadaPage from "@/modules/certificados/CertificadoAsignacionPredeterminadaPage";
+import FirmaDocumentosPage from "@/modules/firmas/FirmaDocumentosPage";
 
 const pages = [
   { path: "/productos", title: "Productos", eyebrow: "Gestión documental", description: "Maestro de productos y códigos asociados al proceso de calidad.", icon: Package },
@@ -55,6 +56,7 @@ export default function AppRouter() {
         <Route element={<MainLayout />}>
           <Route index element={<Dashboard />} />
           <Route path="/operacion/lotes" element={<LotesPage />} />
+          <Route path="/firmas" element={<FirmaDocumentosPage />} />
           <Route path="/operacion/lotes/:loteId" element={<LoteDetallePage />} />
           <Route path="/trazabilidad" element={<TrazabilidadPage />} />
           <Route element={<ProtectedRoute perfilesPermitidos={["JEFE_CALIDAD", "ANALISTA_CALIDAD"]} />}>
