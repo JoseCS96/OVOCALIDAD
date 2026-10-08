@@ -106,3 +106,24 @@ export async function guardarFase(request:{codigo:string;descripcion:string},id?
 export async function cambiarEstadoFase(id:number,estado:"ACTIVO"|"INACTIVO"){
  const {data}=await api.patch<FaseMantenimiento>(`/api/mantenimientos/fases/${id}/estado`,{estado});return data;
 }
+
+
+export type FirmaResponsable={
+ codigoResultado:number;mensaje:string;usuarioDni:string;firmaMimeType:string|null;
+ firmaNombreArchivo:string|null;firmaImagen:string|null;fechaActualizacion:string|null
+};
+export async function obtenerFirmaResponsable(usuarioDni:string){
+ try{
+  const {data}=await api.get<FirmaResponsable>(`/api/mantenimientos/responsables/${encodeURIComponent(usuarioDni)}/firma`);
+  return data;
+ }catch{return null}
+}
+export async function guardarFirmaResponsable(usuarioDni:string,file:File){
+ const fd=new FormData();fd.append("firma",file);
+ const {data}=await api.put<OperacionResponsable>(`/api/mantenimientos/responsables/${encodeURIComponent(usuarioDni)}/firma`,fd);
+ return validarResponsable(data);
+}
+export async function eliminarFirmaResponsable(usuarioDni:string){
+ const {data}=await api.delete<OperacionResponsable>(`/api/mantenimientos/responsables/${encodeURIComponent(usuarioDni)}/firma`);
+ return validarResponsable(data);
+}
