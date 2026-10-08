@@ -1,5 +1,5 @@
 import {api} from "@/lib/api";
-import type {CertificadoEmpresa,FichaTecnicaCertificado,GuardarCertificadoEmpresa,OperacionEmpresaCertificado,OperacionPlantilla,ParametroFt,PlantillaDetalle,PlantillaLista,SeccionDiseno} from "./types";
+import type {CertificadoEmpresa,CertificadoVista,EmitirCertificadoResponse,FichaTecnicaCertificado,GuardarCertificadoEmpresa,OperacionEmpresaCertificado,OperacionPlantilla,ParametroFt,PlantillaDetalle,PlantillaLista,SeccionDiseno} from "./types";
 const validar=<T extends {codigoResultado:number;mensaje:string}>(x:T)=>{if(x.codigoResultado!==0)throw new Error(x.mensaje);return x};
 export async function listarPlantillas(versionFtId?:number,productoCodigo?:string){const {data}=await api.get<PlantillaLista[]>("/api/certificados/plantillas",{params:{versionFtId,productoCodigo}});return data}
 export async function obtenerPlantilla(id:number){const {data}=await api.get<PlantillaDetalle>(`/api/certificados/plantillas/${id}`);return data}
@@ -11,3 +11,20 @@ export async function listarFichasTecnicasCertificado(busqueda=""){const {data}=
 
 export async function obtenerEmpresaCertificado(){const {data}=await api.get<CertificadoEmpresa>("/api/certificados/empresa");return data}
 export async function guardarEmpresaCertificado(body:GuardarCertificadoEmpresa){const {data}=await api.put<OperacionEmpresaCertificado>("/api/certificados/empresa",body);return validar(data)}
+
+
+export async function previsualizarCertificado(loteId:number,certificadoPlantillaId:number){
+ const {data}=await api.get<CertificadoVista>("/api/certificados/previsualizar",{params:{loteId,certificadoPlantillaId}});
+ return data;
+}
+
+export async function emitirCertificado(loteId:number,certificadoPlantillaId:number){
+ const {data}=await api.post<EmitirCertificadoResponse>("/api/certificados/emitir",{loteId,certificadoPlantillaId});
+ if(data.codigoResultado!==0)throw new Error(data.mensaje);
+ return data;
+}
+
+export async function obtenerCertificadoEmitido(certificadoId:number){
+ const {data}=await api.get<CertificadoVista>(`/api/certificados/emitidos/${certificadoId}`);
+ return data;
+}
