@@ -27,6 +27,7 @@ import MetodosEnsayoMantenimientoPage from "@/modules/mantenimientos/MetodosEnsa
 import ContenidosRotuladoMantenimientoPage from "@/modules/mantenimientos/ContenidosRotuladoMantenimientoPage";
 import CargosMantenimientoPage from "@/modules/mantenimientos/CargosMantenimientoPage";
 import ResponsablesMantenimientoPage from "@/modules/mantenimientos/ResponsablesMantenimientoPage";
+import MaestroCertificadoPage from "@/modules/mantenimientos/MaestroCertificadoPage";
 import TrazabilidadPage from "@/modules/trazabilidad/TrazabilidadPage";
 import TrazabilidadDetallePage from "@/modules/trazabilidad/TrazabilidadDetallePage";
 import CertificadosPage from "@/modules/certificados/CertificadosPage";
@@ -88,6 +89,7 @@ export default function AppRouter() {
             <Route path="/mantenimientos/contenidos-rotulado" element={<ContenidosRotuladoMantenimientoPage />} />
             <Route path="/mantenimientos/cargos" element={<CargosMantenimientoPage />} />
             <Route path="/mantenimientos/responsables" element={<ResponsablesMantenimientoPage />} />
+            <Route path="/mantenimientos/certificados" element={<MaestroCertificadoPage />} />
           </Route>
           {pages.map((page) => <Route key={page.path} path={page.path} element={<ModulePlaceholder {...page} />} />)}
         </Route>
