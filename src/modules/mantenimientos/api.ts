@@ -127,3 +127,27 @@ export async function eliminarFirmaResponsable(usuarioDni:string){
  const {data}=await api.delete<OperacionResponsable>(`/api/mantenimientos/responsables/${encodeURIComponent(usuarioDni)}/firma`);
  return validarResponsable(data);
 }
+
+
+export type VinculoResponsableUsuario={
+ usuarioDni:string;
+ segUsuarioId:number|null;
+ nombreUsuario:string|null;
+ nombresApellidos:string|null;
+};
+
+export async function obtenerVinculoResponsableUsuario(usuarioDni:string){
+ const {data}=await api.get<VinculoResponsableUsuario>(
+  `/api/mantenimientos/responsables/${encodeURIComponent(usuarioDni)}/usuario-acceso`
+ );
+ return data;
+}
+
+export async function vincularResponsableUsuario(usuarioDni:string,nombreUsuario:string){
+ const {data}=await api.put<{codigoResultado:number;mensaje:string;usuarioDni?:string;segUsuarioId?:number;nombreUsuario?:string}>(
+  `/api/mantenimientos/responsables/${encodeURIComponent(usuarioDni)}/usuario-acceso`,
+  {nombreUsuario}
+ );
+ if(data.codigoResultado!==0)throw new Error(data.mensaje);
+ return data;
+}
