@@ -28,3 +28,9 @@ export async function obtenerCertificadoEmitido(certificadoId:number){
  const {data}=await api.get<CertificadoVista>(`/api/certificados/emitidos/${certificadoId}`);
  return data;
 }
+
+
+export async function obtenerPlantillaPredeterminada(loteId:number){
+ const {data}=await api.get<PlantillaLista>(`/api/certificados/plantillas/predeterminada/lote/${loteId}`);
+ return data;
+}
