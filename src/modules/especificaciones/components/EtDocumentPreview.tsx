@@ -29,6 +29,25 @@ export default function EtDocumentPreview({data}:{data:DetalleEt}){
  </div>
 }
 function SectionContent({data,seccion}:{data:DetalleEt;seccion:SeccionEt}){const n=norm(seccion.seccionDescripcion),i=data.informacionGeneral;
+ if(n.includes("RESPONSABLE"))return data.responsables.length?<div className="space-y-3">
+  {[
+   ["ELABORADO POR","ELABORADO"],
+   ["REVISADO POR","REVISADO"],
+   ["APROBADO POR","APROBADO"]
+  ].map(([titulo,tipo])=>{
+   const items=data.responsables.filter(x=>norm(x.tipoResponsabilidad).includes(tipo));
+   if(!items.length)return null;
+   return <div key={tipo} className="break-inside-avoid">
+    <p className="mb-1 text-[11px] font-bold uppercase text-slate-600">{titulo}</p>
+    <div className="space-y-1 pl-3">
+     {items.map(x=><div key={x.idRelacion} className="text-slate-700">
+      <span className="font-medium">{x.usuarioNombresApellidos}</span>
+      {x.cargoDescripcion&&<span className="text-slate-500"> — {x.cargoDescripcion}</span>}
+     </div>)}
+    </div>
+   </div>;
+  })}
+ </div>:<Empty/>;
  if(n.includes("DESCRIPCION"))return <Text v={i.versionDescripcion}/>;
  if(n.includes("INGREDIENT"))return data.ingredientes.length?<table className="doc-table"><thead><tr><Th>Ingrediente</Th><Th>Cantidad</Th><Th>Unidad</Th></tr></thead><tbody>{[...data.ingredientes].sort(ord).map(x=><tr key={x.versIngrId}><Td>{x.ingredienteDescripcion}</Td><Td>{x.versIngrValor??"—"}</Td><Td>{x.unidadDeMedida??"—"}</Td></tr>)}</tbody></table>:<Empty/>;
  if(n.includes("RECETA"))return <List a={[...data.recetas].sort(ord).map(x=>x.recetaDescripcion)}/>;
