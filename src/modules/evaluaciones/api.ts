@@ -119,3 +119,15 @@ export async function listarEvaluacionesCalidad() {
   const { data } = await api.get<PanelEvaluacionItem[]>("/api/evaluaciones/listado");
   return data;
 }
+
+
+export async function eliminarEvaluacionPrueba(evaluacionId: number) {
+  const { data } = await api.delete<{
+    codigoResultado: number;
+    mensaje: string;
+    evaluacionId: number;
+    usuario: string;
+  }>(`/api/evaluaciones/${evaluacionId}/pruebas`);
+  if (data.codigoResultado !== 0) throw new Error(data.mensaje);
+  return data;
+}
