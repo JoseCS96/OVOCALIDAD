@@ -266,7 +266,7 @@ export default function LotesPage() {
 
       <Card className="overflow-hidden border-[var(--border)] shadow-[var(--shadow-card)]">
         <CardContent className="p-0">
-          <div className="max-h-[460px] overflow-auto">
+          <div className="h-[calc(100vh-430px)] min-h-[320px] max-h-[520px] overflow-auto">
             <table className="w-full min-w-[1100px] border-collapse text-sm">
               <thead className="sticky top-0 z-10 bg-[var(--surface-muted)] text-left text-xs uppercase tracking-[0.08em] text-[var(--text-secondary)]">
                 <tr>
@@ -337,12 +337,12 @@ export default function LotesPage() {
                     <td className="px-5 py-4 text-right">
                       <DropdownMenu>
                         <DropdownMenuTrigger
-                          render={<Button variant="outline" size="sm" aria-label={`Acciones del lote ${lote.codigoLote}`} />}
+                          render={<Button variant="outline" size="sm" className="bg-white shadow-sm hover:bg-slate-50" aria-label={`Acciones del lote ${lote.codigoLote}`} />}
                         >
                           <MoreHorizontal size={16} />
                           Acciones
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-52">
+                        <DropdownMenuContent align="end" className="w-52 bg-white shadow-lg">
                           {puedeIniciarEvaluacion && lote.evaluacionId !== null && lote.estadoEvaluacionCodigo === "PENDIENTE" && (
                             <DropdownMenuItem disabled={startingId !== null} onClick={() => iniciarMutation.mutate(lote.evaluacionId!)}>
                               <Play size={15} />
