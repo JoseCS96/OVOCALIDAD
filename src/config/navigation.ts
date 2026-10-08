@@ -1,4 +1,4 @@
-import { BarChart3, Boxes, ClipboardCheck, FileCheck2, FileText, FlaskConical, Home, Package, RotateCcw, Settings, ShieldCheck, Wrench, type LucideIcon } from "lucide-react";
+import { BarChart3, Boxes, ClipboardCheck, FileCheck2, FileText, FlaskConical, Home, Package, PenLine, RotateCcw, Settings, ShieldCheck, Wrench, type LucideIcon } from "lucide-react";
 
 export type NavigationItem = {
   label: string;
@@ -38,6 +38,14 @@ export const navigationGroups: NavigationGroup[] = [
         children: [
           { label: "Plantillas", path: "/documentos/diseno-certificados", icon: FileText, permiso: "CERTIFICADO.VER" },
           { label: "Asignación predeterminada", path: "/documentos/diseno-certificados/asignacion", icon: ShieldCheck, permiso: "CERTIFICADO.VER" },
+        ],
+      },
+      {
+        label: "Firma de documentos",
+        icon: PenLine,
+        children: [
+          { label: "Pendientes", path: "/firmas?tab=pendientes", icon: PenLine },
+          { label: "Firmados", path: "/firmas?tab=firmados", icon: FileCheck2 },
         ],
       },
       { label: "Versiones", path: "/documentos/versiones", icon: Boxes, permiso: "VERSION_DOCUMENTAL.VER" },
