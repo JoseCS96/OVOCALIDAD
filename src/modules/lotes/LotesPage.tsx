@@ -79,6 +79,7 @@ export default function LotesPage() {
   const puedeCrearLote = tienePermiso("LOTE.CREAR");
   const puedeIniciarEvaluacion = tienePermiso("EVALUACION.INICIAR");
   const puedeVerEvaluacion = tienePermiso("EVALUACION.VER");
+  const puedeEmitirCertificado = tienePermiso("CERTIFICADO.EMITIR");
   const puedeEliminarPrueba = tienePerfil("JEFE_CALIDAD");
   const [actionError, setActionError] = useState<string | null>(null);
   const [startingId, setStartingId] = useState<number | null>(null);
@@ -375,7 +376,7 @@ export default function LotesPage() {
                               Continuar evaluación
                             </DropdownMenuItem>
                           )}
-                          {lote.estadoCertificacionCodigo === "LISTO_PARA_CERTIFICADO" && (
+                          {puedeEmitirCertificado && lote.estadoCertificacionCodigo === "LISTO_PARA_CERTIFICADO" && (
                             <DropdownMenuItem onClick={() => navigate(`/certificacion/certificados/emitir/${lote.loteId}`)}>
                               <FileCheck2 size={15} />
                               Emitir certificado
