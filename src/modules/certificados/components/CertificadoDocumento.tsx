@@ -7,7 +7,7 @@ function parseJson<T=Record<string,unknown>>(value:string|null):T|null{
 
 export default function CertificadoDocumento({data}:{data:CertificadoVista}){
  const {cabecera,secciones,resultados}=data;
- const ordenadas=[...secciones].sort((a,b)=>a.ordenSeccion-b.ordenSeccion);
+ const ordenadas=[...secciones].sort((a,b)=>a.ordenSeccion-b.ordenSeccion); // fuente de verdad: orden guardado en plantilla/snapshot
  const resultadosPorInforme=Array.from(new Map(resultados.map(r=>[r.ordenInforme,{titulo:r.tituloInforme,orden:r.ordenInforme}])).values()).sort((a,b)=>a.orden-b.orden);
 
  return <article className="mx-auto w-full max-w-[1000px] bg-white text-slate-900 shadow-sm print:max-w-none print:shadow-none">
@@ -52,7 +52,24 @@ function Contenido({tipo,contenido,cabecera}:{tipo:string;contenido:string|null;
  const obj=parseJson<Record<string,unknown>>(contenido);
  if(tipo==="DATOS_EMPRESA"&&obj)return <div className="grid gap-2 text-sm md:grid-cols-2">{Object.entries(obj).filter(([,v])=>v!=null&&String(v).trim()!=="").map(([k,v])=><Dato key={k} l={etiqueta(k)} v={String(v)}/>)}</div>;
  if(tipo==="PRODUCTO"&&obj)return <div className="grid gap-2 text-sm md:grid-cols-2">{Object.entries(obj).filter(([,v])=>v!=null).map(([k,v])=><Dato key={k} l={etiqueta(k)} v={String(v)}/>)}</div>;
- if(tipo==="DATOS_LOTE"&&obj)return <div className="grid gap-2 text-sm md:grid-cols-2">{Object.entries(obj).filter(([,v])=>v!=null).map(([k,v])=><Dato key={k} l={etiqueta(k)} v={k.toLowerCase().includes("fecha")?new Date(String(v)).toLocaleString("es-PE"):String(v)}/>)}</div>;
+ if(tipo==="DATOS_LOTE"&&obj){
+  const valorFecha=(key:string)=>{
+   const v=obj[key];
+   if(v==null||String(v).trim()==="")return "—";
+   const d=new Date(String(v));
+   return Number.isNaN(d.getTime())?String(v):d.toLocaleString("es-PE");
+  };
+  const valor=(key:string)=>{
+   const v=obj[key];
+   return v==null||String(v).trim()===""?"—":String(v);
+  };
+  return <div className="grid gap-x-8 gap-y-3 text-sm md:grid-cols-2">
+   <Dato l="Fecha Producción" v={valorFecha("fechaProduccion")}/>
+   <Dato l="Fecha Caducidad" v={valorFecha("fechaCaducidad")}/>
+   <Dato l="N° Lote" v={valor("lote")}/>
+   <Dato l="Vida Útil" v={valor("vidaUtil")}/>
+  </div>;
+ }
  if(tipo==="FIRMA"&&obj)return <div className="mt-8 flex justify-end"><div className="min-w-[280px] border-t border-slate-500 pt-2 text-center text-sm"><div className="font-medium">{String(obj.responsable??"[Responsable]")}</div><div className="text-slate-500">{String(obj.cargo??"[Cargo]")}</div><div className="mt-1 text-xs text-slate-500">{obj.fecha?new Date(String(obj.fecha)).toLocaleString("es-PE"):""}</div></div></div>;
  if(contenido)return <p className="whitespace-pre-line text-sm leading-6 text-slate-700">{contenido}</p>;
  if(tipo==="PRODUCTO")return <p className="text-sm">{cabecera.productoCodigo} · {cabecera.productoDescripcion}</p>;
