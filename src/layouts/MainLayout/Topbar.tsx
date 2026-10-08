@@ -50,7 +50,7 @@ function Topbar({ sidebarCollapsed, onSidebarToggle }: TopbarProps) {
   }
 
   return (
-    <header className="sticky top-0 z-30 border-b border-[var(--border)] bg-white/92 backdrop-blur">
+    <header className="sticky print:hidden top-0 z-30 border-b border-[var(--border)] bg-white/92 backdrop-blur">
       <div className="flex h-[72px] items-center gap-3 px-4 sm:px-6 lg:px-8">
         <Sheet>
           <SheetTrigger render={<Button variant="outline" size="icon" className="lg:hidden" aria-label="Abrir navegación"><Menu size={18} /></Button>} />
