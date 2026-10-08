@@ -3,6 +3,7 @@ export type PlantillaLista={
  versionFtId:number;
  nombre:string;
  descripcion:string|null;
+ esPredeterminada:boolean;
  documentoId:number;
  documentoCodigo:string;
  documentoDescripcionDocumento:string;
@@ -86,6 +87,7 @@ export type PlantillaDetalle={
  versionFtId:number;
  nombre:string;
  descripcion:string|null;
+ esPredeterminada:boolean;
  documentoCodigo:string;
  documentoDescripcionDocumento:string;
  productoCodigo:string|null;
