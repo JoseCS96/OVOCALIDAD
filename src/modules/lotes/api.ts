@@ -26,3 +26,16 @@ export async function obtenerDetalleLote(loteId: number) {
   const { data } = await api.get<DetalleLote>(`/api/lotes/${loteId}`);
   return data;
 }
+
+
+export async function eliminarLotePrueba(loteId: number) {
+  const { data } = await api.delete<{
+    codigoResultado: number;
+    mensaje: string;
+    loteId: number;
+    codigoLote: string;
+    usuario: string;
+  }>(`/api/lotes/${loteId}/pruebas`);
+  if (data.codigoResultado !== 0) throw new Error(data.mensaje);
+  return data;
+}
