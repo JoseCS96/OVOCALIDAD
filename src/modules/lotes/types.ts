@@ -6,6 +6,8 @@ export type LoteListado = {
   lineaOrigenId: number; lineaOrigenCodigo: string; lineaOrigenDescripcion: string;
   versionId: number; versionNumero: number; versionInicioVigencia: string; versionFinVigencia: string | null;
   estadoLoteId: number; estadoLoteCodigo: string; estadoLoteDescripcion: string;
+  estadoCertificacionCodigo: "NO_DISPONIBLE" | "LISTO_PARA_CERTIFICADO" | "CERTIFICADO_EMITIDO"; estadoCertificacionDescripcion: string;
+  certificadoId: number | null; numeroCertificado: string | null; fechaEmisionCertificado: string | null;
   evaluacionId: number | null; evaluacionPadreId: number | null; tipoEvaluacionId: number | null;
   intentoEvaluacion: number | null; estadoEvaluacionId: number | null; estadoEvaluacionCodigo: string | null;
   estadoEvaluacionDescripcion: string | null; resultadoGeneral: boolean | null;
