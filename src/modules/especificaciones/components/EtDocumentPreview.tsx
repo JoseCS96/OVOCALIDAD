@@ -36,7 +36,7 @@ export default function EtDocumentPreview({data}:{data:DetalleEt}){
       )}
      </div>
 
-     <main className="min-w-0 px-12 py-7 xl:px-14">
+     <main className="min-w-0 px-14 py-7 xl:px-16 2xl:px-20">
       {secciones.map((s,index)=>
        <Section
         key={s.versSeccId}
@@ -48,7 +48,7 @@ export default function EtDocumentPreview({data}:{data:DetalleEt}){
       )}
      </main>
 
-     <footer className="border-t border-slate-300 px-12 py-3 text-[10px] text-slate-500 xl:px-14">
+     <footer className="border-t border-slate-300 px-14 py-3 text-[10px] text-slate-500 xl:px-16 2xl:px-20">
       Documento estructurado desde OVOCALIDAD · {i.documentoCodigo} · V{version(i.versionNumero)}
      </footer>
     </div>
