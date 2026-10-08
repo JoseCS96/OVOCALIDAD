@@ -1,3 +1,4 @@
+import logoOvosur from "@/assets/logos/ovosur-logo.png";
 import type {CaracteristicaEt,DetalleEt,SeccionEt} from "../types";
 
 export default function EtDocumentPreview({data}:{data:DetalleEt}){
@@ -8,9 +9,9 @@ export default function EtDocumentPreview({data}:{data:DetalleEt}){
   <article className="border border-slate-300 text-[13px] text-slate-900">
    <div className="grid items-stretch lg:grid-cols-[minmax(0,1fr)_320px]">
 
-    <div className="min-w-0">
-     <header className="grid grid-cols-[1fr_1.6fr_1fr] border-b border-slate-300">
-      <div className="flex items-center px-8 py-5 text-2xl font-bold italic">Ovosur</div>
+    <div className="min-w-0 px-8 xl:px-10 2xl:px-12">
+     <header className="grid grid-cols-[1fr_1.6fr_1fr] border-x border-b border-slate-300">
+      <div className="flex items-center justify-center px-6 py-5"><img src={logoOvosur} alt="OVOSUR" className="h-14 w-auto max-w-[190px] object-contain"/></div>
       <div className="border-x border-slate-300 px-5 py-4 text-center">
        <p className="text-xs font-semibold uppercase tracking-wider">Especificación técnica</p>
        <h1 className="mt-1 text-base font-bold uppercase">{i.documentoDescripcionDocumento}</h1>
@@ -22,7 +23,7 @@ export default function EtDocumentPreview({data}:{data:DetalleEt}){
       </div>
      </header>
 
-     <div className="grid grid-cols-3 border-b border-slate-300">
+     <div className="grid grid-cols-3 border-x border-b border-slate-300">
       {["ELABORADO POR","REVISADO POR","APROBADO POR"].map(tipo=>
        <div key={tipo} className="min-h-20 border-r border-slate-300 px-5 py-4 last:border-r-0">
         <p className="text-[10px] font-bold text-slate-500">{tipo}</p>
@@ -36,7 +37,7 @@ export default function EtDocumentPreview({data}:{data:DetalleEt}){
       )}
      </div>
 
-     <main className="min-w-0 px-14 py-7 xl:px-16 2xl:px-20">
+     <main className="min-w-0 px-7 py-7 xl:px-8 2xl:px-10">
       {secciones.map((s,index)=>
        <Section
         key={s.versSeccId}
@@ -48,7 +49,7 @@ export default function EtDocumentPreview({data}:{data:DetalleEt}){
       )}
      </main>
 
-     <footer className="border-t border-slate-300 px-14 py-3 text-[10px] text-slate-500 xl:px-16 2xl:px-20">
+     <footer className="border-x border-t border-slate-300 px-7 py-3 text-[10px] text-slate-500 xl:px-8 2xl:px-10">
       Documento estructurado desde OVOCALIDAD · {i.documentoCodigo} · V{version(i.versionNumero)}
      </footer>
     </div>
