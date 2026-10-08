@@ -32,6 +32,8 @@ import TrazabilidadDetallePage from "@/modules/trazabilidad/TrazabilidadDetalleP
 import CertificadosPage from "@/modules/certificados/CertificadosPage";
 import CertificadosBandejaPage from "@/modules/certificados/CertificadosBandejaPage";
 import CertificadoEmisionPage from "@/modules/certificados/CertificadoEmisionPage";
+import CertificadoPrevisualizacionPage from "@/modules/certificados/CertificadoPrevisualizacionPage";
+import CertificadoEmitidoPage from "@/modules/certificados/CertificadoEmitidoPage";
 import CertificadoDisenadorPage from "@/modules/certificados/CertificadoDisenadorPage";
 
 const pages = [
@@ -58,6 +60,8 @@ export default function AppRouter() {
             <Route path="/certificacion/certificados/configuracion" element={<CertificadosPage />} />
             <Route path="/documentos/diseno-certificados" element={<CertificadosPage />} />
             <Route path="/certificacion/certificados/emitir/:loteId" element={<CertificadoEmisionPage />} />
+            <Route path="/certificacion/certificados/previsualizar/:loteId/:plantillaId" element={<CertificadoPrevisualizacionPage />} />
+            <Route path="/certificacion/certificados/emitidos/:certificadoId" element={<CertificadoEmitidoPage />} />
             <Route path="/certificacion/certificados/plantillas/:id" element={<CertificadoDisenadorPage />} />
           </Route>
           <Route path="/trazabilidad/:loteId" element={<TrazabilidadDetallePage />} />
