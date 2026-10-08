@@ -3,31 +3,105 @@ import type {CaracteristicaEt,DetalleEt,SeccionEt} from "../types";
 export default function EtDocumentPreview({data}:{data:DetalleEt}){
  const i=data.informacionGeneral;
  const secciones=documentSections(data.secciones);
+
  return <div className="w-full bg-white shadow-sm print:shadow-none">
   <article className="border border-slate-300 text-[13px] text-slate-900">
-   <header className="grid grid-cols-[1fr_1.6fr_1fr] border-b border-slate-300">
-    <div className="flex items-center px-5 py-4 text-2xl font-bold italic">Ovosur</div>
-    <div className="border-x border-slate-300 px-4 py-3 text-center"><p className="text-xs font-semibold uppercase tracking-wider">Especificación técnica</p><h1 className="mt-1 text-base font-bold uppercase">{i.documentoDescripcionDocumento}</h1></div>
-    <div className="grid grid-rows-3 text-xs"><Meta l="Código" v={i.documentoCodigo}/><Meta l="Versión" v={version(i.versionNumero)}/><Meta l="Vigencia" v={fecha(i.versionInicioVigencia)}/></div>
-   </header>
-   <div className="grid grid-cols-3 border-b border-slate-300">{["ELABORADO POR","REVISADO POR","APROBADO POR"].map(tipo=><div key={tipo} className="min-h-20 border-r border-slate-300 p-3 last:border-r-0"><p className="text-[10px] font-bold text-slate-500">{tipo}</p>{data.responsables.filter(x=>norm(x.tipoResponsabilidad).includes(tipo.split(" ")[0])).map(x=><div key={x.idRelacion} className="mt-1"><p className="text-xs font-medium">{x.usuarioNombresApellidos}</p>{x.cargoDescripcion&&<p className="text-[10px] leading-4 text-slate-500">{x.cargoDescripcion}</p>}</div>)}</div>)}</div>
-   <div className="grid items-start lg:grid-cols-[minmax(0,1fr)_320px]">
-    <main className="min-w-0 px-8 py-5">
-     {secciones.map((s,index)=><Section key={s.versSeccId} id={"et-seccion-"+(index+1)} t={sectionTitle(s.seccionDescripcion)}><SectionContent data={data} seccion={s}/></Section>)}
-    </main>
+   <div className="grid items-stretch lg:grid-cols-[minmax(0,1fr)_320px]">
 
-    <aside className="hidden self-stretch border-l border-slate-200 bg-slate-50/70 lg:block print:hidden">
-     <div className="sticky top-20 max-h-[calc(100vh-6rem)] space-y-5 overflow-y-auto p-5">
-      <div><p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Resumen documental</p><div className="mt-3 space-y-2 text-xs"><SideMeta l="Estado" v={i.estadoVersion}/><SideMeta l="Código" v={i.documentoCodigo}/><SideMeta l="Versión" v={version(i.versionNumero)}/><SideMeta l="Vigencia" v={fecha(i.versionInicioVigencia)}/></div></div>
-      <div className="border-t border-slate-200 pt-4"><p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Documento original</p>{i.archivoOriginalUrl?<button type="button" onClick={()=>window.open(i.archivoOriginalUrl!,"_blank","noopener,noreferrer")} className="mt-3 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-left text-xs font-semibold hover:bg-slate-100">Abrir PDF oficial ↗</button>:<p className="mt-2 text-xs leading-5 text-slate-500">PDF oficial todavía no vinculado a esta versión.</p>}</div>
-      <div className="border-t border-slate-200 pt-4"><p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Navegación</p><nav className="mt-2 space-y-0.5">{secciones.map((s,index)=>{const x={n:String(index+1),t:sectionTitle(s.seccionDescripcion)};return <button key={x.n} type="button" onClick={()=>document.getElementById("et-seccion-"+x.n)?.scrollIntoView({behavior:"smooth",block:"start"})} className="block w-full rounded px-2 py-1.5 text-left text-xs text-slate-600 hover:bg-white hover:text-slate-950">{x.t}</button>})}</nav></div>
+    <div className="min-w-0">
+     <header className="grid grid-cols-[1fr_1.6fr_1fr] border-b border-slate-300">
+      <div className="flex items-center px-8 py-5 text-2xl font-bold italic">Ovosur</div>
+      <div className="border-x border-slate-300 px-5 py-4 text-center">
+       <p className="text-xs font-semibold uppercase tracking-wider">Especificación técnica</p>
+       <h1 className="mt-1 text-base font-bold uppercase">{i.documentoDescripcionDocumento}</h1>
+      </div>
+      <div className="grid grid-rows-3 text-xs">
+       <Meta l="Código" v={i.documentoCodigo}/>
+       <Meta l="Versión" v={version(i.versionNumero)}/>
+       <Meta l="Vigencia" v={fecha(i.versionInicioVigencia)}/>
+      </div>
+     </header>
+
+     <div className="grid grid-cols-3 border-b border-slate-300">
+      {["ELABORADO POR","REVISADO POR","APROBADO POR"].map(tipo=>
+       <div key={tipo} className="min-h-20 border-r border-slate-300 px-5 py-4 last:border-r-0">
+        <p className="text-[10px] font-bold text-slate-500">{tipo}</p>
+        {data.responsables
+         .filter(x=>norm(x.tipoResponsabilidad).includes(tipo.split(" ")[0]))
+         .map(x=><div key={x.idRelacion} className="mt-1">
+          <p className="text-xs font-medium">{x.usuarioNombresApellidos}</p>
+          {x.cargoDescripcion&&<p className="text-[10px] leading-4 text-slate-500">{x.cargoDescripcion}</p>}
+         </div>)}
+       </div>
+      )}
+     </div>
+
+     <main className="min-w-0 px-12 py-7 xl:px-14">
+      {secciones.map((s,index)=>
+       <Section
+        key={s.versSeccId}
+        id={"et-seccion-"+(index+1)}
+        t={sectionTitle(s.seccionDescripcion)}
+       >
+        <SectionContent data={data} seccion={s}/>
+       </Section>
+      )}
+     </main>
+
+     <footer className="border-t border-slate-300 px-12 py-3 text-[10px] text-slate-500 xl:px-14">
+      Documento estructurado desde OVOCALIDAD · {i.documentoCodigo} · V{version(i.versionNumero)}
+     </footer>
+    </div>
+
+    <aside className="hidden min-h-full border-l border-slate-200 bg-slate-50/80 lg:block print:hidden">
+     <div className="sticky top-[72px] max-h-[calc(100vh-72px)] space-y-5 overflow-y-auto p-5">
+      <div>
+       <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Resumen documental</p>
+       <div className="mt-3 space-y-2 text-xs">
+        <SideMeta l="Estado" v={i.estadoVersion}/>
+        <SideMeta l="Código" v={i.documentoCodigo}/>
+        <SideMeta l="Versión" v={version(i.versionNumero)}/>
+        <SideMeta l="Vigencia" v={fecha(i.versionInicioVigencia)}/>
+       </div>
+      </div>
+
+      <div className="border-t border-slate-200 pt-4">
+       <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Documento original</p>
+       {i.archivoOriginalUrl
+        ?<button
+          type="button"
+          onClick={()=>window.open(i.archivoOriginalUrl!,"_blank","noopener,noreferrer")}
+          className="mt-3 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-left text-xs font-semibold hover:bg-slate-100"
+         >
+          Abrir PDF oficial ↗
+         </button>
+        :<p className="mt-2 text-xs leading-5 text-slate-500">PDF oficial todavía no vinculado a esta versión.</p>}
+      </div>
+
+      <div className="border-t border-slate-200 pt-4">
+       <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Navegación</p>
+       <nav className="mt-2 space-y-0.5">
+        {secciones.map((s,index)=>{
+         const x={n:String(index+1),t:sectionTitle(s.seccionDescripcion)};
+         return <button
+          key={x.n}
+          type="button"
+          onClick={()=>document.getElementById("et-seccion-"+x.n)?.scrollIntoView({behavior:"smooth",block:"start"})}
+          className="block w-full rounded px-2 py-1.5 text-left text-xs text-slate-600 hover:bg-white hover:text-slate-950"
+         >
+          {x.t}
+         </button>
+        })}
+       </nav>
+      </div>
      </div>
     </aside>
+
    </div>
-   <footer className="border-t border-slate-300 px-7 py-3 text-[10px] text-slate-500">Documento estructurado desde OVOCALIDAD · {i.documentoCodigo} · V{version(i.versionNumero)}</footer>
   </article>
  </div>
 }
+
 function SectionContent({data,seccion}:{data:DetalleEt;seccion:SeccionEt}){const n=norm(seccion.seccionDescripcion),i=data.informacionGeneral;
  if(n.includes("RESPONSABLE"))return data.responsables.length?<div className="space-y-3">
   {[
