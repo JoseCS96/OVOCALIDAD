@@ -34,3 +34,23 @@ export async function obtenerPlantillaPredeterminada(loteId:number){
  const {data}=await api.get<PlantillaLista>(`/api/certificados/plantillas/predeterminada/lote/${loteId}`);
  return data;
 }
+
+
+export async function descargarCertificadoPdf(certificadoId:number,fallbackName?:string){
+ const response=await api.get<Blob>(
+  `/api/certificados/emitidos/${certificadoId}/pdf`,
+  {responseType:"blob"}
+ );
+ const disposition=response.headers["content-disposition"] as string|undefined;
+ const match=disposition?.match(/filename\*?=(?:UTF-8''|")?([^";]+)/i);
+ const serverName=match?.[1]?decodeURIComponent(match[1].replace(/"/g,"")):null;
+ const fileName=serverName||fallbackName||`certificado-${certificadoId}.pdf`;
+ const url=URL.createObjectURL(response.data);
+ const a=document.createElement("a");
+ a.href=url;
+ a.download=fileName;
+ document.body.appendChild(a);
+ a.click();
+ a.remove();
+ window.setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
