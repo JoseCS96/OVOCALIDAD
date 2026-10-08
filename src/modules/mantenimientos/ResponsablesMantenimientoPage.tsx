@@ -1,7 +1,6 @@
 import {useCallback,useEffect,useMemo,useRef,useState} from "react";
 import {BriefcaseBusiness,CirclePlus,FileImage,History,Pencil,Power,Search,Trash2,Upload,X} from "lucide-react";
 import {Button} from "@/components/ui/button";import {Card,CardContent} from "@/components/ui/card";import {Input} from "@/components/ui/input";
-import firmaDemoGiuliana from "@/assets/signatures/giuliana-minaya-demo.svg";
 import {agregarCargoHistoricoResponsable,editarCargoHistoricoResponsable,cambiarCargoResponsable,cambiarEstadoResponsable,crearResponsable,editarResponsable,eliminarFirmaResponsable,eliminarResponsable,guardarFirmaResponsable,listarCargosActivos,listarResponsables,obtenerFirmaResponsable,obtenerHistorialCargosResponsable,obtenerVinculoResponsableUsuario,vincularResponsableUsuario,type CargoActivo,type HistorialCargoResponsable,type ResponsableMaestro} from "./api";
 type Filtro="todos"|"activos"|"inactivos"; type Modal="nuevo"|"editar"|"cargo"|"historial"|"historial-form"|"firma"|null;
 export default function ResponsablesMantenimientoPage(){
@@ -9,7 +8,6 @@ export default function ResponsablesMantenimientoPage(){
  const [modal,setModal]=useState<Modal>(null),[sel,setSel]=useState<ResponsableMaestro|null>(null),[dni,setDni]=useState(""),[nombre,setNombre]=useState(""),[cargoId,setCargoId]=useState<number|undefined>(),[cargoBusqueda,setCargoBusqueda]=useState(""),[cargoAbierto,setCargoAbierto]=useState(false),[fecha,setFecha]=useState(""),[historial,setHistorial]=useState<HistorialCargoResponsable[]>([]),[histEditando,setHistEditando]=useState<HistorialCargoResponsable|null>(null),[histFechaInicio,setHistFechaInicio]=useState(""),[histFechaFin,setHistFechaFin]=useState(""),[error,setError]=useState(""),[guardando,setGuardando]=useState(false);
  const cargoComboRef=useRef<HTMLDivElement|null>(null);
  const [firmaArchivo,setFirmaArchivo]=useState<File|null>(null),[firmaPreview,setFirmaPreview]=useState<string|null>(null),[firmaCargando,setFirmaCargando]=useState(false),[usuarioAcceso,setUsuarioAcceso]=useState(""),[vinculando,setVinculando]=useState(false);
- const usarFirmaMuestraGiuliana=async()=>{try{setError("");const file=await convertirFirmaMuestraAPng(firmaDemoGiuliana);setFirmaArchivo(file);setFirmaPreview(URL.createObjectURL(file))}catch{setError("No se pudo preparar la firma de muestra.")}};
  const cargar=useCallback(async()=>{setCargando(true);try{setItems(await listarResponsables({busqueda:busqueda.trim()||undefined,estado:filtro==="todos"?undefined:filtro==="activos"}))}finally{setCargando(false)}},[busqueda,filtro]);
  useEffect(()=>{const t=setTimeout(cargar,250);return()=>clearTimeout(t)},[cargar]);
  useEffect(()=>{listarCargosActivos().then(setCargos)},[]);
@@ -50,18 +48,6 @@ export default function ResponsablesMantenimientoPage(){
     <div className="flex min-h-36 items-center justify-center rounded-xl border border-dashed bg-slate-50 p-4">
      {firmaCargando?<span className="text-sm text-slate-500">Cargando firma...</span>:firmaPreview?<img src={firmaPreview} alt="Firma" className="max-h-28 max-w-full object-contain"/>:<span className="text-sm text-slate-400">Sin firma registrada</span>}
     </div>
-    {sel?.usuarioDni==="PEND-GMINAYA"&&<div className="rounded-xl border border-dashed border-sky-200 bg-sky-50/60 p-4">
-     <div className="flex flex-wrap items-center justify-between gap-3">
-      <div>
-       <p className="text-sm font-semibold text-sky-950">Firma de muestra · Giuliana Minaya</p>
-       <p className="mt-1 text-xs text-sky-800/75">Disponible solo para esta prueba funcional. Al seleccionarla podrás guardarla como una firma PNG normal.</p>
-      </div>
-      <Button type="button" variant="outline" onClick={()=>void usarFirmaMuestraGiuliana()}><FileImage/>Usar firma de muestra</Button>
-     </div>
-     <div className="mt-3 rounded-lg bg-white p-3">
-      <img src={firmaDemoGiuliana} alt="Firma de muestra Giuliana Minaya" className="mx-auto max-h-20 max-w-full object-contain"/>
-     </div>
-    </div>}
     <label className="block text-sm font-medium">Imagen de firma
      <Input type="file" accept="image/png,image/jpeg,image/webp" className="mt-1" onChange={e=>{const file=e.target.files?.[0]??null;setFirmaArchivo(file);if(file){const r=new FileReader();r.onload=()=>setFirmaPreview(String(r.result));r.readAsDataURL(file)}}}/>
     </label>
@@ -73,29 +59,4 @@ export default function ResponsablesMantenimientoPage(){
    </div></>:modal==="historial"?<div className="p-5"><div className="mb-4 flex justify-end"><Button onClick={()=>abrirHistForm()}><CirclePlus/>Agregar cargo histórico</Button></div><div className="max-h-[55vh] overflow-auto"><table className="w-full text-sm"><thead><tr className="text-left text-xs uppercase text-slate-500"><th className="py-2">Cargo</th><th>Inicio</th><th>Fin</th><th>Condición</th><th className="text-right">Acciones</th></tr></thead><tbody>{historial.map(h=><tr key={h.usuarioCargoHistorialId} className="border-t"><td className="py-3">{h.cargoDescripcion}</td><td>{h.fechaInicio?.slice(0,10)??"—"}</td><td>{h.fechaFin?.slice(0,10)??"—"}</td><td>{h.cargoActual?"Actual":"Histórico"}</td><td className="text-right">{!h.cargoActual&&<Button size="icon-sm" variant="outline" title="Editar histórico" onClick={()=>abrirHistForm(h)}><Pencil/></Button>}</td></tr>)}</tbody></table></div></div>:modal==="historial-form"?<><div className="space-y-4 p-5"><label className="block text-sm font-medium">Cargo<div ref={cargoComboRef} className="relative mt-1"><Input value={cargoBusqueda} placeholder="Escribe para buscar un cargo..." autoComplete="off" onFocus={()=>setCargoAbierto(true)} onChange={e=>{setCargoBusqueda(e.target.value);setCargoId(undefined);setCargoAbierto(true)}}/>{cargoAbierto&&<div className="absolute z-[60] mt-1 max-h-56 w-full overflow-auto rounded-md border bg-white py-1 shadow-xl">{cargosFiltrados.length?cargosFiltrados.map(c=><button type="button" key={c.cargoId} className="block w-full px-3 py-2 text-left text-sm hover:bg-slate-50" onMouseDown={e=>e.preventDefault()} onClick={()=>{setCargoId(c.cargoId);setCargoBusqueda(c.cargoDescripcion);setCargoAbierto(false)}}>{c.cargoDescripcion}</button>):<div className="px-3 py-3 text-sm text-[var(--text-secondary)]">No se encontraron cargos.</div>}</div>}</div></label><div className="grid gap-4 sm:grid-cols-2"><label className="block text-sm font-medium">Fecha de inicio <span className="font-normal text-slate-400">(opcional)</span><Input type="date" className="mt-1" value={histFechaInicio} onChange={e=>setHistFechaInicio(e.target.value)}/></label><label className="block text-sm font-medium">Fecha fin <span className="font-normal text-slate-400">(opcional)</span><Input type="date" className="mt-1" value={histFechaFin} onChange={e=>setHistFechaFin(e.target.value)}/></label></div>{error&&<p className="text-sm text-red-700">{error}</p>}</div><div className="flex justify-end gap-2 border-t p-5"><Button variant="outline" onClick={()=>setModal("historial")}>Cancelar</Button><Button disabled={guardando} onClick={guardarHistorial}>{guardando?"Guardando...":"Guardar"}</Button></div></>:<><div className="space-y-4 p-5">{modal==="nuevo"&&<label className="block text-sm font-medium">Identificador / DNI<Input className="mt-1" maxLength={20} value={dni} onChange={e=>setDni(e.target.value)}/></label>}{(modal==="nuevo"||modal==="editar")&&<label className="block text-sm font-medium">Nombres y apellidos<Input className="mt-1" maxLength={200} value={nombre} onChange={e=>setNombre(e.target.value)}/></label>}{(modal==="nuevo"||modal==="cargo")&&<><label className="block text-sm font-medium">Cargo<div ref={cargoComboRef} className="relative mt-1"><Input value={cargoBusqueda} placeholder="Escribe para buscar un cargo..." autoComplete="off" onFocus={()=>setCargoAbierto(true)} onChange={e=>{setCargoBusqueda(e.target.value);setCargoId(undefined);setCargoAbierto(true)}}/>{cargoAbierto&&<div className="absolute z-[60] mt-1 max-h-56 w-full overflow-auto rounded-md border bg-white py-1 shadow-xl">{cargosFiltrados.length?cargosFiltrados.map(c=><button type="button" key={c.cargoId} className="block w-full px-3 py-2 text-left text-sm hover:bg-slate-50" onMouseDown={e=>e.preventDefault()} onClick={()=>{setCargoId(c.cargoId);setCargoBusqueda(c.cargoDescripcion);setCargoAbierto(false)}}>{c.cargoDescripcion}</button>):<div className="px-3 py-3 text-sm text-[var(--text-secondary)]">No se encontraron cargos.</div>}</div>}</div></label><label className="block text-sm font-medium">Fecha de inicio<Input type="date" className="mt-1" value={fecha} onChange={e=>setFecha(e.target.value)}/></label></>}{error&&<p className="text-sm text-red-700">{error}</p>}</div><div className="flex justify-end gap-2 border-t p-5"><Button variant="outline" onClick={()=>setModal(null)}>Cancelar</Button><Button disabled={guardando} onClick={guardar}>{guardando?"Guardando...":"Guardar"}</Button></div></>}
   </div></div>}
  </div>
-}
-
-async function convertirFirmaMuestraAPng(url:string):Promise<File>{
- return await new Promise((resolve,reject)=>{
-  const img=new Image();
-  img.onload=()=>{
-   const maxWidth=1200;
-   const scale=Math.min(1,maxWidth/img.naturalWidth);
-   const width=Math.max(1,Math.round(img.naturalWidth*scale));
-   const height=Math.max(1,Math.round(img.naturalHeight*scale));
-   const canvas=document.createElement("canvas");
-   canvas.width=width;
-   canvas.height=height;
-   const ctx=canvas.getContext("2d");
-   if(!ctx){reject(new Error("No se pudo crear el lienzo."));return}
-   ctx.clearRect(0,0,width,height);
-   ctx.drawImage(img,0,0,width,height);
-   canvas.toBlob(blob=>{
-    if(!blob){reject(new Error("No se pudo convertir la firma."));return}
-    resolve(new File([blob],"firma-giuliana-muestra.png",{type:"image/png"}));
-   },"image/png");
-  };
-  img.onerror=()=>reject(new Error("No se pudo cargar la firma de muestra."));
-  img.src=url;
- });
 }
