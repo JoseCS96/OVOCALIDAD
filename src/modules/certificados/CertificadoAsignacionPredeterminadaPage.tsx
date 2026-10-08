@@ -70,7 +70,7 @@ export default function CertificadoAsignacionPredeterminadaPage(){
   <div className="flex flex-wrap items-start justify-between gap-4">
    <div>
     <Button variant="ghost" size="sm" className="-ml-2 mb-1" onClick={()=>nav("/documentos/diseno-certificados")}>
-     <ArrowLeft/>Diseño de certificados
+     <ArrowLeft/>Certificados de calidad
     </Button>
     <p className="text-xs font-semibold uppercase tracking-[.16em] text-[var(--primary)]">Gestión documental · Certificados</p>
     <h1 className="mt-1 text-2xl font-semibold">Asignación de plantilla predeterminada</h1>
