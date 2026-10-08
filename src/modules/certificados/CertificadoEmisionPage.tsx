@@ -73,7 +73,7 @@ export default function CertificadoEmisionPage(){
     <div className="flex items-start gap-3"><CheckCircle2 className="mt-0.5 size-5 text-emerald-600"/><div><div className="font-semibold">{plantilla.nombre}</div><div className="mt-1 text-[var(--text-secondary)]">{plantilla.cantidadSecciones} secciones · {plantilla.cantidadCaracteristicas} parámetros configurados</div></div></div>
    </div>}
    <div className="flex justify-end">
-    <Button disabled={!plantillaId} onClick={()=>nav(`/certificacion/certificados?tab=por-emitir&loteId=${id}&plantillaId=${plantillaId}`)}>
+    <Button disabled={!plantillaId} onClick={()=>nav(`/certificacion/certificados/previsualizar/${id}/${plantillaId}`)}>
      <FileCheck2/>Continuar a previsualización
     </Button>
    </div>
