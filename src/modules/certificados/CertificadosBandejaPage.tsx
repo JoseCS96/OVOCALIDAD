@@ -1,6 +1,6 @@
 import {useMemo,useState} from "react";
 import {useQuery} from "@tanstack/react-query";
-import {ArrowDownUp, FileCheck2, LayoutTemplate, Settings, Search, Star} from "lucide-react";
+import {ArrowDownUp, FileCheck2, LayoutTemplate, Search, Star} from "lucide-react";
 import {useNavigate,useSearchParams} from "react-router-dom";
 import PageContainer from "@/components/common/PageContainer";
 import {Badge} from "@/components/ui/badge";
@@ -58,7 +58,6 @@ export default function CertificadosBandejaPage(){
    <div className="flex gap-2">
     <Button variant="outline" className="bg-white" onClick={()=>nav("/documentos/diseno-certificados")}><LayoutTemplate size={16}/>Plantillas</Button>
     <Button variant="outline" className="bg-white" onClick={()=>nav("/documentos/diseno-certificados/asignacion")}><Star size={16}/>Asignación default</Button>
-    <Button variant="outline" className="bg-white" onClick={()=>nav("/mantenimientos/certificados")}><Settings size={16}/>Maestro certificado</Button>
    </div>
   </div>
 
