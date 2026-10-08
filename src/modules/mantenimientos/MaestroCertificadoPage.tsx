@@ -1,6 +1,7 @@
 import {useEffect,useState} from "react";
 import {useMutation,useQuery,useQueryClient} from "@tanstack/react-query";
 import {Building2,Pencil,Save,X} from "lucide-react";
+import {useSearchParams} from "react-router-dom";
 import PageContainer from "@/components/common/PageContainer";
 import {Button} from "@/components/ui/button";
 import {Card,CardContent} from "@/components/ui/card";
@@ -21,6 +22,8 @@ const empresaVacia:GuardarCertificadoEmpresa={
 
 export default function MaestroCertificadoPage(){
  const qc=useQueryClient();
+ const [params,setParams]=useSearchParams();
+ const tab=(params.get("tab")||"datos") as "datos"|"identidad"|"firmantes"|"parametros";
  const empresa=useQuery({queryKey:["certificado-empresa"],queryFn:obtenerEmpresaCertificado});
  const [editando,setEditando]=useState(false);
  const [form,setForm]=useState<GuardarCertificadoEmpresa>(empresaVacia);
@@ -66,14 +69,21 @@ export default function MaestroCertificadoPage(){
 
  return <PageContainer className="space-y-5">
   <div>
-   <p className="text-xs font-semibold uppercase tracking-[.16em] text-[var(--primary)]">Mantenimientos · Certificados</p>
-   <h1 className="mt-1 text-2xl font-semibold">Mantenimiento de certificados</h1>
+   <p className="text-xs font-semibold uppercase tracking-[.16em] text-[var(--primary)]">Configuración de calidad · Certificados</p>
+   <h1 className="mt-1 text-2xl font-semibold">Configuración de certificados</h1>
    <p className="mt-1 text-sm text-[var(--text-secondary)]">
-    Administra los maestros y parámetros utilizados por la emisión de certificados: datos de empresa, identidad institucional, firmantes y configuración general.
+    Administra los datos transversales utilizados por la emisión y presentación de certificados.
    </p>
   </div>
 
-  <Card className="overflow-hidden">
+  <div className="flex flex-wrap gap-2 rounded-xl border bg-white p-2">
+   <Tab active={tab==="datos"} onClick={()=>setParams({tab:"datos"})}>Datos institucionales</Tab>
+   <Tab active={tab==="identidad"} onClick={()=>setParams({tab:"identidad"})}>Identidad visual</Tab>
+   <Tab active={tab==="firmantes"} onClick={()=>setParams({tab:"firmantes"})}>Firmantes</Tab>
+   <Tab active={tab==="parametros"} onClick={()=>setParams({tab:"parametros"})}>Parámetros</Tab>
+  </div>
+
+  {tab==="datos"&&<Card className="overflow-hidden">
    <div className="h-1 bg-[linear-gradient(90deg,var(--primary),var(--secondary))]"/>
    <CardContent className="p-5">
     <div className="flex flex-wrap items-start justify-between gap-3">
@@ -124,20 +134,37 @@ export default function MaestroCertificadoPage(){
     {guardar.isError&&<div className="mt-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{guardar.error instanceof Error?guardar.error.message:"No se pudieron guardar los datos."}</div>}
     {guardar.isSuccess&&<div className="mt-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">Datos de empresa actualizados correctamente.</div>}
    </CardContent>
-  </Card>
+  </Card>}
 
-  <div className="grid gap-4 md:grid-cols-2">
-   <Card><CardContent className="p-5">
-    <h2 className="font-semibold">Identidad institucional</h2>
-    <p className="mt-1 text-sm text-[var(--text-secondary)]">Próximamente: logo principal, logo alternativo y parámetros visuales OVOSUR.</p>
-   </CardContent></Card>
-   <Card><CardContent className="p-5">
-    <h2 className="font-semibold">Firmantes del certificado</h2>
-    <p className="mt-1 text-sm text-[var(--text-secondary)]">Próximamente: responsable, cargo, firma y vigencia para emisión.</p>
-   </CardContent></Card>
-  </div>
+  {tab==="identidad"&&<Card className="overflow-hidden">
+   <div className="h-1 bg-[linear-gradient(90deg,var(--primary),var(--secondary))]"/>
+   <CardContent className="p-6">
+    <h2 className="font-semibold">Identidad visual</h2>
+    <p className="mt-1 text-sm text-[var(--text-secondary)]">Aquí configuraremos logo principal, logo alternativo y lineamientos visuales OVOSUR utilizados en certificados y PDFs.</p>
+    <div className="mt-5 rounded-xl border border-dashed p-8 text-center text-sm text-[var(--text-secondary)]">Configuración de logos pendiente de implementación.</div>
+   </CardContent>
+  </Card>}
+
+  {tab==="firmantes"&&<Card className="overflow-hidden">
+   <div className="h-1 bg-[linear-gradient(90deg,var(--primary),var(--secondary))]"/>
+   <CardContent className="p-6">
+    <h2 className="font-semibold">Firmantes</h2>
+    <p className="mt-1 text-sm text-[var(--text-secondary)]">Aquí administraremos responsable, cargo, firma, vigencia y estado para la emisión de certificados.</p>
+    <div className="mt-5 rounded-xl border border-dashed p-8 text-center text-sm text-[var(--text-secondary)]">Mantenedor de firmantes pendiente de implementación.</div>
+   </CardContent>
+  </Card>}
+
+  {tab==="parametros"&&<Card className="overflow-hidden">
+   <div className="h-1 bg-[linear-gradient(90deg,var(--primary),var(--secondary))]"/>
+   <CardContent className="p-6">
+    <h2 className="font-semibold">Parámetros de certificado</h2>
+    <p className="mt-1 text-sm text-[var(--text-secondary)]">Aquí centralizaremos numeración, reglas generales y otras configuraciones transversales de certificación.</p>
+    <div className="mt-5 rounded-xl border border-dashed p-8 text-center text-sm text-[var(--text-secondary)]">Parámetros generales pendientes de definición.</div>
+   </CardContent>
+  </Card>}
  </PageContainer>;
 }
 
+function Tab({active,onClick,children}:{active:boolean;onClick:()=>void;children:React.ReactNode}){return <button type="button" onClick={onClick} className={"rounded-lg px-4 py-2 text-sm font-medium transition "+(active?"bg-[var(--primary)] text-white":"text-slate-600 hover:bg-slate-50")}>{children}</button>}
 function Campo({label,children}:{label:string;children:React.ReactNode}){return <label className="block"><span className="mb-1 block text-xs font-semibold text-slate-600">{label}</span>{children}</label>}
 function Dato({label,value}:{label:string;value:string|null}){return <div><span className="font-semibold">{label}:</span> {value||"—"}</div>}
