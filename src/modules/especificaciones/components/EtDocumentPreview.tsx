@@ -1,6 +1,6 @@
 import {useEffect,useState} from "react";
 import logoOvosur from "@/assets/logos/ovosur-logo.png";
-import {obtenerFirmaResponsableDocumento} from "@/modules/firmas/api";
+import {obtenerFirmaAplicadaDocumento} from "@/modules/firmas/api";
 import type {CaracteristicaEt,DetalleEt,SeccionEt} from "../types";
 
 export default function EtDocumentPreview({data}:{data:DetalleEt}){
@@ -27,7 +27,7 @@ export default function EtDocumentPreview({data}:{data:DetalleEt}){
       </div>
      </header>
 
-     <ResponsablesCabecera responsables={data.responsables}/>
+     <ResponsablesCabecera responsables={data.responsables} versionId={i.versionId}/>
 
      <main className="min-w-0 px-7 py-7 xl:px-8 2xl:px-10">
       {secciones.map((s,index)=>
@@ -95,7 +95,7 @@ export default function EtDocumentPreview({data}:{data:DetalleEt}){
  </div>
 }
 
-function ResponsablesCabecera({responsables}:{responsables:DetalleEt["responsables"]}){
+function ResponsablesCabecera({responsables,versionId}:{responsables:DetalleEt["responsables"];versionId:number}){
  const grupos=[
   {label:"ELABORADO POR",key:"ELABORADO"},
   {label:"REVISADO POR",key:"REVISADO"},
@@ -122,7 +122,7 @@ function ResponsablesCabecera({responsables}:{responsables:DetalleEt["responsabl
      {items.map((x,idx)=><div key={x.idRelacion} className={"grid grid-cols-[1.45fr_1fr_1.6fr] text-xs "+(idx<items.length-1?"border-b border-slate-300":"")}>
       <div className="border-r border-slate-300 px-3 py-1.5 text-center">{x.cargoDescripcion??"—"}</div>
       <div className="border-r border-slate-300 px-3 py-1.5 text-center">{x.usuarioNombresApellidos}</div>
-      <div className="min-h-12 px-3 py-1.5 text-center"><FirmaResponsableDocumento usuarioDni={x.usuarioDni}/></div>
+      <div className="min-h-12 px-3 py-1.5 text-center"><FirmaResponsableDocumento usuarioDni={x.usuarioDni} versionId={versionId}/></div>
      </div>)}
     </div>
    </div>;
@@ -130,17 +130,24 @@ function ResponsablesCabecera({responsables}:{responsables:DetalleEt["responsabl
  </div>;
 }
 
-function FirmaResponsableDocumento({usuarioDni}:{usuarioDni:string}){
- const [src,setSrc]=useState<string|null>(null);
+function FirmaResponsableDocumento({usuarioDni,versionId}:{usuarioDni:string;versionId:number}){
+ const [firma,setFirma]=useState<{src:string;fecha:string}|null>(null);
  useEffect(()=>{
   let activo=true;
-  obtenerFirmaResponsableDocumento(usuarioDni).then(r=>{
+  obtenerFirmaAplicadaDocumento("ET",versionId,usuarioDni).then(r=>{
    if(!activo)return;
-   setSrc(r?.firmaImagen&&r.firmaMimeType?`data:${r.firmaMimeType};base64,${r.firmaImagen}`:null);
+   setFirma(
+    r?.firmaImagen&&r.firmaMimeType
+     ?{src:`data:${r.firmaMimeType};base64,${r.firmaImagen}`,fecha:r.fechaFirma}
+     :null
+   );
   });
   return()=>{activo=false};
- },[usuarioDni]);
- return src?<img src={src} alt="Firma registrada" className="mx-auto max-h-10 max-w-[150px] object-contain"/>:null;
+ },[usuarioDni,versionId]);
+ return firma?<div className="flex flex-col items-center justify-center gap-0.5">
+  <img src={firma.src} alt="Firma aplicada" className="mx-auto max-h-9 max-w-[150px] object-contain"/>
+  <span className="text-[9px] text-slate-500">{new Date(firma.fecha).toLocaleString("es-PE",{dateStyle:"short",timeStyle:"short"})}</span>
+ </div>:null;
 }
 
 function reemplazaA(i:DetalleEt["informacionGeneral"]){
