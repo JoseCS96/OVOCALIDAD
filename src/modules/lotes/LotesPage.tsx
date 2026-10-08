@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowDownUp, ChevronLeft, ChevronRight, Eye, FilterX, MoreHorizontal, Play, Plus, RefreshCw, Search } from "lucide-react";
+import { ArrowDownUp, ChevronLeft, ChevronRight, Eye, FilterX, MoreHorizontal, Play, Plus, RefreshCw, Search, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import PageContainer from "@/components/common/PageContainer";
@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { listarLotes } from "./api";
+import { eliminarLotePrueba, listarLotes } from "./api";
 import { iniciarEvaluacion } from "@/modules/evaluaciones/api";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import GenerarLoteModal from "./GenerarLoteModal";
@@ -64,12 +64,27 @@ function formatDate(value: string | null) {
 export default function LotesPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { tienePermiso } = useAuth();
+  const { tienePermiso, tienePerfil } = useAuth();
   const puedeCrearLote = tienePermiso("LOTE.CREAR");
   const puedeIniciarEvaluacion = tienePermiso("EVALUACION.INICIAR");
   const puedeVerEvaluacion = tienePermiso("EVALUACION.VER");
+  const puedeEliminarPrueba = tienePerfil("JEFE_CALIDAD");
   const [actionError, setActionError] = useState<string | null>(null);
   const [startingId, setStartingId] = useState<number | null>(null);
+  const eliminarMutation = useMutation({
+    mutationFn: (loteId: number) => eliminarLotePrueba(loteId),
+    onMutate: () => setActionError(null),
+    onSuccess: async () => {
+      setActionError(null);
+      await queryClient.invalidateQueries({ queryKey: ["lotes"] });
+      await queryClient.invalidateQueries({ queryKey: ["evaluaciones"] });
+      await queryClient.refetchQueries({ queryKey: ["lotes"], type: "active" });
+    },
+    onError: (error) => {
+      setActionError(error instanceof Error ? error.message : "No se pudo eliminar el lote de prueba.");
+    },
+  });
+
   const iniciarMutation = useMutation({
     mutationFn: (evaluacionId: number) => iniciarEvaluacion(evaluacionId),
     onMutate: (evaluacionId) => { setActionError(null); setStartingId(evaluacionId); },
@@ -344,6 +359,21 @@ export default function LotesPage() {
                             <Eye size={15} />
                             Ver detalle
                           </DropdownMenuItem>
+                          {puedeEliminarPrueba && (
+                            <DropdownMenuItem
+                              disabled={eliminarMutation.isPending}
+                              className="text-red-700 focus:text-red-700"
+                              onClick={() => {
+                                const ok = window.confirm(
+                                  `¿Eliminar completamente el lote ${lote.codigoLote} y toda su data de prueba? Esta acción no se puede deshacer.`
+                                );
+                                if (ok) eliminarMutation.mutate(lote.loteId);
+                              }}
+                            >
+                              <Trash2 size={15} />
+                              Eliminar lote (pruebas)
+                            </DropdownMenuItem>
+                          )}
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </td>
