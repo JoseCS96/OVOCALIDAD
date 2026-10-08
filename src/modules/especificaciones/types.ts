@@ -2,7 +2,7 @@ export type InformacionGeneralEt = {
   codigoResultado: number; mensaje: string; documentoId: number; documentoCodigo: string;
   documentoDescripcionDocumento: string; productoCodigo: string; productoDescripcion: string;
   versionId: number; versionNumero: number | null; estadoVersion: string; versionInicioVigencia: string | null;
-  versionReemplazaAId: number | null; versionNroPaginas: number | null; versionDescripcion: string | null;
+  versionReemplazaAId: number | null; versionReemplazadaNumero?: number | null; versionReemplazadaInicioVigencia?: string | null; versionNroPaginas: number | null; versionDescripcion: string | null;
   envyEmbDescripcion?: string|null; almacyDistDescripcion?: string|null; vidaUtilDescripcion?: string|null; descongelamientoDescripcion?: string|null;
   archivoOriginalUrl?: string|null; archivoOriginalNombre?: string|null;
   permiteEditar: boolean; permiteEnviarRevision: boolean; permiteRevisar: boolean; permitePublicar: boolean;
