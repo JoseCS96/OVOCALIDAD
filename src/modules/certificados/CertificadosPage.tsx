@@ -33,7 +33,7 @@ export default function CertificadosPage(){
  const {tienePerfil}=useAuth();
  const puedeEditarEmpresa=tienePerfil("JEFE_CALIDAD");
 
- const q=useQuery({queryKey:["certificado-plantillas"],queryFn:listarPlantillas});
+ const q=useQuery({queryKey:["certificado-plantillas"],queryFn:()=>listarPlantillas()});
  const empresa=useQuery({queryKey:["certificado-empresa"],queryFn:obtenerEmpresaCertificado});
  const [editandoEmpresa,setEditandoEmpresa]=useState(false);
  const [formEmpresa,setFormEmpresa]=useState<GuardarCertificadoEmpresa>(empresaVacia);
