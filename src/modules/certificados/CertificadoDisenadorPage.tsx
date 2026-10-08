@@ -155,12 +155,13 @@ export default function CertificadoDisenadorPage(){
   setSecciones(a=>a.map((s,i)=>i===seccionSeleccionada?{...s,...patch}:s));
  };
 
- const moverSeccion=(direccion:number)=>{
+ const moverSeccion=(direccion:number,indice=seccionSeleccionada)=>{
   setSecciones(a=>{
-   const j=seccionSeleccionada+direccion;
-   if(!actual?.permiteReordenar||j<0||j>=a.length)return a;
+   const origen=a[indice];
+   const j=indice+direccion;
+   if(!origen?.permiteReordenar||j<0||j>=a.length)return a;
    const n=[...a];
-   [n[seccionSeleccionada],n[j]]=[n[j],n[seccionSeleccionada]];
+   [n[indice],n[j]]=[n[j],n[indice]];
    setSeccionSeleccionada(j);
    return normalizarSecciones(n);
   });
@@ -278,8 +279,8 @@ export default function CertificadoDisenadorPage(){
         {s.seccionCodigo==="RESULTADOS"&&<span className="rounded-full bg-[var(--secondary)] px-2 py-0.5 text-[10px] font-bold text-white">{s.resultados.length}</span>}
        </button>
        <div className="mr-1 flex">
-        <Button variant="ghost" size="icon-sm" disabled={!s.permiteReordenar||i===0} onClick={()=>{setSeccionSeleccionada(i);setTimeout(()=>moverSeccion(-1),0)}}><ArrowUp/></Button>
-        <Button variant="ghost" size="icon-sm" disabled={!s.permiteReordenar||i===secciones.length-1} onClick={()=>{setSeccionSeleccionada(i);setTimeout(()=>moverSeccion(1),0)}}><ArrowDown/></Button>
+        <Button variant="ghost" size="icon-sm" disabled={!s.permiteReordenar||i===0} onClick={()=>moverSeccion(-1,i)}><ArrowUp/></Button>
+        <Button variant="ghost" size="icon-sm" disabled={!s.permiteReordenar||i===secciones.length-1} onClick={()=>moverSeccion(1,i)}><ArrowDown/></Button>
        </div>
       </div>)}
      </div>
