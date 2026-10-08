@@ -58,7 +58,7 @@ export default function CertificadosBandejaPage(){
    <div className="flex gap-2">
     <Button variant="outline" className="bg-white" onClick={()=>nav("/documentos/diseno-certificados")}><LayoutTemplate size={16}/>Plantillas</Button>
     <Button variant="outline" className="bg-white" onClick={()=>nav("/documentos/diseno-certificados/asignacion")}><Star size={16}/>Asignación default</Button>
-    <Button variant="outline" className="bg-white" onClick={()=>nav("/documentos/diseno-certificados")}><Settings size={16}/>Configuración</Button>
+    <Button variant="outline" className="bg-white" onClick={()=>nav("/mantenimientos/certificados")}><Settings size={16}/>Maestro certificado</Button>
    </div>
   </div>
 
