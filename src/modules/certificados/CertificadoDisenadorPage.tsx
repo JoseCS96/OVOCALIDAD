@@ -249,7 +249,7 @@ export default function CertificadoDisenadorPage(){
  return <PageContainer className="space-y-5">
   <div className="flex items-start justify-between gap-4">
    <div>
-    <p className="text-xs font-semibold uppercase tracking-[.16em] text-[var(--primary)]">Gestión documental · Diseño de certificados</p>
+    <p className="text-xs font-semibold uppercase tracking-[.16em] text-[var(--primary)]">Gestión documental · Certificados de calidad</p>
     <h1 className="mt-1 text-2xl font-semibold">{plantilla.data.nombre}</h1>
     <p className="mt-1 text-sm text-[var(--text-secondary)]">{plantilla.data.productoCodigo??"—"} · {plantilla.data.documentoCodigo} · FT v{plantilla.data.versionNumero}</p>
    </div>
