@@ -56,8 +56,8 @@ export default function CertificadosBandejaPage(){
     <p className="mt-1 text-sm text-[var(--text-secondary)]">Control de lotes listos para certificar y certificados emitidos.</p>
    </div>
    <div className="flex gap-2">
-    <Button variant="outline" className="bg-white" onClick={()=>nav("/certificacion/certificados/configuracion?tab=plantillas")}><LayoutTemplate size={16}/>Plantillas</Button>
-    <Button variant="outline" className="bg-white" onClick={()=>nav("/certificacion/certificados/configuracion?tab=configuracion")}><Settings size={16}/>Configuración</Button>
+    <Button variant="outline" className="bg-white" onClick={()=>nav("/documentos/diseno-certificados?tab=plantillas")}><LayoutTemplate size={16}/>Plantillas</Button>
+    <Button variant="outline" className="bg-white" onClick={()=>nav("/documentos/diseno-certificados?tab=configuracion")}><Settings size={16}/>Configuración</Button>
    </div>
   </div>
 
