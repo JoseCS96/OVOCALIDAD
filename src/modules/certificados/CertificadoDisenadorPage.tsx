@@ -1,6 +1,6 @@
 import {useEffect,useMemo,useState} from "react";
 import {useMutation,useQuery,useQueryClient} from "@tanstack/react-query";
-import {ArrowDown,ArrowLeft,ArrowUp,Building2,Check,ChevronRight,FileText,Layers3,Plus,Save,Trash2} from "lucide-react";
+import {ArrowDown,ArrowLeft,ArrowUp,Building2,Check,EyeOff,FileText,GripVertical,Layers3,Plus,Save,Trash2} from "lucide-react";
 import {useNavigate,useParams} from "react-router-dom";
 import PageContainer from "@/components/common/PageContainer";
 import {Button} from "@/components/ui/button";
@@ -248,42 +248,52 @@ export default function CertificadoDisenadorPage(){
  return <PageContainer className="space-y-5">
   <div className="flex items-start justify-between gap-4">
    <div>
-    <p className="text-xs font-semibold uppercase tracking-[.16em] text-[var(--text-secondary)]">Certificación · Diseñador</p>
+    <p className="text-xs font-semibold uppercase tracking-[.16em] text-[var(--primary)]">Gestión documental · Diseño de certificados</p>
     <h1 className="mt-1 text-2xl font-semibold">{plantilla.data.nombre}</h1>
     <p className="mt-1 text-sm text-[var(--text-secondary)]">{plantilla.data.productoCodigo??"—"} · {plantilla.data.documentoCodigo} · FT v{plantilla.data.versionNumero}</p>
    </div>
    <div className="flex gap-2">
-    <Button variant="outline" onClick={()=>nav("/certificacion/certificados")}><ArrowLeft/>Volver</Button>
+    <Button variant="outline" className="bg-white" onClick={()=>nav("/documentos/diseno-certificados?tab=plantillas")}><ArrowLeft/>Plantillas</Button>
     <Button disabled={!secciones.length||guardar.isPending} onClick={()=>guardar.mutate()}><Save/>{guardar.isPending?"Guardando...":"Guardar diseño"}</Button>
    </div>
   </div>
 
   <div className="grid min-h-[680px] gap-4 xl:grid-cols-[300px_minmax(0,1fr)]">
-   <Card className="h-fit xl:sticky xl:top-4">
-    <CardContent className="p-3">
-     <div className="mb-3 flex items-center justify-between px-1">
-      <div><p className="text-sm font-semibold">Estructura</p><p className="text-xs text-[var(--text-secondary)]">{secciones.length} secciones</p></div>
-      <Layers3 className="size-5 text-slate-400"/>
+   <Card className="h-fit overflow-hidden xl:sticky xl:top-4">
+    <CardContent className="p-0">
+     <div className="border-b bg-[linear-gradient(135deg,var(--primary-soft)_0%,white_100%)] px-4 py-4">
+      <div className="flex items-center justify-between">
+       <div><h2 className="font-semibold text-[var(--primary-strong)]">Estructura</h2><p className="text-xs text-[var(--text-secondary)]">{secciones.length} secciones</p></div>
+       <div className="flex size-9 items-center justify-center rounded-lg bg-white text-[var(--primary)] shadow-sm"><Layers3 className="size-5"/></div>
+      </div>
      </div>
 
-     <div className="space-y-1">
-      {secciones.map((s,i)=><button key={s.certificadoSeccionId} type="button" onClick={()=>{setSeccionSeleccionada(i);setResultadoSeleccionado(0);setFiltroTipoId(null);setFiltroFaseId(null)}} className={"flex w-full items-center gap-2 rounded-lg border px-3 py-2 text-left text-sm transition "+(seccionSeleccionada===i?"border-slate-400 bg-slate-100":"border-transparent hover:bg-slate-50")}>
-       <span className="w-6 text-xs font-semibold text-slate-400">{String(i+1).padStart(2,"0")}</span>
-       <span className="min-w-0 flex-1 truncate">{s.seccionDescripcion}</span>
-       {s.seccionCodigo==="RESULTADOS"&&<span className="rounded bg-slate-200 px-1.5 py-.5 text-[10px] font-semibold">{s.resultados.length}</span>}
-       <ChevronRight className="size-4 text-slate-400"/>
-      </button>)}
+     <div className="p-2">
+      {secciones.map((s,i)=><div key={s.certificadoSeccionId} className={"mb-1 flex items-center gap-1 rounded-lg border transition "+(seccionSeleccionada===i?"border-[var(--primary)] bg-[var(--primary-soft)]":"border-transparent hover:bg-slate-50")}>
+       <button type="button" onClick={()=>{setSeccionSeleccionada(i);setResultadoSeleccionado(0);setFiltroTipoId(null);setFiltroFaseId(null)}} className="flex min-w-0 flex-1 items-center gap-2 px-2 py-3 text-left">
+        <GripVertical className="size-4 shrink-0 text-slate-400"/>
+        <span className={"w-6 text-xs font-semibold "+(seccionSeleccionada===i?"text-[var(--primary)]":"text-slate-400")}>{String(i+1).padStart(2,"0")}</span>
+        <span className="min-w-0 flex-1 truncate text-sm font-medium">{s.seccionDescripcion}</span>
+        {!s.visible&&<EyeOff className="size-3.5 shrink-0 text-slate-400"/>}
+        {s.seccionCodigo==="RESULTADOS"&&<span className="rounded-full bg-[var(--secondary)] px-2 py-0.5 text-[10px] font-bold text-white">{s.resultados.length}</span>}
+       </button>
+       <div className="mr-1 flex">
+        <Button variant="ghost" size="icon-sm" disabled={!s.permiteReordenar||i===0} onClick={()=>{setSeccionSeleccionada(i);setTimeout(()=>moverSeccion(-1),0)}}><ArrowUp/></Button>
+        <Button variant="ghost" size="icon-sm" disabled={!s.permiteReordenar||i===secciones.length-1} onClick={()=>{setSeccionSeleccionada(i);setTimeout(()=>moverSeccion(1),0)}}><ArrowDown/></Button>
+       </div>
+      </div>)}
      </div>
     </CardContent>
    </Card>
 
    {!actual?<Card><CardContent className="p-10 text-center text-sm text-[var(--text-secondary)]"><FileText className="mx-auto mb-3 size-8 opacity-40"/>Selecciona una sección.</CardContent></Card>:
    <div className="space-y-4">
-    <Card>
+    <Card className="overflow-hidden border-[var(--border)]">
+     <div className="h-1 bg-[linear-gradient(90deg,var(--primary),var(--secondary))]"/>
      <CardContent className="p-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
        <div>
-        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Sección</p>
+        <p className="text-xs font-semibold uppercase tracking-[.14em] text-[var(--primary)]">Sección</p>
         <h2 className="mt-1 text-lg font-semibold">{actual.seccionDescripcion}</h2>
         <p className="mt-1 text-xs text-[var(--text-secondary)]">{actual.tipoContenido}</p>
        </div>
@@ -301,12 +311,12 @@ export default function CertificadoDisenadorPage(){
      <div><h3 className="font-semibold">Valor de la sección</h3><p className="mt-1 text-sm text-[var(--text-secondary)]">La sección es “Título y subtítulo”; estos son sus valores.</p></div>
      <label className="block"><span className="mb-1 block text-xs font-semibold text-slate-600">Título</span><Input value={encabezado.titulo} onChange={e=>actualizarSeccion({contenido:JSON.stringify({...encabezado,titulo:e.target.value})})}/></label>
      <label className="block"><span className="mb-1 block text-xs font-semibold text-slate-600">Subtítulo</span><Input value={encabezado.subtitulo} onChange={e=>actualizarSeccion({contenido:JSON.stringify({...encabezado,subtitulo:e.target.value})})}/></label>
-     <div className="rounded-lg border bg-white p-6 text-center"><div className="text-sm font-semibold uppercase tracking-wide">{encabezado.titulo}</div><div className="mt-1 text-xl font-bold">{encabezado.subtitulo}</div></div>
+     <div className="rounded-lg border border-[var(--border)] bg-[var(--primary-soft)]/35 p-6 text-center"><div className="text-sm font-semibold uppercase tracking-wide">{encabezado.titulo}</div><div className="mt-1 text-xl font-bold">{encabezado.subtitulo}</div></div>
     </CardContent></Card>}
 
     {actual.seccionCodigo==="DATOS_EMPRESA"&&<Card><CardContent className="p-5">
      <div className="flex items-start gap-3"><Building2 className="mt-0.5 size-5 text-slate-500"/><div><h3 className="font-semibold">Valor dinámico de la sección</h3><p className="mt-1 text-sm text-[var(--text-secondary)]">Se obtiene desde Datos para certificado - Empresa.</p></div></div>
-     <div className="mt-4 rounded-lg border bg-slate-50 p-4 text-sm">
+     <div className="mt-4 rounded-lg border border-[var(--border)] bg-[var(--primary-soft)]/55 p-4 text-sm">
       <div className="font-semibold">{empresa.data?.razonSocial||"—"}</div>
       <div className="mt-2"><b>D:</b> {empresa.data?.direccion||"—"}</div>
       <div className="mt-1 flex flex-wrap gap-x-5 gap-y-1"><span><b>T:</b> {empresa.data?.telefono||"—"}</span><span><b>F:</b> {empresa.data?.fax||"—"}</span><span><b>E:</b> {empresa.data?.correo||"—"}</span><span><b>W:</b> {empresa.data?.sitioWeb||"—"}</span></div>
@@ -316,13 +326,13 @@ export default function CertificadoDisenadorPage(){
     {actual.seccionCodigo==="PRODUCTO"&&<Card><CardContent className="p-5">
      <h3 className="font-semibold">Valor dinámico de la sección</h3>
      <p className="mt-1 text-sm text-[var(--text-secondary)]">Se obtiene desde la Ficha Técnica asociada.</p>
-     <div className="mt-4 rounded-lg border bg-slate-50 p-4 text-sm"><b>OVOPRODUCTO:</b> {plantilla.data.productoCodigo||"—"} - {plantilla.data.documentoDescripcionDocumento}</div>
+     <div className="mt-4 rounded-lg border border-[var(--border)] bg-[var(--primary-soft)]/55 p-4 text-sm"><b>OVOPRODUCTO:</b> {plantilla.data.productoCodigo||"—"} - {plantilla.data.documentoDescripcionDocumento}</div>
     </CardContent></Card>}
 
     {actual.seccionCodigo==="DATOS_LOTE"&&<Card><CardContent className="p-5">
      <h3 className="font-semibold">Valor dinámico de la sección</h3>
      <p className="mt-1 text-sm text-[var(--text-secondary)]">Se resolverá con el lote al momento de emitir.</p>
-     <div className="mt-4 grid gap-3 rounded-lg border bg-slate-50 p-4 text-sm sm:grid-cols-2"><div><b>Fecha Producción:</b> [lote]</div><div><b>Fecha Caducidad:</b> [lote/FT]</div><div><b>N° Lote:</b> [lote]</div><div><b>Vida Útil:</b> [FT]</div></div>
+     <div className="mt-4 grid gap-3 rounded-lg border border-[var(--border)] bg-[var(--primary-soft)]/55 p-4 text-sm sm:grid-cols-2"><div><b>Fecha Producción:</b> [lote]</div><div><b>Fecha Caducidad:</b> [lote/FT]</div><div><b>N° Lote:</b> [lote]</div><div><b>Vida Útil:</b> [FT]</div></div>
     </CardContent></Card>}
 
     {actual.seccionCodigo==="RESULTADOS"&&<Card><CardContent className="space-y-5 p-5">
@@ -333,7 +343,7 @@ export default function CertificadoDisenadorPage(){
 
      <div className="grid gap-4 lg:grid-cols-[260px_minmax(0,1fr)]">
       <div className="space-y-2">
-       {actual.resultados.length===0?<div className="rounded-lg border border-dashed p-4 text-sm text-[var(--text-secondary)]">Aún no hay informes configurados.</div>:actual.resultados.map((r,i)=><button key={i} type="button" onClick={()=>setResultadoSeleccionado(i)} className={"w-full rounded-lg border p-3 text-left "+(resultadoSeleccionado===i?"border-slate-400 bg-slate-100":"bg-white")}><div className="flex items-center justify-between gap-2"><span className="font-medium">{r.titulo}</span><span className="rounded bg-slate-200 px-1.5 py-.5 text-[10px] font-semibold">{r.caracteristicas.length}</span></div></button>)}
+       {actual.resultados.length===0?<div className="rounded-lg border border-dashed p-4 text-sm text-[var(--text-secondary)]">Aún no hay informes configurados.</div>:actual.resultados.map((r,i)=><button key={i} type="button" onClick={()=>setResultadoSeleccionado(i)} className={"w-full rounded-lg border p-3 text-left "+(resultadoSeleccionado===i?"border-[var(--primary)] bg-[var(--primary-soft)]":"bg-white hover:bg-slate-50")}><div className="flex items-center justify-between gap-2"><span className="font-medium">{r.titulo}</span><span className="rounded bg-slate-200 px-1.5 py-.5 text-[10px] font-semibold">{r.caracteristicas.length}</span></div></button>)}
       </div>
 
       {!resultadoActual?<div className="rounded-lg border border-dashed p-8 text-center text-sm text-[var(--text-secondary)]">Agrega o selecciona un informe de ensayo.</div>:<div className="space-y-4 rounded-lg border p-4">
@@ -365,8 +375,8 @@ export default function CertificadoDisenadorPage(){
 
        <div className="overflow-hidden rounded-lg border">
         <table className="w-full text-sm">
-         <thead className="bg-slate-50 text-left"><tr><th className="p-3">Usar</th><th className="p-3">Determinación</th><th className="p-3">Tipo</th><th className="p-3">Fase</th><th className="p-3">Unidad</th></tr></thead>
-         <tbody>{parametrosFiltrados.map(p=>{const activo=resultadoActual.caracteristicas.some(x=>x.versionFtCaracteristicaId===p.versionFtCaracteristicaId),ocupado=ocupados.has(p.versionFtCaracteristicaId);return <tr key={p.versionFtCaracteristicaId} className={"border-t "+(ocupado?"opacity-40":"")}><td className="p-3"><button type="button" disabled={ocupado} onClick={()=>alternarParametro(p)} className={"flex size-7 items-center justify-center rounded border "+(activo?"bg-slate-900 text-white":"bg-white")}>{activo&&<Check className="size-4"/>}</button></td><td className="p-3 font-medium">{p.determinacion}</td><td className="p-3">{p.tipoCaractDescripcion??"—"}</td><td className="p-3">{p.faseDescripcion||p.faseCodigo||"—"}</td><td className="p-3">{p.unidadDeMedida||"—"}</td></tr>})}</tbody>
+         <thead className="bg-[var(--primary-soft)] text-left text-[var(--primary-strong)]"><tr><th className="p-3">Usar</th><th className="p-3">Determinación</th><th className="p-3">Tipo</th><th className="p-3">Fase</th><th className="p-3">Unidad</th></tr></thead>
+         <tbody>{parametrosFiltrados.map(p=>{const activo=resultadoActual.caracteristicas.some(x=>x.versionFtCaracteristicaId===p.versionFtCaracteristicaId),ocupado=ocupados.has(p.versionFtCaracteristicaId);return <tr key={p.versionFtCaracteristicaId} className={"border-t "+(ocupado?"opacity-40":"")}><td className="p-3"><button type="button" disabled={ocupado} onClick={()=>alternarParametro(p)} className={"flex size-7 items-center justify-center rounded border "+(activo?"border-[var(--primary)] bg-[var(--primary)] text-white":"bg-white")}>{activo&&<Check className="size-4"/>}</button></td><td className="p-3 font-medium">{p.determinacion}</td><td className="p-3">{p.tipoCaractDescripcion??"—"}</td><td className="p-3">{p.faseDescripcion||p.faseCodigo||"—"}</td><td className="p-3">{p.unidadDeMedida||"—"}</td></tr>})}</tbody>
         </table>
        </div>
       </div>}
@@ -375,15 +385,15 @@ export default function CertificadoDisenadorPage(){
 
     {actual.seccionCodigo==="ALMACENAMIENTO"&&<Card><CardContent className="p-5"><h3 className="font-semibold">Valor dinámico de la sección</h3><p className="mt-1 text-sm text-[var(--text-secondary)]">Se obtiene desde la Ficha Técnica vigente: condición de almacenamiento y, cuando corresponda, descongelamiento.</p></CardContent></Card>}
 
-    {actual.seccionCodigo==="REFERENCIAS"&&<Card><CardContent className="p-5"><h3 className="font-semibold">Valor dinámico de la sección</h3><p className="mt-1 text-sm text-[var(--text-secondary)]">Se construye desde los métodos de ensayo de las características incluidas en los informes.</p><div className="mt-4 space-y-2 rounded-lg border bg-slate-50 p-4 text-sm">{metodosSeleccionados.length?metodosSeleccionados.map(p=><div key={p.versionFtCaracteristicaId}><b>{p.determinacion}:</b> {p.metEnsayoDescripcion}</div>):<span className="text-[var(--text-secondary)]">Aún no hay características seleccionadas.</span>}</div></CardContent></Card>}
+    {actual.seccionCodigo==="REFERENCIAS"&&<Card><CardContent className="p-5"><h3 className="font-semibold">Valor dinámico de la sección</h3><p className="mt-1 text-sm text-[var(--text-secondary)]">Se construye desde los métodos de ensayo de las características incluidas en los informes.</p><div className="mt-4 space-y-2 rounded-lg border border-[var(--border)] bg-[var(--primary-soft)]/55 p-4 text-sm">{metodosSeleccionados.length?metodosSeleccionados.map(p=><div key={p.versionFtCaracteristicaId}><b>{p.determinacion}:</b> {p.metEnsayoDescripcion}</div>):<span className="text-[var(--text-secondary)]">Aún no hay características seleccionadas.</span>}</div></CardContent></Card>}
 
-    {actual.seccionCodigo==="FIRMA"&&<Card><CardContent className="p-5"><h3 className="font-semibold">Valor dinámico de la sección</h3><p className="mt-1 text-sm text-[var(--text-secondary)]">Responsable, cargo y fecha se completarán al emitir.</p><div className="mt-4 rounded-lg border bg-slate-50 p-4 text-sm"><div>[Responsable]</div><div>[Cargo]</div><div>[Fecha]</div></div></CardContent></Card>}
+    {actual.seccionCodigo==="FIRMA"&&<Card><CardContent className="p-5"><h3 className="font-semibold">Valor dinámico de la sección</h3><p className="mt-1 text-sm text-[var(--text-secondary)]">Responsable, cargo y fecha se completarán al emitir.</p><div className="mt-4 rounded-lg border border-[var(--border)] bg-[var(--primary-soft)]/55 p-4 text-sm"><div>[Responsable]</div><div>[Cargo]</div><div>[Fecha]</div></div></CardContent></Card>}
 
     {actual.seccionCodigo==="PIE"&&<Card><CardContent className="p-5"><h3 className="font-semibold">Valor de la sección</h3><textarea className="mt-4 min-h-28 w-full rounded-md border bg-background p-3 text-sm" value={actual.contenido??""} onChange={e=>actualizarSeccion({contenido:e.target.value})}/></CardContent></Card>}
    </div>}
   </div>
 
-  {guardar.isSuccess&&<p className="text-sm text-emerald-700">Diseño guardado correctamente.</p>}
+  {guardar.isSuccess&&<div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">Diseño guardado correctamente.</div>}
   {guardar.isError&&<p className="text-sm text-red-600">{guardar.error instanceof Error?guardar.error.message:"No se pudo guardar el diseño."}</p>}
  </PageContainer>
 }
