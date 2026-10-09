@@ -6,6 +6,7 @@ import type {CaracteristicaEt,DetalleEt,SeccionEt} from "../types";
 export default function EtDocumentPreview({data}:{data:DetalleEt}){
  const i=data.informacionGeneral;
  const secciones=documentSections(data.secciones);
+ const seccionesCuerpo=secciones.filter(s=>!norm(s.seccionDescripcion).includes("RESPONSABLE"));
 
  return <div className="w-full bg-white shadow-sm print:shadow-none">
   <article className="border border-slate-300 text-[13px] text-slate-900">
@@ -27,10 +28,10 @@ export default function EtDocumentPreview({data}:{data:DetalleEt}){
       </div>
      </header>
 
-     <ResponsablesCabecera responsables={data.responsables} versionId={i.versionId}/>
+     <div id="et-responsables" className="scroll-mt-24"><ResponsablesCabecera responsables={data.responsables} versionId={i.versionId}/></div>
 
      <main className="min-w-0 px-7 py-7 xl:px-8 2xl:px-10">
-      {secciones.map((s,index)=>
+      {seccionesCuerpo.map((s,index)=>
        <Section
         key={s.versSeccId}
         id={"et-seccion-"+(index+1)}
@@ -74,7 +75,14 @@ export default function EtDocumentPreview({data}:{data:DetalleEt}){
       <div className="border-t border-slate-200 pt-4">
        <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Navegación</p>
        <nav className="mt-2 space-y-0.5">
-        {secciones.map((s,index)=>{
+        <button
+         type="button"
+         onClick={()=>document.getElementById("et-responsables")?.scrollIntoView({behavior:"smooth",block:"start"})}
+         className="block w-full rounded px-2 py-1.5 text-left text-xs text-slate-600 hover:bg-white hover:text-slate-950"
+        >
+         RESPONSABLES
+        </button>
+        {seccionesCuerpo.map((s,index)=>{
          const x={n:String(index+1),t:sectionTitle(s.seccionDescripcion)};
          return <button
           key={x.n}
