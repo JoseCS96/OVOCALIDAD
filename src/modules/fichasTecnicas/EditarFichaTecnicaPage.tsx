@@ -1,6 +1,6 @@
 import {useEffect,useMemo,useState} from "react";
 import {useMutation,useQuery,useQueryClient} from "@tanstack/react-query";
-import {ArrowLeft,Check,CheckCircle2,Eye,Filter,MoreVertical,Plus,Save,Send,Upload,X,XCircle} from "lucide-react";
+import {ArrowLeft,Check,CheckCircle2,Eye,Filter,MoreVertical,Plus,Save,Send,Trash2,Upload,X,XCircle} from "lucide-react";
 import {useNavigate,useParams} from "react-router-dom";
 import PageContainer from "@/components/common/PageContainer";
 import {Button} from "@/components/ui/button";
@@ -15,7 +15,7 @@ import {
  agregarSeccionFt,guardarCaracteristicaFt,guardarContenidoSeccionFt,listarCaracteristicasFt,
  listarSeccionesFt,obtenerFt,quitarSeccionFt,reordenarSeccionesFt,cambiarEstadoFt,listarHistorialEstadoFt,
  listarDeclaracionesFt,guardarDeclaracionesFt,listarAlergenosFt,guardarAlergenosFt,
- listarGruposCaracteristicaFt,guardarGrupoCaracteristicaFt
+ listarGruposCaracteristicaFt,guardarGrupoCaracteristicaFt,eliminarCaracteristicaFt
 } from "./api";
 import type {CaracteristicaFt,SeccionFt} from "./types";
 
@@ -132,6 +132,14 @@ export default function EditarFichaTecnicaPage(){
    setModalCaracteristicaFt(false);
    setNuevaCaracteristicaId("");
    setNuevoTipoCriterioId("");
+   qc.invalidateQueries({queryKey:["ft-caracteristicas",id]});
+   qc.invalidateQueries({queryKey:["ft-grupos-caracteristicas",id]});
+  }
+ });
+
+ const eliminarCaracteristicaPropia=useMutation({
+  mutationFn:(versionFtCaracteristicaId:number)=>eliminarCaracteristicaFt(id,versionFtCaracteristicaId),
+  onSuccess:()=>{
    qc.invalidateQueries({queryKey:["ft-caracteristicas",id]});
    qc.invalidateQueries({queryKey:["ft-grupos-caracteristicas",id]});
   }
@@ -314,6 +322,7 @@ export default function EditarFichaTecnicaPage(){
        marcarVisibles={marcarVisiblesProximales}
        guardar={guardar}
        editando={editando}
+       onEliminar={x=>{if(x.esPropiaFt&&window.confirm(`¿Retirar "${x.caracteristicaDescripcion}" de esta FT?`))eliminarCaracteristicaPropia.mutate(x.versionFtCaracteristicaId)}}
        titulo="Parámetros proximales"
        ocultarFiltros
       />
@@ -386,7 +395,7 @@ export default function EditarFichaTecnicaPage(){
  </PageContainer>
 }
 
-function CaracteristicasPanel({filas,filasFiltradas,tipos,tipoFiltro,setTipoFiltro,cats,valor,patch,criterioNombre,cambiarCriterio,marcarVisibles,guardar,editando,titulo="Características de la Ficha Técnica",ocultarFiltros=false}:{
+function CaracteristicasPanel({filas,filasFiltradas,tipos,tipoFiltro,setTipoFiltro,cats,valor,patch,criterioNombre,cambiarCriterio,marcarVisibles,guardar,editando,onEliminar,titulo="Características de la Ficha Técnica",ocultarFiltros=false}:{
  filas:CaracteristicaFt[];
  filasFiltradas:CaracteristicaFt[];
  tipos:string[];
@@ -400,6 +409,7 @@ function CaracteristicasPanel({filas,filasFiltradas,tipos,tipoFiltro,setTipoFilt
  marcarVisibles:(v:boolean)=>void;
  guardar:any;
  editando:Record<number,CaracteristicaFt>;
+ onEliminar?:(x:CaracteristicaFt)=>void;
  titulo?:string;
  ocultarFiltros?:boolean;
 }){
@@ -426,7 +436,7 @@ function CaracteristicasPanel({filas,filasFiltradas,tipos,tipoFiltro,setTipoFilt
      <td className="p-3 text-center"><input type="checkbox" checked={x.imprimeCertificado} onChange={e=>patch(base,{imprimeCertificado:e.target.checked,obligatorioCertificado:e.target.checked?x.obligatorioCertificado:false,ordenCertificado:e.target.checked?(x.ordenCertificado??x.ordenTecnico??1):null})}/></td>
      <td className="p-3 text-center"><input type="checkbox" disabled={!x.imprimeCertificado} checked={x.obligatorioCertificado} onChange={e=>patch(base,{obligatorioCertificado:e.target.checked})}/></td>
      <td className="p-3"><Input className="w-20" type="number" min={1} disabled={!x.imprimeCertificado} value={x.ordenCertificado??""} onChange={e=>patch(base,{ordenCertificado:e.target.value?Number(e.target.value):null})}/></td>
-     <td className="p-3"><Button size="sm" disabled={!editando[base.versionFtCaracteristicaId]||guardar.isPending} onClick={()=>guardar.mutate(x)}><Save/>Guardar</Button></td>
+     <td className="p-3"><div className="flex items-center justify-end gap-1">{x.esPropiaFt&&onEliminar&&<Button type="button" size="icon-sm" variant="outline" title="Retirar de la FT" onClick={()=>onEliminar(x)}><Trash2/></Button>}<Button size="sm" disabled={!editando[base.versionFtCaracteristicaId]||guardar.isPending} onClick={()=>guardar.mutate(x)}><Save/>Guardar</Button></div></td>
     </tr>})}
     {filasFiltradas.length===0&&<tr><td colSpan={9} className="p-8 text-center text-sm text-[var(--text-secondary)]">No hay características para el tipo seleccionado.</td></tr>}
    </tbody></table>
