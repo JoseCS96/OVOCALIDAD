@@ -121,7 +121,14 @@ export const navigationGroups: NavigationGroup[] = [
     items: [
       { label: "Trazabilidad", path: "/trazabilidad", icon: Boxes, permiso: "TRAZABILIDAD.VER" },
       { label: "Reportes", path: "/reportes", icon: BarChart3, permiso: "REPORTE.VER" },
-      { label: "Administración", path: "/administracion", icon: Settings, permiso: "ADMINISTRACION.VER" },
+      {
+        label: "Administración",
+        icon: Settings,
+        perfilesPermitidos: ["JEFE_CALIDAD"],
+        children: [
+          { label: "Usuarios de acceso", path: "/administracion/usuarios", icon: ShieldCheck, perfilesPermitidos: ["JEFE_CALIDAD"] },
+        ],
+      },
     ],
   },
 ];
