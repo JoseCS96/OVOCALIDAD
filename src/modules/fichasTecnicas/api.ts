@@ -1,5 +1,5 @@
 import {api} from "@/lib/api";
-import type {CrearFichaTecnicaRequest,CrearFichaTecnicaResponse,CaracteristicaFt,GuardarCaracteristicaFt,OperacionFt,FichaTecnicaGestion,EliminarFichaTecnicaResponse,SeccionFt,OperacionSeccionFt,ReordenarSeccionesFt,CambiarEstadoFtRequest,CambiarEstadoFtResponse,HistorialEstadoFt} from "./types";
+import type {CrearFichaTecnicaRequest,CrearFichaTecnicaResponse,CaracteristicaFt,GuardarCaracteristicaFt,OperacionFt,FichaTecnicaGestion,EliminarFichaTecnicaResponse,SeccionFt,OperacionSeccionFt,ReordenarSeccionesFt,CambiarEstadoFtRequest,CambiarEstadoFtResponse,HistorialEstadoFt,DeclaracionFt,GuardarDeclaracionFt,AlergenoFt,GuardarAlergenoFt,GrupoCaracteristicaFt,GuardarGrupoCaracteristicaFt,OperacionComplementoFt} from "./types";
 function validar<T extends {codigoResultado:number;mensaje:string}>(data:T){if(data.codigoResultado!==0)throw new Error(data.mensaje);return data}
 export async function crearFt(request:CrearFichaTecnicaRequest){const {data}=await api.post<CrearFichaTecnicaResponse>("/api/fichas-tecnicas",request);return validar(data)}
 export async function listarCaracteristicasFt(versionId:number){const {data}=await api.get<CaracteristicaFt[]>(`/api/fichas-tecnicas/${versionId}/caracteristicas`);return data}
@@ -19,3 +19,31 @@ export async function reordenarSeccionesFt(versionId:number,request:ReordenarSec
 
 export async function cambiarEstadoFt(versionId:number,request:CambiarEstadoFtRequest){const {data}=await api.post<CambiarEstadoFtResponse>(`/api/fichas-tecnicas/${versionId}/cambiar-estado`,request);return validar(data)}
 export async function listarHistorialEstadoFt(versionId:number){const {data}=await api.get<HistorialEstadoFt[]>(`/api/fichas-tecnicas/${versionId}/historial-estados`);return data}
+
+
+export async function listarDeclaracionesFt(versionId:number){
+ const {data}=await api.get<DeclaracionFt[]>(`/api/fichas-tecnicas/${versionId}/declaraciones`);
+ return data;
+}
+export async function guardarDeclaracionesFt(versionId:number,declaraciones:GuardarDeclaracionFt[]){
+ const {data}=await api.put<OperacionComplementoFt>(`/api/fichas-tecnicas/${versionId}/declaraciones`,{declaraciones});
+ return validar(data);
+}
+
+export async function listarAlergenosFt(versionId:number){
+ const {data}=await api.get<AlergenoFt[]>(`/api/fichas-tecnicas/${versionId}/alergenos`);
+ return data;
+}
+export async function guardarAlergenosFt(versionId:number,alergenos:GuardarAlergenoFt[]){
+ const {data}=await api.put<OperacionComplementoFt>(`/api/fichas-tecnicas/${versionId}/alergenos`,{alergenos});
+ return validar(data);
+}
+
+export async function listarGruposCaracteristicaFt(versionId:number){
+ const {data}=await api.get<GrupoCaracteristicaFt[]>(`/api/fichas-tecnicas/${versionId}/grupos-caracteristicas`);
+ return data;
+}
+export async function guardarGrupoCaracteristicaFt(versionId:number,tipoCaractId:number,request:GuardarGrupoCaracteristicaFt){
+ const {data}=await api.put<OperacionComplementoFt>(`/api/fichas-tecnicas/${versionId}/grupos-caracteristicas/${tipoCaractId}`,request);
+ return validar(data);
+}
