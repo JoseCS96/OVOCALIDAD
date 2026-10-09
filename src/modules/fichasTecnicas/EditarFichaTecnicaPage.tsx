@@ -8,9 +8,14 @@ import {Card,CardContent} from "@/components/ui/card";
 import {Input} from "@/components/ui/input";
 import {obtenerCatalogosEt} from "@/modules/especificaciones/api";
 import EstructuraFtPanel from "./components/EstructuraFtPanel";
+import DeclaracionesFtPanel from "./components/DeclaracionesFtPanel";
+import AlergenosFtPanel from "./components/AlergenosFtPanel";
+import GrupoCaracteristicaFtEditor from "./components/GrupoCaracteristicaFtEditor";
 import {
  agregarSeccionFt,guardarCaracteristicaFt,guardarContenidoSeccionFt,listarCaracteristicasFt,
- listarSeccionesFt,obtenerFt,quitarSeccionFt,reordenarSeccionesFt,cambiarEstadoFt,listarHistorialEstadoFt
+ listarSeccionesFt,obtenerFt,quitarSeccionFt,reordenarSeccionesFt,cambiarEstadoFt,listarHistorialEstadoFt,
+ listarDeclaracionesFt,guardarDeclaracionesFt,listarAlergenosFt,guardarAlergenosFt,
+ listarGruposCaracteristicaFt,guardarGrupoCaracteristicaFt
 } from "./api";
 import type {CaracteristicaFt,SeccionFt} from "./types";
 
@@ -23,6 +28,9 @@ export default function EditarFichaTecnicaPage(){
  const chars=useQuery({queryKey:["ft-caracteristicas",id],queryFn:()=>listarCaracteristicasFt(id),enabled:Number.isFinite(id)});
  const secciones=useQuery({queryKey:["ft-secciones",id],queryFn:()=>listarSeccionesFt(id),enabled:Number.isFinite(id)});
  const historial=useQuery({queryKey:["ft-historial",id],queryFn:()=>listarHistorialEstadoFt(id),enabled:Number.isFinite(id)});
+ const declaraciones=useQuery({queryKey:["ft-declaraciones",id],queryFn:()=>listarDeclaracionesFt(id),enabled:Number.isFinite(id)});
+ const alergenos=useQuery({queryKey:["ft-alergenos",id],queryFn:()=>listarAlergenosFt(id),enabled:Number.isFinite(id)});
+ const grupos=useQuery({queryKey:["ft-grupos-caracteristicas",id],queryFn:()=>listarGruposCaracteristicaFt(id),enabled:Number.isFinite(id)});
  const cats=useQuery({queryKey:["catalogos-et"],queryFn:obtenerCatalogosEt});
 
  const [editando,setEditando]=useState<Record<number,CaracteristicaFt>>({});
@@ -34,14 +42,19 @@ export default function EditarFichaTecnicaPage(){
  const [mostrarHistorial,setMostrarHistorial]=useState(false);
  const [menuWorkflow,setMenuWorkflow]=useState(false);
  const [nuevaSeccion,setNuevaSeccion]=useState({titulo:"",tipoContenido:"TEXTO" as "TEXTO"|"LISTA"|"TABLA"});
+ const [modalCaracteristicaFt,setModalCaracteristicaFt]=useState(false);
+ const [nuevaCaracteristicaId,setNuevaCaracteristicaId]=useState("");
+ const [nuevoTipoCriterioId,setNuevoTipoCriterioId]=useState("");
 
  const filas=useMemo(()=>[...(chars.data??[])].sort((a,b)=>(a.versionFaseOrden??9999)-(b.versionFaseOrden??9999)||(a.ordenTecnico??9999)-(b.ordenTecnico??9999)||a.versionFtCaracteristicaId-b.versionFtCaracteristicaId),[chars.data]);
  const filasSecciones=useMemo(()=>[...(secciones.data??[])].sort((a,b)=>(a.orden??9999)-(b.orden??9999)),[secciones.data]);
  const tipos=useMemo(()=>{
-  const valores=filas.map(x=>x.tipoCaractDescripcion?.trim()).filter((x):x is string=>!!x);
+  const valores=filasGenerales.map(x=>x.tipoCaractDescripcion?.trim()).filter((x):x is string=>!!x);
   return ["TODOS",...Array.from(new Set(valores)).sort((a,b)=>a.localeCompare(b))];
- },[filas]);
- const filasFiltradas=useMemo(()=>tipoFiltro==="TODOS"?filas:filas.filter(x=>x.tipoCaractDescripcion===tipoFiltro),[filas,tipoFiltro]);
+ },[filasGenerales]);
+ const filasGenerales=useMemo(()=>filas.filter(x=>(x.tipoCaractDescripcion??"").trim().toUpperCase()!=="PROXIMAL"),[filas]);
+ const filasProximales=useMemo(()=>filas.filter(x=>(x.tipoCaractDescripcion??"").trim().toUpperCase()==="PROXIMAL"),[filas]);
+ const filasFiltradas=useMemo(()=>tipoFiltro==="TODOS"?filasGenerales:filasGenerales.filter(x=>x.tipoCaractDescripcion===tipoFiltro),[filasGenerales,tipoFiltro]);
 
  useEffect(()=>{
   if(!filasSecciones.length){setSeccionActiva(null);return}
@@ -52,7 +65,7 @@ export default function EditarFichaTecnicaPage(){
   mutationFn:(x:CaracteristicaFt)=>guardarCaracteristicaFt(id,{
    versionFtCaracteristicaId:x.versionFtCaracteristicaId,caracteristicaId:x.caracteristicaId,tipoCriterioId:x.tipoCriterioId,
    valorCuantitativoInicial:x.valorCuantitativoInicial,valorCuantitativoFinal:x.valorCuantitativoFinal,valorCuantitativoIgual:x.valorCuantitativoIgual,
-   valorCualitativo:x.valorCualitativo,unidadDeMedida:x.unidadDeMedida,imprimeCertificado:x.imprimeCertificado,
+   valorTolerancia:x.valorTolerancia,valorCualitativo:x.valorCualitativo,unidadDeMedida:x.unidadDeMedida,imprimeCertificado:x.imprimeCertificado,
    obligatorioCertificado:x.obligatorioCertificado,ordenCertificado:x.imprimeCertificado?x.ordenCertificado:null
   }),
   onSuccess:(_,x)=>{
@@ -77,6 +90,51 @@ export default function EditarFichaTecnicaPage(){
  const quitarSeccion=useMutation({
   mutationFn:(versionFtSeccionId:number)=>quitarSeccionFt(id,versionFtSeccionId),
   onSuccess:()=>qc.invalidateQueries({queryKey:["ft-secciones",id]})
+ });
+
+ const guardarDeclaraciones=useMutation({
+  mutationFn:(items:import("./types").GuardarDeclaracionFt[])=>guardarDeclaracionesFt(id,items),
+  onSuccess:()=>qc.invalidateQueries({queryKey:["ft-declaraciones",id]})
+ });
+
+ const guardarAlergenos=useMutation({
+  mutationFn:(items:import("./types").GuardarAlergenoFt[])=>guardarAlergenosFt(id,items),
+  onSuccess:()=>qc.invalidateQueries({queryKey:["ft-alergenos",id]})
+ });
+
+ const guardarGrupo=useMutation({
+  mutationFn:({tipoCaractId,request}:{tipoCaractId:number;request:import("./types").GuardarGrupoCaracteristicaFt})=>guardarGrupoCaracteristicaFt(id,tipoCaractId,request),
+  onSuccess:()=>qc.invalidateQueries({queryKey:["ft-grupos-caracteristicas",id]})
+ });
+
+ const agregarCaracteristicaPropia=useMutation({
+  mutationFn:()=>{
+   const caracteristica=cats.data?.caracteristicas.find(x=>x.caracteristicaId===Number(nuevaCaracteristicaId));
+   if(!caracteristica)throw new Error("Selecciona una característica.");
+   const tipoCriterioId=Number(nuevoTipoCriterioId);
+   if(!tipoCriterioId)throw new Error("Selecciona un criterio.");
+   return guardarCaracteristicaFt(id,{
+    versionFtCaracteristicaId:null,
+    caracteristicaId:caracteristica.caracteristicaId,
+    tipoCriterioId,
+    valorCuantitativoInicial:null,
+    valorCuantitativoFinal:null,
+    valorCuantitativoIgual:null,
+    valorTolerancia:null,
+    valorCualitativo:null,
+    unidadDeMedida:caracteristica.unidad??null,
+    imprimeCertificado:false,
+    obligatorioCertificado:false,
+    ordenCertificado:null
+   });
+  },
+  onSuccess:()=>{
+   setModalCaracteristicaFt(false);
+   setNuevaCaracteristicaId("");
+   setNuevoTipoCriterioId("");
+   qc.invalidateQueries({queryKey:["ft-caracteristicas",id]});
+   qc.invalidateQueries({queryKey:["ft-grupos-caracteristicas",id]});
+  }
  });
 
  const cambiarEstado=useMutation({
@@ -120,7 +178,10 @@ export default function EditarFichaTecnicaPage(){
  const activaBase=filasSecciones.find(x=>x.versionFtSeccionId===seccionActiva)??filasSecciones[0];
  const activa=activaBase?seccionValor(activaBase):undefined;
  const busy=moverSeccion.isPending||quitarSeccion.isPending||agregarSeccion.isPending||guardarSeccion.isPending||cambiarEstado.isPending;
- const esCaracteristicas=activa?.tipoContenido==="CARACTERISTICAS"||activa?.codigo==="CARACTERISTICAS";
+ const esDeclaraciones=activa?.codigo==="DECLARACIONES";
+ const esAlergenos=activa?.codigo==="ALERGENOS";
+ const esProximal=activa?.codigo==="PROXIMAL";
+ const esCaracteristicas=!esProximal&&(activa?.tipoContenido==="CARACTERISTICAS"||activa?.codigo==="CARACTERISTICAS");
  const estado=(ft.data.estadoVersion??"").toUpperCase();
 
  return <PageContainer className="space-y-5">
@@ -210,21 +271,68 @@ export default function EditarFichaTecnicaPage(){
 
    <div className="min-w-0">
     {!activa?<Card><CardContent className="p-8 text-center text-sm text-[var(--text-secondary)]">No se encontraron secciones para esta FT.</CardContent></Card>
-    :esCaracteristicas?<CaracteristicasPanel
-      filas={filas}
-      filasFiltradas={filasFiltradas}
-      tipos={tipos}
-      tipoFiltro={tipoFiltro}
-      setTipoFiltro={setTipoFiltro}
-      cats={cats.data}
-      valor={valor}
-      patch={patch}
-      criterioNombre={criterioNombre}
-      cambiarCriterio={cambiarCriterio}
-      marcarVisibles={marcarVisibles}
-      guardar={guardar}
-      editando={editando}
+    :esDeclaraciones?<DeclaracionesFtPanel
+      items={declaraciones.data??[]}
+      cargando={declaraciones.isLoading}
+      guardando={guardarDeclaraciones.isPending}
+      onGuardar={items=>guardarDeclaraciones.mutate(items)}
      />
+    :esAlergenos?<AlergenosFtPanel
+      items={alergenos.data??[]}
+      cargando={alergenos.isLoading}
+      guardando={guardarAlergenos.isPending}
+      onGuardar={items=>guardarAlergenos.mutate(items)}
+     />
+    :esProximal?<div className="space-y-4">
+      <Card><CardContent className="flex flex-wrap items-start justify-between gap-3 p-5">
+       <div><h2 className="font-semibold">Proximal <span className="font-normal text-[var(--text-secondary)]">(Valores promedio)</span></h2><p className="mt-1 text-sm text-[var(--text-secondary)]">Parámetros propios de la Ficha Técnica. No se agregan a la ET ni a las evaluaciones.</p></div>
+       <Button variant="outline" onClick={()=>setModalCaracteristicaFt(true)}><Plus/>Agregar parámetro proximal</Button>
+      </CardContent></Card>
+      {grupos.data?.find(g=>g.tipoCaractDescripcion.trim().toUpperCase()==="PROXIMAL")&&<GrupoCaracteristicaFtEditor
+       grupo={grupos.data.find(g=>g.tipoCaractDescripcion.trim().toUpperCase()==="PROXIMAL")!}
+       guardando={guardarGrupo.isPending}
+       onGuardar={request=>guardarGrupo.mutate({tipoCaractId:grupos.data!.find(g=>g.tipoCaractDescripcion.trim().toUpperCase()==="PROXIMAL")!.tipoCaractId,request})}
+      />}
+      <CaracteristicasPanel
+       filas={filasProximales}
+       filasFiltradas={filasProximales}
+       tipos={["PROXIMAL"]}
+       tipoFiltro="PROXIMAL"
+       setTipoFiltro={()=>{}}
+       cats={cats.data}
+       valor={valor}
+       patch={patch}
+       criterioNombre={criterioNombre}
+       cambiarCriterio={cambiarCriterio}
+       marcarVisibles={marcarVisibles}
+       guardar={guardar}
+       editando={editando}
+       titulo="Parámetros proximales"
+       ocultarFiltros
+      />
+     </div>
+    :esCaracteristicas?<div className="space-y-4">
+      {tipoFiltro!=="TODOS"&&grupos.data?.find(g=>g.tipoCaractDescripcion===tipoFiltro)&&<GrupoCaracteristicaFtEditor
+       grupo={grupos.data.find(g=>g.tipoCaractDescripcion===tipoFiltro)!}
+       guardando={guardarGrupo.isPending}
+       onGuardar={request=>guardarGrupo.mutate({tipoCaractId:grupos.data!.find(g=>g.tipoCaractDescripcion===tipoFiltro)!.tipoCaractId,request})}
+      />}
+      <CaracteristicasPanel
+       filas={filasGenerales}
+       filasFiltradas={filasFiltradas}
+       tipos={tipos}
+       tipoFiltro={tipoFiltro}
+       setTipoFiltro={setTipoFiltro}
+       cats={cats.data}
+       valor={valor}
+       patch={patch}
+       criterioNombre={criterioNombre}
+       cambiarCriterio={cambiarCriterio}
+       marcarVisibles={marcarVisibles}
+       guardar={guardar}
+       editando={editando}
+      />
+     </div>
     :<Card><CardContent className="space-y-4 p-5">
       <div className="flex flex-wrap items-start justify-between gap-3 border-b pb-4">
        <div className="min-w-0 flex-1">
@@ -249,6 +357,17 @@ export default function EditarFichaTecnicaPage(){
    </div>
   </div>
 
+  {modalCaracteristicaFt&&<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/35 p-4">
+   <Card className="w-full max-w-xl bg-white"><CardContent className="space-y-4 p-5">
+    <div className="flex items-start justify-between"><div><h3 className="text-lg font-semibold">Agregar parámetro proximal</h3><p className="text-sm text-[var(--text-secondary)]">Selecciona una característica del maestro tipo PROXIMAL. Esta característica será exclusiva de la FT.</p></div><Button variant="ghost" size="icon" onClick={()=>setModalCaracteristicaFt(false)}><X/></Button></div>
+    <label className="block space-y-1.5"><span className="text-sm font-medium">Característica</span><select className="h-10 w-full rounded-md border bg-white px-3 text-sm" value={nuevaCaracteristicaId} onChange={e=>setNuevaCaracteristicaId(e.target.value)}><option value="">Seleccionar...</option>{(cats.data?.caracteristicas??[]).filter(x=>x.tipoCaracteristica?.trim().toUpperCase()==="PROXIMAL"&&!filas.some(f=>f.caracteristicaId===x.caracteristicaId)).map(x=><option key={x.caracteristicaId} value={x.caracteristicaId}>{x.caracteristicaDescripcion}</option>)}</select></label>
+    {(cats.data?.caracteristicas??[]).filter(x=>x.tipoCaracteristica?.trim().toUpperCase()==="PROXIMAL"&&!filas.some(f=>f.caracteristicaId===x.caracteristicaId)).length===0&&<div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">No hay características PROXIMAL disponibles. Créelas primero en Configuración de calidad → Tipos de característica / Características.</div>}
+    <label className="block space-y-1.5"><span className="text-sm font-medium">Criterio</span><select className="h-10 w-full rounded-md border bg-white px-3 text-sm" value={nuevoTipoCriterioId} onChange={e=>setNuevoTipoCriterioId(e.target.value)}><option value="">Seleccionar...</option>{(cats.data?.tiposCriterio??[]).map(x=><option key={x.tipoCriterioId} value={x.tipoCriterioId}>{x.tipoCriterioDescripcionUsuario||x.tipoCriterio}</option>)}</select></label>
+    {agregarCaracteristicaPropia.isError&&<div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{agregarCaracteristicaPropia.error instanceof Error?agregarCaracteristicaPropia.error.message:"No se pudo agregar el parámetro."}</div>}
+    <div className="flex justify-end gap-2 border-t pt-4"><Button variant="outline" onClick={()=>setModalCaracteristicaFt(false)}>Cancelar</Button><Button disabled={!nuevaCaracteristicaId||!nuevoTipoCriterioId||agregarCaracteristicaPropia.isPending} onClick={()=>agregarCaracteristicaPropia.mutate()}><Plus/>{agregarCaracteristicaPropia.isPending?"Agregando...":"Agregar"}</Button></div>
+   </CardContent></Card>
+  </div>}
+
   {modalAgregar&&<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/35 p-4">
    <Card className="w-full max-w-lg bg-white"><CardContent className="space-y-4 p-5">
     <div className="flex items-start justify-between"><div><h3 className="text-lg font-semibold">Agregar sección</h3><p className="text-sm text-[var(--text-secondary)]">Crea una sección adicional propia de esta FT.</p></div><Button variant="ghost" size="icon" onClick={()=>setModalAgregar(false)}><X/></Button></div>
@@ -260,7 +379,7 @@ export default function EditarFichaTecnicaPage(){
  </PageContainer>
 }
 
-function CaracteristicasPanel({filas,filasFiltradas,tipos,tipoFiltro,setTipoFiltro,cats,valor,patch,criterioNombre,cambiarCriterio,marcarVisibles,guardar,editando}:{
+function CaracteristicasPanel({filas,filasFiltradas,tipos,tipoFiltro,setTipoFiltro,cats,valor,patch,criterioNombre,cambiarCriterio,marcarVisibles,guardar,editando,titulo="Características de la Ficha Técnica",ocultarFiltros=false}:{
  filas:CaracteristicaFt[];
  filasFiltradas:CaracteristicaFt[];
  tipos:string[];
@@ -274,16 +393,18 @@ function CaracteristicasPanel({filas,filasFiltradas,tipos,tipoFiltro,setTipoFilt
  marcarVisibles:(v:boolean)=>void;
  guardar:any;
  editando:Record<number,CaracteristicaFt>;
+ titulo?:string;
+ ocultarFiltros?:boolean;
 }){
  return <div className="space-y-4">
-  <Card><CardContent className="p-5"><h2 className="font-semibold">Características de la Ficha Técnica</h2><p className="mt-1 text-sm text-[var(--text-secondary)]">{filas.length} características heredadas de la ET. Los valores de la FT son independientes y determinan qué parámetros pueden imprimirse en certificado.</p></CardContent></Card>
+  <Card><CardContent className="p-5"><h2 className="font-semibold">{titulo}</h2><p className="mt-1 text-sm text-[var(--text-secondary)]">{filas.length} características configuradas en esta FT. Los valores son independientes de la ET y la selección de certificado se controla por versión FT.</p></CardContent></Card>
 
-  <Card><CardContent className="space-y-4 p-4">
+  {!ocultarFiltros&&<Card><CardContent className="space-y-4 p-4">
    <div className="flex flex-wrap items-center justify-between gap-3">
     <div className="flex flex-wrap items-center gap-2"><div className="flex items-center gap-2 text-sm font-medium"><Filter size={16}/>Filtrar por tipo</div>{tipos.map(tipo=><Button key={tipo} type="button" size="sm" variant={tipoFiltro===tipo?"default":"outline"} onClick={()=>setTipoFiltro(tipo)}>{tipo==="TODOS"?"Todos":tipo}</Button>)}</div>
     <div className="flex flex-wrap gap-2"><Button type="button" size="sm" variant="outline" onClick={()=>marcarVisibles(true)} disabled={filasFiltradas.length===0}>Marcar visibles</Button><Button type="button" size="sm" variant="outline" onClick={()=>marcarVisibles(false)} disabled={filasFiltradas.length===0}>Desmarcar visibles</Button></div>
    </div>
-  </CardContent></Card>
+  </CardContent></Card>}
 
   <Card><CardContent className="p-0"><div className="overflow-x-auto">
    <table className="w-full min-w-[1250px] text-sm"><thead className="border-b bg-slate-50 text-left"><tr>
@@ -293,7 +414,7 @@ function CaracteristicasPanel({filas,filasFiltradas,tipos,tipoFiltro,setTipoFilt
      <td className="p-3">{x.tipoCaractDescripcion}</td>
      <td className="p-3 font-semibold">{x.caracteristicaDescripcion}<div className="mt-0.5 text-xs font-normal text-[var(--text-secondary)]">Orden técnico {x.ordenTecnico??"—"} · {x.faseCodigo??"Sin fase"}</div></td>
      <td className="p-3"><select className="h-9 min-w-36 rounded-md border bg-white px-2" value={x.tipoCriterioId} onChange={e=>cambiarCriterio(base,Number(e.target.value))}>{(cats?.tiposCriterio??[]).map((t:any)=><option key={t.tipoCriterioId} value={t.tipoCriterioId}>{t.tipoCriterioDescripcionUsuario||t.tipoCriterio}</option>)}</select></td>
-     <td className="p-3">{crit==="RANGO"?<div className="flex items-center gap-2"><Input className="w-28" type="number" step="any" value={x.valorCuantitativoInicial??""} onChange={e=>patch(base,{valorCuantitativoInicial:numero(e.target.value)})}/><span>–</span><Input className="w-28" type="number" step="any" value={x.valorCuantitativoFinal??""} onChange={e=>patch(base,{valorCuantitativoFinal:numero(e.target.value)})}/></div>:crit==="CUALITATIVO"||crit==="AUSENCIA"?<Input className="min-w-52" value={x.valorCualitativo??""} onChange={e=>patch(base,{valorCualitativo:e.target.value||null})}/>:<Input className="w-32" type="number" step="any" value={crit==="IGUAL"?(x.valorCuantitativoIgual??""):(crit==="MAXIMO"||crit==="MENOR_QUE"?(x.valorCuantitativoFinal??""):(x.valorCuantitativoInicial??""))} onChange={e=>{const v=numero(e.target.value);if(crit==="IGUAL")patch(base,{valorCuantitativoIgual:v,valorCuantitativoInicial:null,valorCuantitativoFinal:null});else if(crit==="MAXIMO"||crit==="MENOR_QUE")patch(base,{valorCuantitativoFinal:v,valorCuantitativoInicial:null,valorCuantitativoIgual:null});else patch(base,{valorCuantitativoInicial:v,valorCuantitativoFinal:null,valorCuantitativoIgual:null})}}/>}</td>
+     <td className="p-3">{crit==="TOLERANCIA"?<div className="flex items-center gap-2"><Input className="w-28" type="number" step="any" value={x.valorCuantitativoIgual??""} onChange={e=>patch(base,{valorCuantitativoIgual:numero(e.target.value)})}/><span>±</span><Input className="w-24" type="number" step="any" value={x.valorTolerancia??""} onChange={e=>patch(base,{valorTolerancia:numero(e.target.value)})}/></div>:crit==="RANGO"?<div className="flex items-center gap-2"><Input className="w-28" type="number" step="any" value={x.valorCuantitativoInicial??""} onChange={e=>patch(base,{valorCuantitativoInicial:numero(e.target.value)})}/><span>–</span><Input className="w-28" type="number" step="any" value={x.valorCuantitativoFinal??""} onChange={e=>patch(base,{valorCuantitativoFinal:numero(e.target.value)})}/></div>:crit==="CUALITATIVO"||crit==="AUSENCIA"?<Input className="min-w-52" value={x.valorCualitativo??""} onChange={e=>patch(base,{valorCualitativo:e.target.value||null})}/>:<Input className="w-32" type="number" step="any" value={crit==="IGUAL"?(x.valorCuantitativoIgual??""):(crit==="MAXIMO"||crit==="MENOR_QUE"?(x.valorCuantitativoFinal??""):(x.valorCuantitativoInicial??""))} onChange={e=>{const v=numero(e.target.value);if(crit==="IGUAL")patch(base,{valorCuantitativoIgual:v,valorCuantitativoInicial:null,valorCuantitativoFinal:null});else if(crit==="MAXIMO"||crit==="MENOR_QUE")patch(base,{valorCuantitativoFinal:v,valorCuantitativoInicial:null,valorCuantitativoIgual:null});else patch(base,{valorCuantitativoInicial:v,valorCuantitativoFinal:null,valorCuantitativoIgual:null})}}/>}</td>
      <td className="p-3"><Input className="w-28" value={x.unidadDeMedida??""} onChange={e=>patch(base,{unidadDeMedida:e.target.value||null})}/></td>
      <td className="p-3 text-center"><input type="checkbox" checked={x.imprimeCertificado} onChange={e=>patch(base,{imprimeCertificado:e.target.checked,obligatorioCertificado:e.target.checked?x.obligatorioCertificado:false,ordenCertificado:e.target.checked?(x.ordenCertificado??x.ordenTecnico??1):null})}/></td>
      <td className="p-3 text-center"><input type="checkbox" disabled={!x.imprimeCertificado} checked={x.obligatorioCertificado} onChange={e=>patch(base,{obligatorioCertificado:e.target.checked})}/></td>
