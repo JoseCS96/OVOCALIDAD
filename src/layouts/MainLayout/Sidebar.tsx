@@ -1,9 +1,10 @@
 import { ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
 import AppLogo from "@/components/branding/AppLogo";
 import { navigationGroups, type NavigationItem } from "@/config/navigation";
 import { useAuth } from "@/modules/auth/AuthContext";
+import { listarMisSolicitudesFirma } from "@/modules/firmas/api";
 import SidebarGroup from "./SidebarGroup";
 import SidebarItem from "./SidebarItem";
 
@@ -13,11 +14,36 @@ function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const { tieneModulo, tienePermiso, tienePerfil } = useAuth();
   const location = useLocation();
   const [openItems, setOpenItems] = useState<Record<string, boolean>>({});
+  const [tieneFirmasAsignadas, setTieneFirmasAsignadas] = useState(false);
+
+  useEffect(() => {
+    let activo = true;
+
+    const cargarFirmasAsignadas = async () => {
+      try {
+        const solicitudes = await listarMisSolicitudesFirma();
+        if (activo) setTieneFirmasAsignadas(solicitudes.length > 0);
+      } catch {
+        if (activo) setTieneFirmasAsignadas(false);
+      }
+    };
+
+    void cargarFirmasAsignadas();
+
+    const refrescar = () => void cargarFirmasAsignadas();
+    window.addEventListener("ovocalidad:firmas-updated", refrescar);
+
+    return () => {
+      activo = false;
+      window.removeEventListener("ovocalidad:firmas-updated", refrescar);
+    };
+  }, []);
 
   const canSee = (item: NavigationItem) =>
     (!item.moduloCodigo || tieneModulo(item.moduloCodigo)) &&
     (!item.permiso || tienePermiso(item.permiso)) &&
-    (!item.perfilesPermitidos || item.perfilesPermitidos.some(tienePerfil));
+    (!item.perfilesPermitidos || item.perfilesPermitidos.some(tienePerfil)) &&
+    (!item.requiereFirmaAsignada || tieneFirmasAsignadas);
 
   const filterItem = (item: NavigationItem): NavigationItem | null => {
     if (!canSee(item)) return null;
@@ -35,7 +61,7 @@ function Sidebar({ collapsed, onToggle }: SidebarProps) {
           items: group.items.map(filterItem).filter((x): x is NavigationItem => !!x),
         }))
         .filter((group) => group.items.length > 0),
-    [tieneModulo, tienePermiso, tienePerfil]
+    [tieneModulo, tienePermiso, tienePerfil, tieneFirmasAsignadas]
   );
 
   const pathAndSearch = location.pathname + location.search;
