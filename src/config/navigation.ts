@@ -7,6 +7,7 @@ export type NavigationItem = {
   moduloCodigo?: string;
   permiso?: string;
   perfilesPermitidos?: string[];
+  requiereFirmaAsignada?: boolean;
   children?: NavigationItem[];
 };
 
@@ -43,6 +44,7 @@ export const navigationGroups: NavigationGroup[] = [
       {
         label: "Firma de documentos",
         icon: PenLine,
+        requiereFirmaAsignada: true,
         children: [
           { label: "Pendientes", path: "/firmas?tab=pendientes", icon: PenLine },
           { label: "Firmados", path: "/firmas?tab=firmados", icon: FileCheck2 },
