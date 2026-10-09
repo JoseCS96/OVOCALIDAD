@@ -48,12 +48,12 @@ export default function EditarFichaTecnicaPage(){
 
  const filas=useMemo(()=>[...(chars.data??[])].sort((a,b)=>(a.versionFaseOrden??9999)-(b.versionFaseOrden??9999)||(a.ordenTecnico??9999)-(b.ordenTecnico??9999)||a.versionFtCaracteristicaId-b.versionFtCaracteristicaId),[chars.data]);
  const filasSecciones=useMemo(()=>[...(secciones.data??[])].sort((a,b)=>(a.orden??9999)-(b.orden??9999)),[secciones.data]);
+ const filasGenerales=useMemo(()=>filas.filter(x=>(x.tipoCaractDescripcion??"").trim().toUpperCase()!=="PROXIMAL"),[filas]);
+ const filasProximales=useMemo(()=>filas.filter(x=>(x.tipoCaractDescripcion??"").trim().toUpperCase()==="PROXIMAL"),[filas]);
  const tipos=useMemo(()=>{
   const valores=filasGenerales.map(x=>x.tipoCaractDescripcion?.trim()).filter((x):x is string=>!!x);
   return ["TODOS",...Array.from(new Set(valores)).sort((a,b)=>a.localeCompare(b))];
  },[filasGenerales]);
- const filasGenerales=useMemo(()=>filas.filter(x=>(x.tipoCaractDescripcion??"").trim().toUpperCase()!=="PROXIMAL"),[filas]);
- const filasProximales=useMemo(()=>filas.filter(x=>(x.tipoCaractDescripcion??"").trim().toUpperCase()==="PROXIMAL"),[filas]);
  const filasFiltradas=useMemo(()=>tipoFiltro==="TODOS"?filasGenerales:filasGenerales.filter(x=>x.tipoCaractDescripcion===tipoFiltro),[filasGenerales,tipoFiltro]);
 
  useEffect(()=>{
@@ -165,12 +165,19 @@ export default function EditarFichaTecnicaPage(){
  const criterioNombre=(x:CaracteristicaFt)=>cats.data?.tiposCriterio.find(t=>t.tipoCriterioId===x.tipoCriterioId)?.tipoCriterio?.toUpperCase()??"";
  const cambiarCriterio=(base:CaracteristicaFt,tipoCriterioId:number)=>{
   const nombre=cats.data?.tiposCriterio.find(t=>t.tipoCriterioId===tipoCriterioId)?.tipoCriterio?.toUpperCase()??"";
-  const p:Partial<CaracteristicaFt>={tipoCriterioId,valorCuantitativoInicial:null,valorCuantitativoFinal:null,valorCuantitativoIgual:null,valorCualitativo:null};
+  const p:Partial<CaracteristicaFt>={tipoCriterioId,valorCuantitativoInicial:null,valorCuantitativoFinal:null,valorCuantitativoIgual:null,valorTolerancia:null,valorCualitativo:null};
   if(nombre==="AUSENCIA")p.valorCualitativo="Ausencia";patch(base,p);
  };
- const marcarVisibles=(marcar:boolean)=>setEditando(actual=>{
-  const nuevo={...actual};filasFiltradas.forEach(base=>{const x=actual[base.versionFtCaracteristicaId]??base;nuevo[base.versionFtCaracteristicaId]={...x,imprimeCertificado:marcar,obligatorioCertificado:marcar?x.obligatorioCertificado:false,ordenCertificado:marcar?(x.ordenCertificado??x.ordenTecnico??1):null}});return nuevo;
+ const marcarVisiblesEn=(bases:CaracteristicaFt[],marcar:boolean)=>setEditando(actual=>{
+  const nuevo={...actual};
+  bases.forEach(base=>{
+   const x=actual[base.versionFtCaracteristicaId]??base;
+   nuevo[base.versionFtCaracteristicaId]={...x,imprimeCertificado:marcar,obligatorioCertificado:marcar?x.obligatorioCertificado:false,ordenCertificado:marcar?(x.ordenCertificado??x.ordenTecnico??1):null};
+  });
+  return nuevo;
  });
+ const marcarVisibles=(marcar:boolean)=>marcarVisiblesEn(filasFiltradas,marcar);
+ const marcarVisiblesProximales=(marcar:boolean)=>marcarVisiblesEn(filasProximales,marcar);
 
  if(ft.isLoading||chars.isLoading||secciones.isLoading||cats.isLoading)return <PageContainer><div className="py-16 text-center">Cargando Ficha Técnica...</div></PageContainer>;
  if(ft.isError||chars.isError||secciones.isError||!ft.data)return <PageContainer><div className="py-16 text-center text-red-600">No se pudo cargar la Ficha Técnica.</div></PageContainer>;
@@ -304,7 +311,7 @@ export default function EditarFichaTecnicaPage(){
        patch={patch}
        criterioNombre={criterioNombre}
        cambiarCriterio={cambiarCriterio}
-       marcarVisibles={marcarVisibles}
+       marcarVisibles={marcarVisiblesProximales}
        guardar={guardar}
        editando={editando}
        titulo="Parámetros proximales"
